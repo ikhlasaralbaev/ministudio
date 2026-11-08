@@ -1,0 +1,42 @@
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import { getLocale } from "@/i18n/server";
+import { landingDict } from "@/i18n/landing";
+import { Nav } from "@/components/landing/Nav";
+import { Hero } from "@/components/landing/Hero";
+import { HowItWorks } from "@/components/landing/HowItWorks";
+import { Features } from "@/components/landing/Features";
+import { Faq, FinalCta, Footer, Marquee, Templates } from "@/components/landing/Sections";
+import { ScrollProgress, SmoothScroll } from "@/components/landing/Motion";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = landingDict(await getLocale());
+  return { title: t.meta.title, description: t.meta.description };
+}
+
+export default async function Landing() {
+  const locale = await getLocale();
+  const t = landingDict(locale);
+  // signed-in visitors go straight to their dashboard; others to Google sign-in
+  const jar = await cookies();
+  const signedIn = jar.getAll().some((c) => c.name.endsWith("better-auth.session_token"));
+  const cta = signedIn ? { href: "/dashboard", label: t.nav.dashboard } : { href: "/login", label: t.nav.cta };
+
+  return (
+    <div className="ms-auto min-h-[100dvh] bg-ink font-body text-paper antialiased selection:bg-saffron selection:text-on-accent">
+      <SmoothScroll />
+      <ScrollProgress />
+      <Nav t={t.nav} locale={locale} cta={cta} />
+      <main>
+        <Hero t={t.hero} cta={cta} />
+        <Marquee items={t.marquee} />
+        <HowItWorks t={t.how} />
+        <Features t={t.features} />
+        <Templates t={t.templates} />
+        <Faq t={t.faq} />
+        <FinalCta t={t.final} cta={cta} />
+      </main>
+      <Footer t={t.footer} nav={t.nav} />
+    </div>
+  );
+}

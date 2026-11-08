@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/* ======================================================================
+   MiniStudio design system ("Primer"-like, GitHub style)
+   One token set drives the whole app; dark by default, light via prefers-color-scheme.
+   Semantic names: bg (page), panel / panel-2 (surfaces), line (borders), fg / muted (text),
+   accent (selection, links, focus), primary (green main actions), ok / warn / danger (status).
+   ====================================================================== */
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #21262d;
+  --panel-3: #2b3139;
+  --line: #30363d;
+  --fg: #e6edf3;
+  --muted: #8b949e;
+  --accent: #2f81f7;
+  --accent-2: #58a6ff;
+  --primary: #238636;
+  --primary-2: #2ea043;
+  --ok: #3fb950;
+  --warn: #d29922;
+  --danger: #f85149;
+  --pur: #a371f7;
+  --pink: #f778ba;
+  --shadow: 0 0 0 1px var(--line), 0 16px 32px #01040966;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f8fa;
+    --panel-2: #eaeef2;
+    --panel-3: #d8dee4;
+    --line: #d0d7de;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --accent: #0969da;
+    --accent-2: #0969da;
+    --primary: #1f883d;
+    --primary-2: #1a7f37;
+    --ok: #1a7f37;
+    --warn: #9a6700;
+    --danger: #cf222e;
+    --pur: #8250df;
+    --pink: #bf3989;
+    --shadow: 0 0 0 1px var(--line), 0 16px 32px #1f23281a;
+    color-scheme: light;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-panel-3: var(--panel-3);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-2: var(--accent-2);
+  --color-primary: var(--primary);
+  --color-primary-2: var(--primary-2);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-pur: var(--pur);
+  --color-pink: var(--pink);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  /* GitHub-like corners: smaller than Tailwind's defaults, applied app-wide */
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --radius-3xl: 16px;
+}
+
+html,
+body {
+  height: 100%;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+::selection {
+  background: #2f81f755;
+}
+
+/* ---------- shared components ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.1s;
+}
+.btn:hover {
+  background: var(--panel-2);
+  border-color: var(--muted);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn:disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.btn-primary {
+  background: var(--primary);
+  border-color: #ffffff22;
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--primary-2);
+  border-color: #ffffff33;
+}
+.btn-danger {
+  color: var(--danger);
+}
+.btn-danger:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.btn-lg {
+  height: 44px;
+  padding: 0 22px;
+  font-size: 15px;
+  border-radius: 8px;
+}
+.btn-sm {
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.card {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  border-radius: 10px;
+}
+.inp {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 10px;
+  outline: 0;
+  min-width: 0;
+  color: var(--fg);
+}
+.inp:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px #2f81f733;
+}
+.tp {
+  display: inline-block;
+  background: #388bfd26;
+  color: var(--accent-2);
+  border-radius: 99px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.lb {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid;
+  border-radius: 99px;
+  padding: 0 9px;
+  font-size: 12px;
+  font-weight: 500;
+}
+.lb-ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); }
+.lb-warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.lb-danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+.lb-accent { color: var(--accent-2); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+.lb-pur { color: var(--pur); border-color: color-mix(in srgb, var(--pur) 40%, transparent); }
+.rise { animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: calc(var(--i, 0) * 45ms); }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- studio canvas ---------- */
+.canvas-edit [data-node-id] {
+  cursor: default;
+  outline-offset: -1px;
+}
+.canvas-edit [data-node-id]:hover {
+  outline: 1px solid #2f81f7aa;
+}
+.canvas-edit [data-node-id][data-selected="true"] {
+  outline: 2px solid #2f81f7 !important;
+  outline-offset: -2px;
+}
+.canvas-dots {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--line) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--panel-3);
+  border-radius: 8px;
+}
+.phone-scroll::-webkit-scrollbar {
+  width: 0;
+}
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.ai-working {
+  background: linear-gradient(90deg, #2f81f700 0%, #2f81f733 50%, #2f81f700 100%);
+  background-size: 800px 100%;
+  animation: shimmer 1.2s linear infinite;
+}
+
+/* ---------- weave loader: threads rise in turn ---------- */
+.ikat-loader {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: var(--size, 28px);
+}
+.ikat-loader i {
+  display: block;
+  width: calc(var(--size, 28px) / 6);
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(180deg, var(--pur), color-mix(in srgb, var(--accent) 35%, transparent));
+  transform-origin: bottom;
+  animation: weave 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  animation-delay: calc(var(--i) * 90ms);
+}
+@keyframes weave {
+  0%, 100% { transform: scaleY(0.28); opacity: 0.45; }
+  45% { transform: scaleY(1); opacity: 1; }
+}
+.ms-skeleton {
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--accent) 16%, transparent) 50%, transparent 70%) 0 0 / 300% 100%;
+  background-color: var(--panel-2);
+  animation: ms-sweep 1.6s ease-in-out infinite;
+}
+@keyframes ms-sweep {
+  from { background-position: 100% 0; }
+  to { background-position: 0% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ikat-loader i, .ms-skeleton, .ai-working, .rise { animation: none; }
+}

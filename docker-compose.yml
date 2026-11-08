@@ -1,0 +1,31 @@
+# Production: MiniStudio + MongoDB on one server.
+#   cp .env.production.example .env.production   # fill in values
+#   docker compose up -d --build
+# The app listens on port 80 of the server; the hosting edge (or a reverse proxy) adds HTTPS.
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      MONGODB_URI: mongodb://mongo:27017
+    ports:
+      - "80:3000"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    # not published to the internet: only the app container can reach it
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mongo-data:

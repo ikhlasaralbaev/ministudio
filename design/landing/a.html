@@ -1,0 +1,68 @@
+<!doctype html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MiniStudio · A: Atlas (qorong'i)</title>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0e0f12;--ink2:#16171c;--ink3:#1f2128;--hair:#2b2d36;--fog:#a19d96;--paper:#f3f1ec;--acc:#ff8a3d;--on:#17120d}
+*{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper);font:400 16px/1.6 Manrope,sans-serif}
+h1,h2,h3,.d{font-family:Unbounded,sans-serif;letter-spacing:-.03em;line-height:1.08;font-weight:600}
+a{color:inherit;text-decoration:none}.w{max-width:1180px;margin:0 auto;padding:0 20px}
+nav{position:fixed;inset:12px 0 auto;z-index:9}nav .w{display:flex;align-items:center;gap:24px;height:60px;border:1px solid var(--hair);border-radius:99px;background:#0e0f12b8;backdrop-filter:blur(14px);padding:0 14px 0 22px}
+nav .l{margin-left:auto;display:flex;gap:26px;color:var(--fog);font-size:14px}nav b{font:600 15px Unbounded}
+.btn{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border-radius:99px;background:var(--acc);color:var(--on);font-weight:700;border:0;cursor:pointer;transition:transform .15s}.btn:active{transform:scale(.97)}
+.hero{min-height:100dvh;padding:130px 0 70px;position:relative;overflow:hidden;text-align:center}
+.hero:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#ff8a3d14 0 8px,transparent 8px 30px,#ff8a3d0d 30px 38px,transparent 38px 64px);-webkit-mask:radial-gradient(60% 55% at 50% 40%,#000,transparent);mask:radial-gradient(60% 55% at 50% 40%,#000,transparent)}
+.hero .w{position:relative}h1{font-size:clamp(2.2rem,5.2vw,4.4rem)}h1 em{font-style:normal;color:var(--acc)}
+.sub{color:var(--fog);font-size:18px;max-width:560px;margin:20px auto 34px}
+.prompt{max-width:760px;margin:0 auto;background:var(--ink2);border:1px solid var(--hair);border-radius:28px;padding:14px;text-align:left;box-shadow:0 40px 80px -30px #ff8a3d33;transition:border-color .2s}.prompt:focus-within{border-color:var(--acc)}
+textarea{width:100%;min-height:96px;resize:none;border:0;outline:0;background:none;color:var(--paper);font:500 18px/1.5 Manrope;padding:8px 10px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--hair);background:none;color:var(--fog);border-radius:99px;padding:7px 14px;font:500 13px Manrope;cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:.15s}.chip:hover{border-color:var(--acc);color:var(--paper)}
+.go{margin-left:auto;width:46px;height:46px;border-radius:50%;padding:0;justify-content:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:22px}
+section{padding:90px 0}h2{font-size:clamp(1.8rem,3.4vw,2.9rem);max-width:20ch}.lead{color:var(--fog);margin:14px 0 40px;max-width:52ch}
+/* editor mock */
+.win{border:1px solid var(--hair);border-radius:22px;background:var(--ink2);overflow:hidden;box-shadow:0 50px 100px -40px #000}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--hair);color:var(--fog);font-size:13px}.bar i{width:10px;height:10px;border-radius:50%;background:var(--ink3)}
+.bar .m{margin-left:auto;display:flex;gap:4px;background:var(--ink3);padding:3px;border-radius:99px}.bar .m span{padding:4px 12px;border-radius:99px}.bar .m .on{background:var(--acc);color:var(--on);font-weight:700}
+.ed{display:grid;grid-template-columns:230px 1fr 260px;min-height:520px}
+.pane{padding:16px;font-size:13px;color:var(--fog)}.pane h4{font:600 11px Manrope;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.lay div{padding:7px 10px;border-radius:10px;display:flex;gap:8px;align-items:center}.lay .s{background:#ff8a3d26;color:var(--paper)}.lay .i1{padding-left:26px}.lay .i2{padding-left:42px}
+.stage{display:grid;place-items:center;background:radial-gradient(#2b2d36 1px,transparent 1px) 0 0/18px 18px;position:relative;padding:24px 0}
+.ph{width:236px;height:470px;border-radius:38px;border:8px solid #2a2b33;background:#fff8f3;color:#1f1410;padding:30px 12px 12px;position:relative;overflow:hidden;font-size:11px}
+.ph:before{content:"";position:absolute;top:8px;left:50%;width:70px;height:18px;margin-left:-35px;border-radius:99px;background:#000}
+.ph h5{font:800 17px Manrope}.card{background:#fff;border-radius:14px;padding:6px;margin-top:10px;box-shadow:0 2px 10px #0001}.img{height:78px;border-radius:10px;background:linear-gradient(135deg,#d99a5b,#8d4b22)}.img.b{background:linear-gradient(135deg,#e8c070,#a8602a)}
+.card p{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-weight:700}.card u{background:#e8590c;color:#fff;border-radius:8px;padding:3px 8px;text-decoration:none;font-size:10px}
+.sel{outline:2px solid var(--acc);outline-offset:2px;border-radius:6px}
+.cm{position:absolute;right:-6px;top:150px;width:210px;background:var(--ink);border:1px solid var(--hair);border-radius:18px;padding:12px;color:var(--paper);box-shadow:0 20px 40px #0008;font-size:12px}.cm small{color:var(--fog);display:block;margin-bottom:6px}
+.fld{display:flex;justify-content:space-between;border:1px solid var(--hair);border-radius:10px;padding:8px 10px;margin-bottom:8px;color:var(--paper)}.sw{width:16px;height:16px;border-radius:5px;background:var(--acc)}
+/* bots */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.bot{border:1px solid var(--hair);background:var(--ink2);border-radius:24px;padding:22px;transition:.25s;position:relative;overflow:hidden}.bot:hover{transform:translateY(-6px);border-color:var(--acc)}
+.bot i{font-size:26px;color:var(--acc);display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:#ff8a3d1f;margin-bottom:46px}.bot h3{font-size:17px}.bot p{color:var(--fog);font-size:14px;margin-top:6px}
+/* ship */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--hair);border-radius:28px;overflow:hidden}.st{padding:34px;background:var(--ink2)}.st+.st{border-left:1px solid var(--hair)}.st .t{font:600 40px Unbounded;color:var(--acc)}.st .t small{font-size:15px;color:var(--fog)}.st h3{margin:20px 0 8px;font-size:18px}.st p{color:var(--fog);font-size:15px}
+.cta{text-align:center;border:1px solid var(--hair);border-radius:36px;padding:80px 20px;background:var(--ink2)}.cta h2{margin:0 auto 24px}footer{padding:40px 0;color:var(--fog);font-size:14px;text-align:center}
+@media(max-width:900px){.ed{grid-template-columns:1fr}.pane{display:none}.grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.st+.st{border:0;border-top:1px solid var(--hair)}nav .l{display:none}.cm{display:none}}
+</style></head><body>
+<nav><div class="w"><b>MiniStudio</b><div class="l"><a href="#edit">Tahrirlash</a><a href="#bots">Botlar</a><a href="#ship">Ishga tushirish</a></div><a class="btn" href="/login"><i class="ph-bold ph-google-logo"></i>Kirish</a></div></nav>
+<header class="hero"><div class="w">
+<h1>Gapiring. <em>Telegram</em><br>ilovangiz tayyor.</h1>
+<p class="sub">Biznesingizni oddiy so'z bilan tasvirlang. AI menyu, savat, to'lov va bot bilan ishlaydigan Mini App yaratadi.</p>
+<form class="prompt" onsubmit="location='/login';return false"><textarea id="p" placeholder="Masalan: Nukusdagi gul do'koni uchun ilova: guldastalar, yetkazib berish va Click orqali to'lov"></textarea>
+<div class="row"><button type="button" class="chip"><i class="ph-bold ph-sparkle"></i>Sonnet 5.5</button><button type="button" class="chip"><i class="ph-bold ph-translate"></i>O'zbekcha</button><button class="btn go" aria-label="Yaratish"><i class="ph-bold ph-arrow-up"></i></button></div></form>
+<div class="chips" id="ch"><button class="chip" data-t="Kafe uchun menyu, savat va yetkazib berish"><i class="ph-bold ph-coffee"></i>Kafe</button><button class="chip" data-t="Sartaroshxonaga xizmat, usta va vaqt tanlab yozilish"><i class="ph-bold ph-scissors"></i>Sartaroshxona</button><button class="chip" data-t="Kurslar katalogi va ro'yxatdan o'tish formasi"><i class="ph-bold ph-graduation-cap"></i>O'quv markazi</button><button class="chip" data-t="Daromad va xarajatlarni yuritadigan hisob-kitob daftari"><i class="ph-bold ph-wallet"></i>Hisob-kitob</button><button class="chip" data-t="Gul do'koni: katalog, yetkazib berish, Click to'lovi"><i class="ph-bold ph-flower-lotus"></i>Gul do'koni</button></div>
+</div></header>
+<section id="edit"><div class="w"><h2>Bosing. Yozing. O'zgardi.</h2><p class="lead">Telefondagi istalgan elementni bosing va nima o'zgarishini oddiy so'z bilan ayting. Dizayn va mantiq birdaniga yangilanadi.</p>
+<div class="win"><div class="bar"><i></i><i></i><i></i><span style="margin-left:10px">ministudio.uz / studio / Lazzat Kafe</span><div class="m"><span class="on">Vibe</span><span>Advanced</span></div></div>
+<div class="ed"><div class="pane lay"><h4>Qatlamlar</h4><div class="s"><i class="ph-bold ph-device-mobile"></i>Menyu</div><div class="i1"><i class="ph-bold ph-rows"></i>Sarlavha</div><div class="i1"><i class="ph-bold ph-list-dashes"></i>Taomlar</div><div class="i2 s"><i class="ph-bold ph-text-t"></i>Narx</div><div class="i2"><i class="ph-bold ph-cursor-click"></i>Qo'shish</div><div><i class="ph-bold ph-shopping-cart"></i>Savat</div><div><i class="ph-bold ph-check-circle"></i>Tayyor</div></div>
+<div class="stage"><div class="ph"><h5>Lazzat Kafe</h5><div style="opacity:.6;margin-top:2px">Nima buyurtma qilamiz?</div><div class="card"><div class="img"></div><p>Osh <span class="sel">38 000</span></p><p><span style="font-weight:400;opacity:.6">Toshkentcha</span><u>Qo'shish</u></p></div><div class="card"><div class="img b"></div><p>Lag'mon <span>32 000</span></p></div></div>
+<div class="cm"><small><i class="ph-bold ph-cursor-click"></i> narx</small>Narxni kattaroq va qalinroq qil<div style="margin-top:10px;display:flex;justify-content:flex-end"><span class="btn" style="height:30px;padding:0 12px;font-size:12px">Yuborish</span></div></div></div>
+<div class="pane"><h4>Xususiyatlar</h4><div class="fld">Matn<span>38 000 so'm</span></div><div class="fld">Rang<span class="sw"></span></div><div class="fld">Qalinlik<span>700</span></div><div class="fld">Burchak<span>14</span></div><h4 style="margin-top:18px">Mantiq</h4><div class="fld">Bosilganda<span>Savatga</span></div></div></div></div></div></section>
+<section id="bots"><div class="w"><h2>Har qanday bot. Bitta jumladan.</h2><p class="lead">Do'kon, bron, ariza, hisob-kitob, so'rovnoma. Nima kerakligini yozing, qolganini AI qiladi.</p>
+<div class="grid"><div class="bot"><i class="ph-bold ph-storefront"></i><h3>Onlayn do'kon</h3><p>Katalog, savat, Click va Payme</p></div><div class="bot"><i class="ph-bold ph-calendar-check"></i><h3>Bron va yozilish</h3><p>Xizmat, usta, vaqt</p></div><div class="bot"><i class="ph-bold ph-graduation-cap"></i><h3>Kurs va ariza</h3><p>Ro'yxatdan o'tish formalari</p></div><div class="bot"><i class="ph-bold ph-wallet"></i><h3>Hisob-kitob</h3><p>Daromad va xarajat tarixi</p></div><div class="bot"><i class="ph-bold ph-fork-knife"></i><h3>Restoran menyusi</h3><p>Buyurtma va yetkazib berish</p></div><div class="bot"><i class="ph-bold ph-megaphone"></i><h3>Lid yig'ish</h3><p>Mijoz ma'lumotlari Excel'ga</p></div><div class="bot"><i class="ph-bold ph-chat-teardrop-text"></i><h3>So'rovnoma</h3><p>Savollar va natijalar</p></div><div class="bot"><i class="ph-bold ph-plus-circle"></i><h3>Sizniki</h3><p>Istagan g'oyangiz</p></div></div></div></section>
+<section id="ship"><div class="w"><h2>Yozishdan ishga tushirishgacha 3 daqiqa.</h2><p class="lead">Server, domen, HTTPS va bot ulanishi bilan band bo'lmaysiz.</p>
+<div class="steps"><div class="st"><div class="t">30<small> soniya</small></div><h3>Tasvirlang</h3><p>AI ekranlar, ranglar va mantiqni yaratadi.</p></div><div class="st"><div class="t">1<small> daqiqa</small></div><h3>Bosib tahrirlang</h3><p>Qolgan o'zgarishlar oddiy so'z bilan.</p></div><div class="st"><div class="t">1<small> bosish</small></div><h3>Publish</h3><p>Bot, menyu tugmasi va to'lov tayyor.</p></div></div></div></section>
+<section><div class="w"><div class="cta"><h2>Birinchi ilovangizni hoziroq yarating</h2><a class="btn" href="/login">Bepul boshlash<i class="ph-bold ph-arrow-up-right"></i></a></div></div></section>
+<footer>© MiniStudio · Telegram Mini App konstruktori</footer>
+<script>const p=document.getElementById('p');document.querySelectorAll('#ch .chip').forEach(b=>b.onclick=()=>{p.value='';let i=0,t=b.dataset.t;clearInterval(window.tm);window.tm=setInterval(()=>{p.value=t.slice(0,++i);if(i>=t.length)clearInterval(window.tm)},18);p.focus()})</script>
+</body></html>
