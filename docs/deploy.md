@@ -89,3 +89,14 @@ docker exec sahna-mongo-1 mongodump --db ministudio --archive --gzip > ministudi
 
 Serverga yuborib: `docker compose exec -T mongo mongorestore --archive --gzip < ministudio.gz`.
 Bunda `APP_SECRET` lokaldagi bilan bir xil bo'lishi shart.
+
+## CI/CD (GitHub Actions)
+`.github/workflows/ci-cd.yml`: every push and pull request runs types, lint, tests (with a MongoDB service, so the
+integration tests run too) and the production build. A push to `main` that passes CI then deploys through
+`deploy/deploy.sh` (the `production` environment). Pull requests never deploy.
+
+Repository secrets (Settings → Secrets and variables → Actions):
+- `DEPLOY_SSH_KEY`: private key of a dedicated deploy key (its public half in the server's `~/.ssh/authorized_keys`)
+- `DEPLOY_KNOWN_HOSTS`: the server's host key line, e.g. `ssh-keyscan -p 27943 157.180.5.110`
+- `ENV_PRODUCTION`: full contents of `.env.production`
+- `DEPLOY_HOST`, `DEPLOY_PORT` (optional, override the defaults in `deploy.sh`)
