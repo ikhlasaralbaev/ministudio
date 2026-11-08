@@ -66,25 +66,29 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span className="hidden sm:inline">MiniStudio</span>
         </Link>
         <div className="ml-auto flex items-center gap-3">
+          {me?.isAdmin && !path.startsWith("/admin") && (
+            <Link href="/admin" className="btn btn-sm" title={t.nav.admin}>
+              <ShieldCheck size={14} /> <span className="hidden sm:inline">{t.nav.admin}</span>
+            </Link>
+          )}
           <LangSwitch />
           {me && <UserMenu me={me} />}
         </div>
       </header>
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-        <aside
-          className={`scroll-thin flex shrink-0 gap-1 overflow-x-auto border-b border-line bg-panel p-2 md:flex-col md:overflow-visible md:border-b-0 md:border-r ${
-            rail ? "md:w-14" : "md:w-56"
-          }`}
-        >
-          {global.map((i) => link(i, rail))}
-          {scoped.length > 0 && (
-            <>
-              {!rail && <span className="mx-2 mt-3 hidden text-[11px] font-semibold uppercase tracking-wide text-muted md:block">{t.nav.project}</span>}
-              <span className="mx-1 my-1 hidden border-t border-line md:block" />
-              {scoped.map((i) => link(i, rail))}
-            </>
-          )}
-        </aside>
+        {/* The menu is for moving between the sections of ONE project; the dashboard and admin pages have nothing to choose from. */}
+        {scoped.length > 0 && (
+          <aside
+            className={`scroll-thin flex shrink-0 gap-1 overflow-x-auto border-b border-line bg-panel p-2 md:flex-col md:overflow-visible md:border-b-0 md:border-r ${
+              rail ? "md:w-14" : "md:w-56"
+            }`}
+          >
+            {global.map((i) => link(i, rail))}
+            {!rail && <span className="mx-2 mt-3 hidden text-[11px] font-semibold uppercase tracking-wide text-muted md:block">{t.nav.project}</span>}
+            <span className="mx-1 my-1 hidden border-t border-line md:block" />
+            {scoped.map((i) => link(i, rail))}
+          </aside>
+        )}
         <div className="min-h-0 min-w-0 flex-1 overflow-auto">{children}</div>
       </div>
     </div>
