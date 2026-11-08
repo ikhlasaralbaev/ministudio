@@ -2,7 +2,7 @@ import type { Action, AppDoc, UINode } from "@/lib/types";
 
 export function nodeLabel(n: UINode): string {
   if (n.name) return n.name;
-  const t = (n.props?.text as string) || (n.props?.title as string) || (n.props?.placeholder as string) || (n.props?.source as string);
+  const t = (n.type === "Icon" ? (n.props?.name as string) : undefined) || (n.props?.text as string) || (n.props?.title as string) || (n.props?.placeholder as string) || (n.props?.source as string);
   if (t) return String(t).replace(/\{\{\s*|\s*\}\}/g, "").slice(0, 28);
   return n.type;
 }
@@ -13,6 +13,7 @@ export const TYPE_ICON: Record<string, string> = {
   Row: "⇆",
   Text: "T",
   Image: "▣",
+  Icon: "✦",
   Button: "◉",
   Input: "⌨",
   List: "≣",

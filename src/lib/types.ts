@@ -8,6 +8,7 @@ export const NODE_TYPES = [
   "Row",
   "Text",
   "Image",
+  "Icon",
   "Button",
   "Input",
   "List",

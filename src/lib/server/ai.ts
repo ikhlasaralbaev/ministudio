@@ -1,4 +1,5 @@
 import { lintBot } from "@/lib/bot";
+import { parseIcon } from "@/lib/icons";
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
@@ -30,7 +31,10 @@ const client = () => (_client ??= new Anthropic());
 type Msg = Anthropic.MessageParam;
 
 /** Extra semantic checks zod can't express: expressions parse, navigate targets exist, list sources, binds. */
-export function lint(doc: AppDoc): string[] {
+// Emoji and dingbat symbols: in generated UI they must be Icon nodes (checked for new apps; edits stay free to use them on request).
+const EMOJI = new RegExp("[\\u{1F000}-\\u{1FAFF}\\u{2600}-\\u{27BF}\\u{2B00}-\\u{2BFF}]", "u");
+
+export function lint(doc: AppDoc, opts: { noEmoji?: boolean } = {}): string[] {
   const errs: string[] = [];
   const screenIds = new Set(doc.screens.map((s) => s.id));
   const recordCols = new Set(doc.collections.filter((c) => c.mode === "records").map((c) => c.name));
@@ -63,7 +67,14 @@ export function lint(doc: AppDoc): string[] {
     if (n.type !== "Screen" && !parent) errs.push(`${w}: top-level nodes must be Screen`);
     checkExpr(w + ".visibleIf", n.visibleIf);
     if (n.type === "List") checkExpr(w + ".source", n.props?.source as string);
-    for (const k of ["text", "src", "alt", "placeholder", "emptyText"]) checkTpl(`${w}.${k}`, n.props?.[k]);
+    for (const k of ["text", "src", "alt", "placeholder", "emptyText", "name", "color"]) checkTpl(`${w}.${k}`, n.props?.[k]);
+    if (n.type === "Icon") {
+      const name = n.props?.name;
+      if (typeof name !== "string" || !name.trim()) errs.push(`${w}: Icon needs props.name (a Phosphor icon name like "shopping-cart")`);
+      else if (!name.includes("{{") && !parseIcon(name, n.props?.weight as string)) errs.push(`${w}: "${name}" is not a Phosphor icon name (use e.g. shopping-cart, house, user, check-circle)`);
+    }
+    if (opts.noEmoji && ["Text", "Button", "Badge"].includes(n.type) && typeof n.props?.text === "string" && EMOJI.test(n.props.text))
+      errs.push(`${w}: emoji/symbol in text "${n.props.text}": use an Icon node (Phosphor) instead`);
     checkActions(w, n.events?.onClick);
   });
   errs.push(...lintBot(doc.bot, [...recordCols]));
@@ -191,7 +202,7 @@ export async function generateApp(
       const r = AppDocSchema.safeParse(input);
       if (!r.success) return { ok: false, error: zodErr(r.error) };
       const doc = { ...r.data, screens: ensureIds(r.data.screens) };
-      const errs = lint(doc);
+      const errs = lint(doc, { noEmoji: true });
       return errs.length ? { ok: false, error: errs.join("\n") } : { ok: true, value: doc };
     },
   });

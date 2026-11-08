@@ -222,6 +222,22 @@ export function NodeInspector({
             <Txt value={String(p.text ?? "")} onChange={(v) => setProp("text", v)} multiline={node.type === "Text"} />
           </Row>
         )}
+        {node.type === "Icon" && (
+          <>
+            <Row label="Ikonka">
+              <Txt mono value={String(p.name ?? "")} placeholder="shopping-cart" onChange={(v) => setProp("name", v)} />
+            </Row>
+            <Row label="O'lcham">
+              <Txt mono value={String(p.size ?? 22)} onChange={(v) => setProp("size", Number(v) || 22)} />
+            </Row>
+            <Row label="Rang">
+              <Txt mono value={String(p.color ?? "")} placeholder="#e8590c" onChange={(v) => setProp("color", v)} />
+            </Row>
+            <Row label="Qalinlik">
+              <Sel value={String(p.weight || "bold")} options={["thin", "light", "regular", "bold", "fill", "duotone"]} onChange={(v) => setProp("weight", v)} />
+            </Row>
+          </>
+        )}
         {node.type === "Text" && (
           <Row label="Turi">
             <Sel value={String(p.variant || "body")} options={["h1", "h2", "h3", "body", "caption"]} onChange={(v) => setProp("variant", v)} />

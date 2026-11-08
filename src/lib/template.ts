@@ -57,10 +57,14 @@ export function cafeTemplate(name = "Lazzat Kafe"): AppDoc {
                 ],
               },
               {
-                id: "btn_cart_top",
-                type: "Button",
-                props: { text: "🛒 {{ count(state.cart) }}", variant: "secondary" },
+                id: "row_cart_top",
+                type: "Row",
+                style: { background: "#e8590c1f", color: "#e8590c", borderRadius: 999, padding: "10px 14px", fontWeight: 700, gap: 8, transition: "all .15s" },
                 events: { onClick: [{ type: "navigate", screen: "scr_cart" }] },
+                children: [
+                  { id: "ico_cart_top", type: "Icon", props: { name: "shopping-cart", size: 20, color: "#e8590c", weight: "fill" } },
+                  { id: "txt_cart_count", type: "Text", props: { text: "{{ count(state.cart) }}" } },
+                ],
               },
             ],
           },
@@ -148,7 +152,13 @@ export function cafeTemplate(name = "Lazzat Kafe"): AppDoc {
                     type: "Row",
                     children: [
                       { id: "txt_ci_price", type: "Text", props: { text: "{{ fmt(item.price) }}", variant: "caption" } },
-                      { id: "btn_ci_remove", type: "Button", props: { text: "✕", variant: "ghost" }, style: { padding: "4px 8px" }, events: { onClick: [{ type: "removeAt", key: "cart", index: "index" }] } },
+                      {
+                        id: "box_ci_remove",
+                        type: "Box",
+                        style: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center" },
+                        events: { onClick: [{ type: "removeAt", key: "cart", index: "index" }] },
+                        children: [{ id: "ico_ci_remove", type: "Icon", props: { name: "x", size: 18, color: "#868e96" } }],
+                      },
                     ],
                   },
                 ],
@@ -208,7 +218,7 @@ export function cafeTemplate(name = "Lazzat Kafe"): AppDoc {
         name: "Tayyor",
         style: { justifyContent: "center", alignItems: "center", textAlign: "center" },
         children: [
-          { id: "txt_done_icon", type: "Text", props: { text: "✅" }, style: { fontSize: 64 } },
+          { id: "ico_done", type: "Icon", props: { name: "check-circle", size: 72, color: "#2f9e44", weight: "fill" } },
           { id: "txt_done", type: "Text", props: { text: "Rahmat! Buyurtmangiz qabul qilindi", variant: "h2" } },
           { id: "txt_done_sub", type: "Text", props: { text: "Buyurtma raqami: {{ state.orderId }}", variant: "caption" } },
           { id: "btn_done_menu", type: "Button", props: { text: "Menyuga qaytish", variant: "secondary" }, events: { onClick: [{ type: "navigate", screen: "scr_menu" }] } },

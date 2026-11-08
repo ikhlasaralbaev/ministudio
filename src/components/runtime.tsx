@@ -2,6 +2,7 @@
 // One renderer for both the Studio canvas and the published Telegram Mini App.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { Action, AppDoc, UINode } from "@/lib/types";
+import { iconUrl } from "@/lib/icons";
 import { evaluate, interpolate } from "@/lib/expr";
 import { applyRecordChange, type RecordChange, type RecordRow, type RecordsByCollection } from "@/lib/records";
 
@@ -347,6 +348,10 @@ function baseStyle(n: UINode, doc: AppDoc): React.CSSProperties {
         width: "100%",
         boxSizing: "border-box",
       };
+    case "Icon": {
+      const size = Number(n.props?.size) || 22;
+      return { display: "block", flex: "none", width: size, height: size, objectFit: "contain" };
+    }
     case "Badge":
       return {
         display: "inline-block",
@@ -441,6 +446,15 @@ function NodeView({ n, scope }: { n: UINode; scope: Record<string, unknown> }) {
           {interpolate(p.text, scope)}
         </button>
       );
+    case "Icon": {
+      // Phosphor icon tinted with `color` (default: the theme's text color), decorative for screen readers
+      const size = Number(p.size) || 22;
+      const src = iconUrl(String(interpolate(p.name, scope) || ""), String(interpolate(p.color, scope) || doc.theme.text), p.weight as string);
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='4' height='4'/>"} width={size} height={size} alt="" aria-hidden style={style} {...editProps} />
+      );
+    }
     case "Badge":
       return (
         <span style={style} {...editProps}>

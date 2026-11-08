@@ -26,6 +26,7 @@ Types and props:
 - Row      horizontal flex container (alignItems center, gap 8). Use style.justifyContent "space-between" etc.
 - Text     props: { "text": template, "variant": "h1"|"h2"|"h3"|"body"|"caption" }
 - Image    props: { "src": template url, "alt", "aspect": "16/10" | "1/1" ... }
+- Icon     props: { "name": Phosphor icon name e.g. "shopping-cart", "size"?: px (22), "color"?: "#hex" (default theme.text), "weight"?: "bold"(default)|"fill"|"regular"|"light"|"thin"|"duotone" }
 - Button   props: { "text": template, "variant": "primary"|"secondary"|"ghost" }
 - Input    props: { "bind": state key, "placeholder", "inputType": "text"|"tel"|"number"|"email", "multiline"?: bool }
 - List     props: { "source": expression returning array, "emptyText" }. children = template rendered for each element,
@@ -116,11 +117,25 @@ Typography
 
 Components and states
 - Touch targets at least 44px tall. Secondary actions use variant "secondary" or "ghost", destructive ones a red text color.
-- Icons: use one consistent emoji style for icons inside soft tinted circles (e.g. 40px circle with primary at 12% opacity).
+- Icons: ALWAYS the Icon node, never emoji or unicode symbols (🛒 ✓ ✕ ★ ➕) as icons or decoration in any Text/Button/Badge.
+  Names: house storefront shopping-cart bag heart star user phone envelope map-pin clock calendar-blank magnifying-glass plus minus x check
+  check-circle warning-circle info trash pencil-simple gear bell credit-card wallet receipt tag package truck coffee fork-knife scissors
+  graduation-cap car camera chat-circle share-network arrow-left arrow-right caret-right list funnel (any other valid Phosphor name works).
+  One weight per app ("bold" for UI, "fill" for the active/selected state). List rows and feature blocks: icon in a 40px circle tinted
+  with primary at 12%; next to labels a bare 20-24px icon. Icon + label button/chip = clickable Row (gap 8, centered) with Icon + Text;
+  icon-only button = 44px Box with a centered Icon.
+- Navigation: 3+ sections get a bottom tab bar (sticky Row at the bottom, each tab = Box with Icon + caption; active = primary + "fill",
+  others at 55% opacity; paddingBottom "env(safe-area-inset-bottom)"). Sub-screens: ghost back Button with an arrow-left Icon. No hamburger menus.
 - Every List has a friendly emptyText (and, where useful, an empty-state Box with an icon, one line of text and an action).
 - Show feedback for every action: haptic light on taps, success haptic + alert/navigation after saving, validation messages with if.
 - Forms: one Input per row, clear placeholders, label captions above inputs, inputType tel/number/email where it applies.
 - Status and categories as Badges with tinted backgrounds; progress/ratio as a slim bar (Box with height 6, radius 3).
+
+Polish
+- Feels alive: style.transition "all .15s" on cards and buttons; selected chips/tabs clearly differ from the rest (primary bg + white text vs tinted);
+  unavailable = opacity .5. Never convey state by color alone (Icon + text).
+- Single-line rows truncate long text (overflow hidden, textOverflow ellipsis, whiteSpace nowrap). Align everything to the 16px grid; no text touching card edges.
+- Every screen is complete in all states: content, empty (Icon + one line + action) and the confirmation after an action. Never a blank screen.
 
 Content
 - Text language: the language of the user's prompt (default Uzbek, Latin script). Prices in so'm with fmt().
@@ -128,7 +143,7 @@ Content
 - Use real-looking images from https://images.unsplash.com/photo-...?w=800 for products/places; keep aspect ratios consistent in a list.
 
 Make it actually work: real state, real lists over collections, cart counters, validation with "if", order saved with dbInsert + notifyOwner.
-Give every node a meaningful unique id (prefix by type: scr_, box_, row_, txt_, img_, btn_, inp_, lst_, bdg_).
+Give every node a meaningful unique id (prefix by type: scr_, box_, row_, txt_, img_, ico_, btn_, inp_, lst_, bdg_).
 `;
 
 export const GENERATE_SYSTEM = `You are the design + logic engine of MiniStudio, a builder for Telegram Mini Apps.
