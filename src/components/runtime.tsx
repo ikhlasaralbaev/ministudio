@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import type { Action, AppDoc, UINode } from "@/lib/types";
 import { iconUrl } from "@/lib/icons";
 import { evaluate, interpolate } from "@/lib/expr";
+import { appLang } from "@/lib/lang";
 import { applyRecordChange, type RecordChange, type RecordRow, type RecordsByCollection } from "@/lib/records";
 
 /* ---------------- Host: side effects that differ between studio preview and production ---------------- */
@@ -64,8 +65,8 @@ function staticCollections(doc: AppDoc) {
 function tgUser() {
   const u = tg()?.initDataUnsafe?.user;
   return u
-    ? { id: u.id, firstName: u.first_name, lastName: u.last_name || "", username: u.username || "" }
-    : { id: 0, firstName: "Mehmon", lastName: "", username: "" };
+    ? { id: u.id, firstName: u.first_name, lastName: u.last_name || "", username: u.username || "", languageCode: u.language_code || "" }
+    : { id: 0, firstName: "Mehmon", lastName: "", username: "", languageCode: "" };
 }
 
 export function useRuntime(doc: AppDoc, host: Host, opts?: { initialScreen?: string }): Runtime {
@@ -119,6 +120,7 @@ export function useRuntime(doc: AppDoc, host: Host, opts?: { initialScreen?: str
       state: stateRef.current,
       collections: { ...recordsRef.current, ...staticCollections(docRef.current) },
       user: tgUser(),
+      lang: appLang(stateRef.current.lang, tgUser().languageCode),
       screen: stackRef.current[stackRef.current.length - 1],
       ...extra,
     }),

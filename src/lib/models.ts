@@ -6,13 +6,15 @@ export interface AiModel {
   hint: string;
   /** Shown in the picker but cannot be chosen; projects that had it fall back to the default. */
   disabled?: boolean;
+  /** USD per million tokens (input / output): the base of what a request costs in credits. */
+  price: { in: number; out: number };
 }
 
 export const AI_MODELS: AiModel[] = [
-  { id: "claude-opus-5-5", label: "Opus 5.5", hint: "Vaqtincha o‘chirilgan · $4 / $20", disabled: true },
-  { id: "claude-sonnet-5-5", label: "Sonnet 5.5", hint: "Tez va sifatli · tavsiya etiladi · $2 / $10" },
-  { id: "claude-haiku-5-5", label: "Haiku 5.5", hint: "Eng tez va arzon · oddiy tahrirlar · $0.10 / $0.50" },
-  { id: "claude-fable-5-1", label: "Fable 5.1", hint: "Vaqtincha o‘chirilgan · $10 / $50", disabled: true },
+  { id: "claude-opus-5-5", label: "Opus 5.5", hint: "Vaqtincha o‘chirilgan · $4 / $20", disabled: true, price: { in: 4, out: 20 } },
+  { id: "claude-sonnet-5-5", label: "Sonnet 5.5", hint: "Tez va sifatli · tavsiya etiladi · $2 / $10", price: { in: 2, out: 10 } },
+  { id: "claude-haiku-5-5", label: "Haiku 5.5", hint: "Eng tez va arzon · oddiy tahrirlar · $0.10 / $0.50", price: { in: 0.1, out: 0.5 } },
+  { id: "claude-fable-5-1", label: "Fable 5.1", hint: "Vaqtincha o‘chirilgan · $10 / $50", disabled: true, price: { in: 10, out: 50 } },
 ];
 
 export const DEFAULT_AI_MODEL = "claude-sonnet-5-5";

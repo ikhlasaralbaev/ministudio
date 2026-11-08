@@ -26,9 +26,14 @@ export async function signInWithTelegram(initData: string): Promise<{ userId: st
   const linked = await ensureTelegramUser(tg);
   if (!(await sessionUserById(linked.id))) throw new HttpError("Akkaunt bloklangan", 403, "banned");
 
-  // A real Better Auth session, exactly as a Google sign-in would make it.
+  await startSession(linked.id, tg.id);
+  return { userId: linked.id };
+}
+
+/** A real Better Auth session for this user, exactly as a Google sign-in would make it (cookie set on the response). */
+export async function startSession(userId: string, tgId?: number): Promise<void> {
   const ctx = await auth.$context;
-  const session = await ctx.internalAdapter.createSession(linked.id);
+  const session = await ctx.internalAdapter.createSession(userId);
   if (!session) throw new HttpError("Sessiya yaratib bo'lmadi", 500);
   const cookie = ctx.authCookies.sessionToken;
   const signature = createHmac("sha256", ctx.secret).update(session.token).digest("base64");
@@ -41,6 +46,5 @@ export async function signInWithTelegram(initData: string): Promise<{ userId: st
     ...(maxAge ? { maxAge } : {}),
   });
   // the panel opens in the language the person chose in the bot (Russian by default)
-  (await cookies()).set(LOCALE_COOKIE, await getBotLang(tg.id), { path: "/", maxAge: 31_536_000, sameSite: "lax" });
-  return { userId: linked.id };
+  if (tgId) (await cookies()).set(LOCALE_COOKIE, await getBotLang(tgId), { path: "/", maxAge: 31_536_000, sameSite: "lax" });
 }

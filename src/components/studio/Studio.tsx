@@ -7,6 +7,7 @@ import { api, pollAi, runAi, uploadAsset } from "@/lib/client";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
+import { SharePoster } from "@/components/SharePoster";
 import { AiPrompt } from "@/components/AiPrompt";
 import { BuildingScreen } from "@/components/BuildingScreen";
 import { useAttachments } from "@/components/Attachments";
@@ -57,6 +58,8 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const [screenId, setScreenId] = useState<string>(project.doc?.screens[0]?.id || "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("edit");
+  // Narrow screens show one panel at a time (chat / layers / app / properties) with a tab bar; wide screens show them side by side.
+  const [pane, setPane] = useState<"left" | "center" | "right">("center");
   const [busy, setBusy] = useState<null | "generate" | "global" | string>(null);
   const building = busy === "generate" || starting;
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -86,6 +89,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     } catch {}
   };
   const vibe = layout === "vibe";
+  // narrow screens: a build puts the loading screen in front; with no app yet the chat is where you start
+  useEffect(() => {
+    if (building) setPane("center");
+    else if (vibe && !doc) setPane("left");
+  }, [building, vibe, doc]);
 
   const toast = useCallback((text: string, kind: Toast["kind"] = "info") => {
     const t = { id: Date.now() + Math.random(), text, kind };
@@ -422,7 +430,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
                 <button
                   onClick={publish}
                   disabled={publishing}
-                  className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-2 disabled:opacity-50"
+                  className="shrink-0 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-2 disabled:opacity-50 max-md:order-first"
                 >
                   {publishing ? "E'lon qilinmoqda…" : version ? `Publish · v${version + 1}` : "Publish"}
                 </button>
@@ -433,9 +441,17 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         }
       />
 
+      {(vibe || doc) && (
+        <PaneTabs
+          pane={pane}
+          setPane={setPane}
+          items={vibe ? [["left", "Chat"], ["center", "Ilova"]] : [["left", "Qatlamlar"], ["center", "Ilova"], ["right", "Xususiyatlar"]]}
+        />
+      )}
+
       {vibe ? (
         <div className="flex min-h-0 flex-1">
-          <aside className="w-[400px] shrink-0 border-r border-line bg-panel">
+          <aside className={`${pane === "left" ? "block" : "hidden"} w-full shrink-0 border-r border-line bg-panel md:block md:w-[400px]`}>
             <ChatPanel
               projectId={id}
               hasDoc={!!doc}
@@ -446,6 +462,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
               onSend={(t, refs) => (doc ? edit(t, null, refs) : generate(t, refs))}
             />
           </aside>
+          <div className={`${pane === "center" ? "contents" : "hidden md:contents"}`}>
           {doc ? (
             <Canvas
               doc={doc}
@@ -465,6 +482,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
           ) : (
             building ? <BuildingScreen /> : <VibePlaceholder busy={false} />
           )}
+          </div>
         </div>
       ) : !doc && readOnly ? (
         <div className="canvas-dots grid flex-1 place-items-center p-6 text-muted">Ilova hali yaratilmagan.</div>
@@ -482,7 +500,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       ) : (
         <div className="flex min-h-0 flex-1">
           {/* left */}
-          <aside className="w-64 shrink-0 border-r border-line bg-panel">
+          <aside className={`${pane === "left" ? "block" : "hidden"} w-full shrink-0 border-r border-line bg-panel md:block md:w-64`}>
             <Layers
               doc={doc}
               screenId={screenId}
@@ -500,6 +518,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
           </aside>
 
           {/* center */}
+          <div className={`${pane === "center" ? "contents" : "hidden md:contents"}`}>
           <Canvas
             doc={doc}
             mode={mode}
@@ -514,9 +533,10 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
             onAddScreen={addScreen}
             readOnly={readOnly}
           />
+          </div>
 
           {/* right */}
-          <aside className="scroll-thin w-80 shrink-0 overflow-auto border-l border-line bg-panel">
+          <aside className={`${pane === "right" ? "block" : "hidden"} scroll-thin w-full shrink-0 overflow-auto border-l border-line bg-panel md:block md:w-80`}>
             <fieldset disabled={readOnly} className="contents">
             {selected ? (
               <NodeInspector
@@ -555,6 +575,8 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         <PublishModal
           res={published}
           projectId={id}
+          name={doc?.name || project.name}
+          color={doc?.theme.primary || "#2a8bd1"}
           onBot={(botUsername) => setPublished((r) => (r ? { ...r, botUsername } : r))}
           onClose={() => setPublished(null)}
         />
@@ -712,7 +734,7 @@ function Canvas(props: {
   useLayoutEffect(() => {
     const w = wrapRef.current;
     if (!w) return;
-    const update = () => setFit(Math.max(0.55, Math.min(1, (w.clientHeight - 48 - 30) / FRAME_H)));
+    const update = () => setFit(Math.max(0.4, Math.min(1, (w.clientHeight - 48 - 30) / FRAME_H, (w.clientWidth - 24) / (SCREEN_W + 32))));
     update();
     const ro = new ResizeObserver(update);
     ro.observe(w);
@@ -1006,13 +1028,35 @@ function GlobalBar({ busy, disabled, onSend }: { busy: boolean; disabled: boolea
   );
 }
 
+/** Tab bar for narrow screens: which of the studio's panels is shown. Hidden from md up. */
+function PaneTabs({ pane, setPane, items }: { pane: "left" | "center" | "right"; setPane: (p: "left" | "center" | "right") => void; items: ["left" | "center" | "right", string][] }) {
+  return (
+    <div className="flex shrink-0 border-b border-line bg-panel md:hidden">
+      {items.map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => setPane(k)}
+          className={`flex-1 py-2 text-[13px] ${pane === k ? "border-b-2 border-accent font-medium text-fg" : "text-muted"}`}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function PublishModal({
   res,
   projectId,
+  name,
+  color,
   onBot,
   onClose,
 }: {
   res: { url: string; version: number; botUsername: string | null; warnings: string[] };
+  name: string;
+  color: string;
   projectId: string;
   onBot: (botUsername: string | null) => void;
   onClose: () => void;
@@ -1032,6 +1076,12 @@ function PublishModal({
             <span>Telegramda ochish</span>
             <span>@{res.botUsername} ↗</span>
           </a>
+        )}
+        {/* QR code + printable poster: a table card, a window sticker, a flyer */}
+        {res.botUsername && (
+          <div className="mt-3">
+            <SharePoster botUsername={res.botUsername} name={name} color={color} />
+          </div>
         )}
         {/* no bot yet: create it right here (one tap for Telegram accounts), no trip to Settings */}
         {!res.botUsername && (

@@ -7,7 +7,9 @@ import { envOf, getProject, projects, publicUrl } from "./projects";
 import { escapeHtml, tgApi } from "./telegram";
 import { botSecret, ownerCode } from "./runtime";
 import { connectBot } from "./botconnect";
-import { consumeLinkCode, linkTelegram, peekLinkCode } from "./tglink";
+import { consumeLinkCode, ensureTelegramUser, linkTelegram, peekLinkCode } from "./tglink";
+import { approveLogin, peekLogin } from "./tglogin";
+import { sessionUserById } from "./users";
 import { HttpError } from "./http";
 import { handleManagerChat } from "./managerchat";
 import { getBotLang } from "./managerprefs";
@@ -205,10 +207,47 @@ export async function handleManagerUpdate(update: {
         : { chat_id: chatId, ...html, text: t.link.expired }).catch(() => {});
       return owner ? "link: asked to confirm" : "link: bad code";
     }
+    const login = /^\/start\s+login_([a-f0-9]{24})\s*$/.exec(msg.text || "")?.[1];
+    if (login) {
+      const t = BOT_DICT[await getBotLang(msg.from?.id)];
+      const row = await peekLogin(login);
+      await tgApi(m.token, "sendMessage", row
+        ? {
+            chat_id: chatId,
+            ...html,
+            text: t.login.confirm(escapeHtml(row.browser)),
+            reply_markup: { inline_keyboard: [[{ text: t.login.yes, callback_data: `lg:${login}` }, { text: t.btn.no, callback_data: "lg:no" }]] },
+          }
+        : { chat_id: chatId, ...html, text: t.login.expired }).catch(() => {});
+      return row ? "login: asked to confirm" : "login: bad code";
+    }
     return handleManagerChat(update);
   }
 
   const cb = update.callback_query;
+  if (cb?.data?.startsWith("lg:")) {
+    const t = BOT_DICT[await getBotLang(cb.from.id)];
+    const chat = cb.message?.chat?.id;
+    const done = (text: string) =>
+      Promise.all([
+        tgApi(m.token, "answerCallbackQuery", { callback_query_id: cb.id }).catch(() => {}),
+        chat && cb.message?.message_id ? tgApi(m.token, "editMessageText", { chat_id: chat, message_id: cb.message.message_id, text, ...html }).catch(() => {}) : null,
+      ]);
+    const code = cb.data.slice(3);
+    if (code === "no") {
+      await done(t.login.declined);
+      return "login: declined";
+    }
+    // Telegram-first: whoever confirms has an account (made here when it is their first time), unless blocked
+    const account = await ensureTelegramUser({ id: cb.from.id, first_name: cb.from.first_name, username: cb.from.username });
+    if (!(await sessionUserById(account.id))) {
+      await done(t.blocked);
+      return "login: blocked";
+    }
+    const okLogin = await approveLogin(code, account.id);
+    await done(okLogin ? t.login.approved : t.login.expired);
+    return okLogin ? "login: approved" : "login: expired";
+  }
   if (cb?.data?.startsWith("lk:")) {
     const t = BOT_DICT[await getBotLang(cb.from.id)];
     const chat = cb.message?.chat?.id;

@@ -1,8 +1,9 @@
 "use client";
 import { shownEmail } from "@/lib/display";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PaperPlaneTilt, SignOut, Translate } from "@phosphor-icons/react";
+import { Coins, PaperPlaneTilt, SignOut, Translate } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
 import { fmt } from "@/i18n/app";
 import { LOCALES, LOCALE_LABEL } from "@/i18n/config";
@@ -38,8 +39,8 @@ export function ProjectNav({
   return (
     <>
       <div className="flex h-11 shrink-0 items-center gap-3 border-b border-line bg-panel px-4">
-        <span className="max-w-64 truncate text-sm font-semibold">{name || "…"}</span>
-        <div className="ml-auto flex items-center gap-2">{right}</div>
+        <span className="max-w-28 shrink-0 truncate text-sm font-semibold sm:max-w-64">{name || "…"}</span>
+        <div className="scroll-thin ml-auto flex min-w-0 items-center gap-2 overflow-x-auto">{right}</div>
       </div>
       {project?.permissions.viaAdmin && (
         <div className="shrink-0 bg-warn/15 px-4 py-1.5 text-center text-xs text-warn">
@@ -59,6 +60,8 @@ export interface Me {
   name: string;
   image?: string | null;
   isAdmin: boolean;
+  /** Credit balance; null for platform admins (not metered). */
+  credits?: number | null;
 }
 
 let meCache: Promise<Me | null> | null = null;
@@ -83,8 +86,23 @@ export function UserMenu({ me }: { me: Me }) {
     await authClient.signOut();
     router.replace("/login");
   }
+  const [credits, setCredits] = useState<number | null>(me.credits ?? null);
+  useEffect(() => {
+    const refresh = () => api<{ credits: number | null }>("/api/me/credits").then((r) => setCredits(r.credits)).catch(() => {});
+    window.addEventListener("ms:credits", refresh);
+    window.addEventListener("focus", refresh);
+    return () => {
+      window.removeEventListener("ms:credits", refresh);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
   return (
     <div className="flex items-center gap-2 text-sm">
+      {credits !== null && (
+        <Link href="/billing" title={t.billing.chipTitle} className={`btn btn-sm ${credits <= 0 ? "border-danger/60 text-danger" : ""}`}>
+          <Coins size={14} weight="fill" /> {credits <= 0 ? t.billing.empty : formatCredits(credits)}
+        </Link>
+      )}
       {me.image ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={me.image} alt="" className="h-6 w-6 rounded-full" referrerPolicy="no-referrer" />
@@ -141,3 +159,6 @@ export function Field({
 
 export const inputCls =
   "w-full rounded-md border border-line bg-bg px-3 py-1.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/25";
+
+/** Credits are shown whole when they are whole, otherwise with one decimal. */
+export const formatCredits = (c: number) => (Number.isInteger(c) ? String(c) : c.toFixed(1));

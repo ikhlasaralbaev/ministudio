@@ -141,3 +141,16 @@ References go to the AI as vision input (max 5 per request, a few thousand token
 (address, size, dominant color). In the manager bot, a photo asks "logo or reference" (Telegram's 20 MB download limit applies
 first; photos are staged for 24 h while waiting for the answer). `sharp` is a direct dependency and listed in
 `serverExternalPackages`; the Docker image installs its Linux binary through `npm ci`.
+
+
+## Credits (balance)
+Every AI request spends credits: 1 credit = $0.01 of model cost (a typical Sonnet app is ~5-10 credits, a small Haiku edit ~1).
+A new account gets `FREE_CREDITS` (default 100) the first time its balance is read; platform admins (`SUPER_ADMIN_EMAILS`) are not
+metered. `CREDIT_MARKUP` (default 1) multiplies the cost. With no credits left a request is refused (HTTP 402, and a message in
+the bot). The balance and history are on `/billing`; an admin adds credits per user in the admin page ("Kredit"). Online
+top-up (Click/Payme for the platform itself) is not built yet: it needs a merchant account for MiniStudio. Everything lives in
+the `credit_balances` and `credit_ledger` collections, so a payment only has to call `addCredits(userId, credits, "topup", ...)`.
+
+## Other new settings
+`NOTIFY_AFTER_MS` (default 20000): AI jobs longer than this are announced in Telegram when no page is watching.
+Browser login through Telegram needs the manager bot (`TELEGRAM_MANAGER_BOT_TOKEN` / `_USERNAME`).

@@ -41,6 +41,7 @@ export async function pollAi<T = any>(projectId: string, jobId: string, opts: { 
     try {
       const j = await api<{ status: "running" | "done" | "error"; result?: T; error?: string }>(`/api/projects/${projectId}/ai/${jobId}?w=${watchLevel()}`);
       misses = 0;
+      if (j.status === "done" || j.status === "error") window.dispatchEvent(new Event("ms:credits")); // the balance just changed
       if (j.status === "done") return j.result as T;
       if (j.status === "error") throw new Error(j.error || "AI xatosi");
     } catch (e) {

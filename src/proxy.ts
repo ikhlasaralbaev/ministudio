@@ -11,6 +11,7 @@ const PUBLIC = [
   /^\/api\/bot\//,
   /^\/api\/manager\/webhook$/,
   /^\/api\/tg\/signin$/,
+  /^\/api\/tglogin(\/|$)/, // browser login through Telegram (the page is not signed in yet)
   /^\/api\/assets\//, // logos are public (route checks access for the rest)
   /^\/tg$/, // Telegram Mini App entry (signs in with Telegram initData)
   /^\/api\/pay\//,

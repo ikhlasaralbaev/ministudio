@@ -9,9 +9,9 @@ import { db } from "./db";
 import { HttpError } from "./http";
 import { envOf, projects, type ProjectRow } from "./projects";
 import { emptyUsage, recordPrompt, type Usage } from "./usage";
-import { isTelegramOnly } from "./tglink";
 import { notifyJobDone, shouldNotify } from "./notify";
-import type { SessionUser } from "./access";
+import { chargeUsage, requireCredits } from "./credits";
+import { isPlatformAdmin, type SessionUser } from "./access";
 
 export type AiOutcome = { ok: true; result: Record<string, unknown> } | { ok: false; error: string };
 
@@ -47,12 +47,9 @@ export async function startAiJob(o: {
     editDoc = parsed.data;
   }
 
-  // Accounts created from Telegram alone get a daily cap on AI requests (until real plans exist).
-  if (isTelegramOnly(user.email)) {
-    const limit = Number(process.env.TG_AI_DAILY_LIMIT) || 20;
-    const used = await (await db()).collection("usage").countDocuments({ userId: user.id, mock: { $ne: true }, at: { $gt: new Date(Date.now() - 86_400_000) } });
-    if (used >= limit) throw new HttpError("Kunlik AI limiti tugadi. Ertaga urinib ko'ring.", 429);
-  }
+  // Credits: nothing left, no new request (platform admins are not metered).
+  const metered = !isPlatformAdmin(user.email);
+  if (metered) await requireCredits(user.id);
 
   // attachments: references (images) and the logo (a text note), both only from THIS project
   const extras = { images: await aiImages(id, o.refs), logo: await logoInfo(id, p.logoAssetId) };
@@ -64,8 +61,10 @@ export async function startAiJob(o: {
 
   const started = Date.now();
   // Every request lands in the prompt history: who asked what, the model, tokens, time and outcome.
-  const record = (status: "ok" | "error", usage: Usage, extra: { message?: string; opsCount?: number; error?: string }) =>
-    recordPrompt({ userId: user.id, userEmail: user.email, projectId: id, kind, prompt, nodeId, usage, durationMs: Date.now() - started, status, ...extra });
+  const record = async (status: "ok" | "error", usage: Usage, extra: { message?: string; opsCount?: number; error?: string }) => {
+    await recordPrompt({ userId: user.id, userEmail: user.email, projectId: id, kind, prompt, nodeId, usage, durationMs: Date.now() - started, status, ...extra });
+    if (metered) await chargeUsage(user.id, usage, String(jobId)).catch((e) => console.error("charge", e));
+  };
 
   const work = async (): Promise<Record<string, unknown>> => {
     try {

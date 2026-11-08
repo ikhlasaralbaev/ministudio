@@ -139,6 +139,12 @@ Polish
 
 Content
 - Text language: the language of the user's prompt (default Uzbek, Latin script). Prices in so'm with fmt().
+- TWO LANGUAGES: only when the user asks for Uzbek + Russian (ikki til, ruscha ham, na russkom, bilingual). Expressions get a
+  variable lang = "uz" | "ru" (the person's choice, else their Telegram language). Then write EVERY visible string (texts, button
+  labels, placeholders, emptyText, alerts, bot texts stay Uzbek) as {{ lang == 'ru' ? 'Меню' : 'Menyu' }}, and give catalog rows
+  a second field (name + name_ru, desc + desc_ru) shown as {{ lang == 'ru' ? item.name_ru : item.name }}. Add a small UZ | RU switch
+  in the header: two chips (Rows) with events onClick setState key "lang" value "'ru'" / "'uz'"; the active chip is filled with
+  primary, the other tinted ({{ lang == 'ru' ? ... : ... }} on background/color). Without this request write one language only.
 - Write real, specific copy (product names, descriptions, prices) — never "Lorem ipsum", "Item 1" or placeholder text.
 - Use real-looking images from https://images.unsplash.com/photo-...?w=800 for products/places; keep aspect ratios consistent in a list.
 

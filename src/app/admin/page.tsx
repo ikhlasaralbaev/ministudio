@@ -26,6 +26,7 @@ interface UserRow {
   banned: boolean;
   isAdmin: boolean;
   projects: number;
+  credits: number | null;
   usage: Usage;
 }
 interface ProjectRow {
@@ -110,6 +111,18 @@ function Users() {
       alert((e as Error).message);
     }
   }
+  async function grant(u: UserRow) {
+    const v = prompt(`${u.name || shownEmail(u.email)}: nechta kredit qo'shilsin? (kamaytirish uchun minus bilan yozing)`, "100");
+    if (v === null) return;
+    const credits = Number(v.replace(",", "."));
+    if (!Number.isFinite(credits) || credits === 0) return alert("Miqdor noto'g'ri");
+    try {
+      await api(`/api/admin/users/${u.id}/credits`, { method: "POST", json: { credits } });
+      l.reload();
+    } catch (e) {
+      alert((e as Error).message);
+    }
+  }
   return (
     <>
       <input className={inputCls + " mb-4 max-w-sm"} placeholder="Email yoki ism bo'yicha qidirish" value={l.q} onChange={(e) => l.setQ(e.target.value)} />
@@ -122,6 +135,7 @@ function Users() {
               <th className={th}>Ro&apos;yxatdan o&apos;tgan</th>
               <th className={th}>Loyihalar</th>
               <th className={th}>AI: so&apos;rov · kirish/chiqish token</th>
+              <th className={th}>Kredit</th>
               <th className={th} />
             </tr>
           </thead>
@@ -139,7 +153,13 @@ function Users() {
                 <td className={td + " text-muted"}>{u.createdAt ? timeAgo(u.createdAt) : "—"}</td>
                 <td className={td}>{u.projects}</td>
                 <td className={td + " font-mono text-xs"}>{usageText(u.usage)}</td>
-                <td className={td + " text-right"}>
+                <td className={td + " font-mono text-xs"}>{u.isAdmin ? "∞" : u.credits === null ? "—" : u.credits}</td>
+                <td className={td + " space-x-3 text-right"}>
+                  {!u.isAdmin && (
+                    <button onClick={() => grant(u)} className="text-xs text-accent-2 hover:underline">
+                      Kredit
+                    </button>
+                  )}
                   {!u.isAdmin && (
                     <button onClick={() => toggle(u)} className={`text-xs ${u.banned ? "text-ok" : "text-danger"} hover:underline`}>
                       {u.banned ? "Blokdan chiqarish" : "Bloklash"}
@@ -262,6 +282,7 @@ const ACTION_LABEL: Record<string, string> = {
   "member.add": "A'zo qo'shdi",
   "member.update": "A'zo ruxsatini o'zgartirdi",
   "member.remove": "A'zoni olib tashladi",
+  "credits.grant": "Kredit qo'shdi",
   "user.ban": "Foydalanuvchini blokladi",
   "user.unban": "Blokdan chiqardi",
   "project.suspend": "Loyihani to'xtatdi",

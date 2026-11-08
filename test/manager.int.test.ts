@@ -323,18 +323,24 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(await (await projects()).countDocuments({ ownerId: ids.A })).toBe(before);
   });
 
-  it("the daily AI cap applies to accounts made from Telegram alone", async () => {
+  it("with no credits left an AI request is refused with a clear message; a request is charged what it used", async () => {
     const { usersCol } = await import("@/lib/server/users");
-    const { rawDb } = await import("@/lib/server/db");
-    process.env.TG_AI_DAILY_LIMIT = "2";
+    const { addCredits, getCredits, chargeUsage } = await import("@/lib/server/credits");
     const TGC = 880003;
-    await say(TGC, "/start"); // creates the Telegram-only account
+    await say(TGC, "/start");
     const uid = ((await usersCol().findOne({ telegramId: TGC } as never)) as unknown as { _id: { toHexString(): string } })._id.toHexString();
-    await rawDb().collection("usage").insertMany([1, 2].map(() => ({ userId: uid, mock: false, at: new Date() })));
+    expect(await getCredits(uid)).toBe(100); // the starting grant
+    // a real Sonnet request: 5000 in + 5000 out = $0.06 = 6 credits
+    await chargeUsage(uid, { inputTokens: 5000, outputTokens: 5000, model: "claude-sonnet-5-5", mock: false });
+    expect(await getCredits(uid)).toBe(94);
+    expect(await chargeUsage(uid, { inputTokens: 9999, outputTokens: 9999, model: "x", mock: true })).toBe(0); // demo requests are free
+    await addCredits(uid, -94, "admin"); // drained
+    expect(await getCredits(uid)).toBe(0);
     await say(TGC, "kafe uchun menyu va yetkazib berish ilovasi");
-    await waitFor(() => last().text.includes("лимит"));
-    expect(last().text).toContain("Дневной лимит ИИ-запросов исчерпан");
-    delete process.env.TG_AI_DAILY_LIMIT;
+    await waitFor(() => last().text.includes("Кредиты"));
+    expect(last().text).toContain("Кредиты закончились");
+    await addCredits(uid, 50, "admin", "to'lov");
+    expect(await getCredits(uid)).toBe(50);
   });
 
   it("project card, publish, and latest records", async () => {

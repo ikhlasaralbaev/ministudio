@@ -69,7 +69,8 @@ const ru = {
   noRecords: (name: string) => `📦 <b>${name}</b>\n\nЗаписей пока нет.`,
   botHas: "🤖 К этому проекту бот уже подключён.",
   botCreate: "🤖 <b>Создание бота</b>\n\nОткроется экран Telegram — нажмите «Создать». Бот подключится сам.",
-  err: { limit: "Дневной лимит ИИ-запросов исчерпан. Попробуйте завтра.", notFound: "Проект не найден.", noRights: "Недостаточно прав для этого действия.", generic: "Не получилось выполнить. Попробуйте ещё раз." },
+  err: { credits: "Кредиты закончились. Пополните баланс на сайте (раздел «Кредиты»).", limit: "Дневной лимит ИИ-запросов исчерпан. Попробуйте завтра.", notFound: "Проект не найден.", noRights: "Недостаточно прав для этого действия.", generic: "Не получилось выполнить. Попробуйте ещё раз." },
+  login: { confirm: (b: string) => `🔐 <b>Вход на сайт</b>\n\nБраузер: <b>${b}</b>\n\nЭто вы? Если вы ничего не открывали, нажмите «Нет».`, yes: "✅ Да, это я", approved: "✅ <b>Готово</b>\n\nВернитесь в браузер: вход выполнен.", declined: "Вход отменён.", expired: "⌛️ Запрос на вход устарел. Нажмите «Войти через Telegram» на сайте ещё раз." },
   failed: (why: string) => `⚠️ ${why}`,
   link: {
     confirm: (email: string) => `🔗 <b>Привязать этот Telegram?</b>\n\nК аккаунту MiniStudio: <b>${email}</b>\n\nЕсли это не вы — нажмите «Нет».`,
@@ -159,7 +160,8 @@ const uz: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nHozircha yozuv yo‘q.`,
   botHas: "🤖 Bu loyihaga bot allaqachon ulangan.",
   botCreate: "🤖 <b>Bot yaratish</b>\n\nTelegram ekrani ochiladi — «Yaratish» tugmasini bosing. Bot o‘zi ulanadi.",
-  err: { limit: "Kunlik AI so‘rovlari limiti tugadi. Ertaga urinib ko‘ring.", notFound: "Loyiha topilmadi.", noRights: "Bu amal uchun huquq yetarli emas.", generic: "Bajarib bo‘lmadi. Qayta urinib ko‘ring." },
+  err: { credits: "Kreditlar tugadi. Balansni saytda («Kreditlar» bo‘limi) to‘ldiring.", limit: "Kunlik AI so‘rovlari limiti tugadi. Ertaga urinib ko‘ring.", notFound: "Loyiha topilmadi.", noRights: "Bu amal uchun huquq yetarli emas.", generic: "Bajarib bo‘lmadi. Qayta urinib ko‘ring." },
+  login: { confirm: (b) => `🔐 <b>Saytga kirish</b>\n\nBrauzer: <b>${b}</b>\n\nBu sizmisiz? Hech narsa ochmagan bo‘lsangiz, «Yo‘q» ni bosing.`, yes: "✅ Ha, bu men", approved: "✅ <b>Tayyor</b>\n\nBrauzerga qayting: kirish bajarildi.", declined: "Kirish bekor qilindi.", expired: "⌛️ Kirish so‘rovi eskirgan. Saytda «Telegram orqali kirish» tugmasini qayta bosing." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Shu Telegram ulansinmi?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBu siz bo‘lmasangiz — «Yo‘q» tugmasini bosing.`,
@@ -248,7 +250,8 @@ const en: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nNo records yet.`,
   botHas: "🤖 This project already has a bot connected.",
   botCreate: "🤖 <b>Create the bot</b>\n\nA Telegram screen opens — press “Create”. The bot connects by itself.",
-  err: { limit: "The daily limit of AI requests is used up. Try again tomorrow.", notFound: "Project not found.", noRights: "You don’t have the rights for this action.", generic: "That did not work. Please try again." },
+  err: { credits: "You are out of credits. Top up on the site (the Credits page).", limit: "The daily limit of AI requests is used up. Try again tomorrow.", notFound: "Project not found.", noRights: "You don’t have the rights for this action.", generic: "That did not work. Please try again." },
+  login: { confirm: (b) => `🔐 <b>Sign in to the site</b>\n\nBrowser: <b>${b}</b>\n\nIs this you? If you did not open anything, press “No”.`, yes: "✅ Yes, it is me", approved: "✅ <b>Done</b>\n\nGo back to the browser: you are signed in.", declined: "Sign-in cancelled.", expired: "⌛️ The sign-in request expired. Press “Sign in with Telegram” on the site again." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Link this Telegram?</b>\n\nTo the MiniStudio account: <b>${email}</b>\n\nIf this is not you, press “No”.`,
@@ -337,7 +340,8 @@ const kaa: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nHázirshe jazıw joq.`,
   botHas: "🤖 Bul joybarǵa bot aldınan ulanǵan.",
   botCreate: "🤖 <b>Bot jaratıw</b>\n\nTelegram ekranı ashıladı — «Jaratıw» túymesin basıń. Bot ózi ulanadı.",
-  err: { limit: "Kúnlik AI sorawları limiti tamamlandı. Erteń urınıp kóriń.", notFound: "Joybar tabılmadı.", noRights: "Bul háreket ushın huqıq jetkiliksiz.", generic: "Orınlap bolmadı. Qayta urınıp kóriń." },
+  err: { credits: "Kreditler tamamlandı. Balansti saytta («Kreditler» bólimi) toltırıń.", limit: "Kúnlik AI sorawları limiti tamamlandı. Erteń urınıp kóriń.", notFound: "Joybar tabılmadı.", noRights: "Bul háreket ushın huqıq jetkiliksiz.", generic: "Orınlap bolmadı. Qayta urınıp kóriń." },
+  login: { confirm: (b) => `🔐 <b>Saytqa kiriw</b>\n\nBrauzer: <b>${b}</b>\n\nBul sizbe? Hesh nárse ashpaǵan bolsańız, «Yaq» túymesin basıń.`, yes: "✅ Awa, bul men", approved: "✅ <b>Tayın</b>\n\nBrauzerge qaytıń: kiriw orınlandı.", declined: "Kiriw biykarlandı.", expired: "⌛️ Kiriw sorawı eskirgen. Saytta «Telegram arqalı kiriw» túymesin qayta basıń." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Usı Telegram ulansınba?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBul siz bolmasańız — «Yaq» túymesin basıń.`,

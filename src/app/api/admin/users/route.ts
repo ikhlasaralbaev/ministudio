@@ -2,6 +2,7 @@ import { requireAdmin, isPlatformAdmin } from "@/lib/server/access";
 import { containsRegex, listParams, PAGE_SIZE } from "@/lib/server/admin";
 import { projects } from "@/lib/server/projects";
 import { usageTotals } from "@/lib/server/usage";
+import { peekCredits } from "@/lib/server/credits";
 import { usersCol } from "@/lib/server/users";
 import { handle, ok } from "@/lib/server/http";
 
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
       usersCol().countDocuments(filter),
     ]);
     const ids = list.map((u) => u._id.toHexString());
+    const credits = await peekCredits(ids);
     const [counts, usage] = await Promise.all([
       (await projects())
         .aggregate<{ _id: string; n: number }>([{ $match: { ownerId: { $in: ids } } }, { $group: { _id: "$ownerId", n: { $sum: 1 } } }])
@@ -36,6 +38,7 @@ export async function GET(req: Request) {
           banned: !!u.banned,
           isAdmin: isPlatformAdmin(u.email),
           projects: projectCount.get(id) || 0,
+          credits: credits.get(id) ?? null,
           usage: usage.get(id) || { requests: 0, inputTokens: 0, outputTokens: 0 },
         };
       }),

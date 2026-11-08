@@ -15,6 +15,8 @@ const uz = {
     published: "v{n} e’lon qilingan", unpublished: "e’lon qilinmagan", del: "O‘chirish",
     confirm: "“{name}” loyihasi, uning buyurtmalari va to‘lovlari butunlay o‘chiriladi. Qaytarib bo‘lmaydi.\n\nTasdiqlash uchun loyiha nomini yozing:",
     mismatch: "Nom mos kelmadi, loyiha o‘chirilmadi.",
+    templates: "Yoki tayyor shablondan boshlang",
+    copy: "Nusxalash", importFile: "Fayldan import", importBad: "Importni bajarib bo‘lmadi",
   },
   build: {
     title: "Ilovangizni yaratyapman",
@@ -23,7 +25,14 @@ const uz = {
   },
   tg: { title: "Telegramni ulang", hint: "Botda loyihalaringiz ham ko‘rinadi. Aks holda bot alohida akkaunt ochadi.", btn: "Telegramni ulash", waiting: "Telegramda «Start» va «Ha, ulash» tugmalarini bosing…" },
   notify: { title: "Tayyor", body: "AI so‘rovi bajarildi" },
-  login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
+  billing: {
+    chipTitle: "Kreditlar balansi", empty: "Kredit yo‘q", title: "Kreditlar", balance: "Joriy balans", unit: "kredit",
+    how: "AI so‘rovlari kreditga sarflanadi: oddiy ilova yaratish taxminan 5–10 kredit, kichik tahrir 1–2 kredit.",
+    topupTitle: "Balansni to‘ldirish", topupSoon: "Onlayn to‘lov (Click, Payme) tez orada qo‘shiladi. Hozircha kreditni administrator qo‘shadi.",
+    history: "Tarix", noHistory: "Hali harakat yo‘q.", back: "Loyihalar", unmetered: "Siz platforma administratorisiz: kreditlar hisoblanmaydi.",
+    reasons: { grant: "Boshlang‘ich kredit", ai: "AI so‘rovi", topup: "To‘ldirish", admin: "Administrator" },
+  },
+  login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", telegramOpen: "Telegramni ochish", telegram: "Telegram orqali kirish", telegramWait: "Telegramda «Start» va «Ha, bu men» tugmalarini bosing…", telegramFail: "Kirish bajarilmadi. Qayta urinib ko‘ring.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
 };
 
 export type AppDict = typeof uz;
@@ -41,6 +50,8 @@ const en: AppDict = {
     published: "v{n} published", unpublished: "not published", del: "Delete",
     confirm: "Project “{name}”, its orders and payments will be deleted permanently. This cannot be undone.\n\nType the project name to confirm:",
     mismatch: "The name did not match, the project was not deleted.",
+    templates: "Or start from a template",
+    copy: "Duplicate", importFile: "Import from file", importBad: "Import failed",
   },
   build: {
     title: "Building your app",
@@ -49,7 +60,14 @@ const en: AppDict = {
   },
   tg: { title: "Link Telegram", hint: "Your projects will show up in the bot too. Otherwise the bot opens a separate account.", btn: "Link Telegram", waiting: "Press “Start” and “Yes, link” in Telegram…" },
   notify: { title: "Done", body: "Your AI request finished" },
-  login: { failed: "Sign-in was rejected. Your account may be blocked.", google: "Sign in with Google", redirecting: "Redirecting…", back: "Home" },
+  billing: {
+    chipTitle: "Credit balance", empty: "No credits", title: "Credits", balance: "Current balance", unit: "credits",
+    how: "AI requests spend credits: building a typical app takes about 5–10 credits, a small edit 1–2.",
+    topupTitle: "Top up", topupSoon: "Online payment (Click, Payme) is coming soon. For now an administrator adds credits.",
+    history: "History", noHistory: "Nothing yet.", back: "Projects", unmetered: "You are a platform administrator: credits are not counted.",
+    reasons: { grant: "Starting credits", ai: "AI request", topup: "Top-up", admin: "Administrator" },
+  },
+  login: { failed: "Sign-in was rejected. Your account may be blocked.", telegramOpen: "Open Telegram", telegram: "Sign in with Telegram", telegramWait: "Press “Start” and “Yes, it is me” in Telegram…", telegramFail: "Sign-in failed. Try again.", google: "Sign in with Google", redirecting: "Redirecting…", back: "Home" },
 };
 
 const ru: AppDict = {
@@ -65,6 +83,8 @@ const ru: AppDict = {
     published: "v{n} опубликован", unpublished: "не опубликован", del: "Удалить",
     confirm: "Проект «{name}», его заказы и платежи будут удалены навсегда. Отменить нельзя.\n\nДля подтверждения введите название проекта:",
     mismatch: "Название не совпало, проект не удалён.",
+    templates: "Или начните с шаблона",
+    copy: "Дублировать", importFile: "Импорт из файла", importBad: "Не удалось импортировать",
   },
   build: {
     title: "Создаю ваше приложение",
@@ -73,7 +93,14 @@ const ru: AppDict = {
   },
   tg: { title: "Привяжите Telegram", hint: "Проекты будут видны и в боте. Иначе бот откроет отдельный аккаунт.", btn: "Привязать Telegram", waiting: "Нажмите «Start» и «Да, привязать» в Telegram…" },
   notify: { title: "Готово", body: "Запрос к ИИ выполнен" },
-  login: { failed: "Вход отклонён. Возможно, ваш аккаунт заблокирован.", google: "Войти через Google", redirecting: "Перенаправляем…", back: "На главную" },
+  billing: {
+    chipTitle: "Баланс кредитов", empty: "Нет кредитов", title: "Кредиты", balance: "Текущий баланс", unit: "кредитов",
+    how: "ИИ-запросы тратят кредиты: создание обычного приложения — около 5–10 кредитов, небольшая правка — 1–2.",
+    topupTitle: "Пополнение", topupSoon: "Онлайн-оплата (Click, Payme) скоро появится. Пока кредиты добавляет администратор.",
+    history: "История", noHistory: "Пока ничего нет.", back: "Проекты", unmetered: "Вы администратор платформы: кредиты не списываются.",
+    reasons: { grant: "Стартовые кредиты", ai: "ИИ-запрос", topup: "Пополнение", admin: "Администратор" },
+  },
+  login: { failed: "Вход отклонён. Возможно, ваш аккаунт заблокирован.", telegramOpen: "Открыть Telegram", telegram: "Войти через Telegram", telegramWait: "Нажмите «Start» и «Да, это я» в Telegram…", telegramFail: "Не удалось войти. Попробуйте ещё раз.", google: "Войти через Google", redirecting: "Перенаправляем…", back: "На главную" },
 };
 
 const kaa: AppDict = {
@@ -89,6 +116,8 @@ const kaa: AppDict = {
     published: "v{n} járiyalanǵan", unpublished: "járiyalanbaǵan", del: "Óshiriw",
     confirm: "“{name}” joybarı, onıń buyırtpaları hám tólemleri pútkilley óshiriledi. Qaytarıp bolmaydı.\n\nRastlaw ushın joybar atın jazıń:",
     mismatch: "Atı sáykes kelmedi, joybar óshirilmedi.",
+    templates: "Yamasa tayın úlgiden baslań",
+    copy: "Nusqalaw", importFile: "Fayldan import", importBad: "Importtı orınlaw múmkin bolmadı",
   },
   build: {
     title: "Ilovańızdı jaratıp atırman",
@@ -97,7 +126,14 @@ const kaa: AppDict = {
   },
   tg: { title: "Telegramdı ulań", hint: "Joybarlarıńız botta da kórinedi. Ápiwayı halda bot bólek akkaunt ashadı.", btn: "Telegramdı ulaw", waiting: "Telegramda «Start» hám «Awa, ulaw» túymelerin basıń…" },
   notify: { title: "Tayın", body: "AI sorawı orınlandı" },
-  login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
+  billing: {
+    chipTitle: "Kredit balansı", empty: "Kredit joq", title: "Kreditler", balance: "Házirgi balans", unit: "kredit",
+    how: "AI sorawları kreditke jumsaladı: ápiwayı ilova jaratıw shama menen 5–10 kredit, kishi dúzetiw 1–2 kredit.",
+    topupTitle: "Balansti toltırıw", topupSoon: "Onlayn tólem (Click, Payme) tezde qosıladı. Házirshe kreditti administrator qosadı.",
+    history: "Tariyx", noHistory: "Házirshe háreket joq.", back: "Joybarlar", unmetered: "Siz platforma administratorısız: kreditler esaplanbaydı.",
+    reasons: { grant: "Baslanǵısh kredit", ai: "AI sorawı", topup: "Toltırıw", admin: "Administrator" },
+  },
+  login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", telegramOpen: "Telegramdı ashıw", telegram: "Telegram arqalı kiriw", telegramWait: "Telegramda «Start» hám «Awa, bul men» túymelerin basıń…", telegramFail: "Kiriw orınlanbadı. Qayta urınıp kóriń.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
 };
 
 export const APP_DICT: Record<Locale, AppDict> = { uz, en, ru, kaa };

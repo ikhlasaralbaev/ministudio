@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import { Field, inputCls, ProjectNav } from "@/components/ui";
 import { Members } from "@/components/Members";
 import { BotCreator } from "@/components/BotCreator";
+import { SharePoster } from "@/components/SharePoster";
 import { LogoUploader } from "@/components/AssetUploader";
 import type { ProjectDTO } from "@/lib/types";
 
@@ -44,6 +45,7 @@ const KNOWN: { key: string; label: string; hint: React.ReactNode; secret?: boole
 
 function SettingsInner() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const isNew = useSearchParams().get("new") === "1";
   const [name, setName] = useState("");
   const [data, setData] = useState<EnvResp | null>(null);
@@ -145,7 +147,8 @@ function SettingsInner() {
               </div>
               <div className="space-y-4">
                 {g === "Telegram" && <BotCreator projectId={id} onConnected={() => void load()} onOwnerId={(tgId) => setForm((f) => ({ ...f, OWNER_CHAT_ID: String(tgId) }))} />}
-                {KNOWN.filter((k) => k.group === g).map((k) => (
+                {g === "Telegram" && data?.botUsername && <SharePoster botUsername={data.botUsername} name={name || "Mini App"} />}
+                {KNOWN.filter((k) => k.group === g && !(k.key === "BOT_TOKEN" && !data?.env.BOT_TOKEN)).map((k) => ( // no bot yet: the card above takes the token (checked before saving)
                   <Field key={k.key} label={`${k.label} · ${k.key}`} hint={k.hint}>
                     <input
                       className={inputCls + " font-mono"}
@@ -228,6 +231,34 @@ function SettingsInner() {
         </form>
         <div className="mx-auto max-w-3xl px-6 pb-10 pt-6">
           {project && me && <Members projectId={id} perms={project.permissions} userId={me.id} />}
+
+          {project && (
+            <section className="rounded-2xl border border-line bg-panel p-6">
+              <h2 className="mb-1 font-semibold">Nusxa va eksport</h2>
+              <p className="mb-4 text-sm text-muted">Ilovaning dizayni va mantig&apos;i (kalitlar, buyurtmalar va mijozlar ma&apos;lumoti kirmaydi).</p>
+              <div className="flex flex-wrap gap-2">
+                <a className="btn btn-sm" href={`/api/projects/${id}/export`} download>
+                  Yuklab olish (JSON)
+                </a>
+                {canEdit && (
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={async () => {
+                      try {
+                        const r = await api<{ _id: string }>(`/api/projects/${id}/duplicate`, { method: "POST" });
+                        router.push(`/projects/${r._id}/studio`);
+                      } catch (e) {
+                        setMsg({ ok: false, text: (e as Error).message });
+                      }
+                    }}
+                  >
+                    Nusxa yaratish
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
         </div>
       </div>
     </div>

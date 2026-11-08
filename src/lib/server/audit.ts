@@ -11,6 +11,7 @@ export type AuditAction =
   | "member.add"
   | "member.update"
   | "member.remove"
+  | "credits.grant"
   | "user.ban"
   | "user.unban"
   | "project.suspend"

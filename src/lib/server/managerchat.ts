@@ -220,7 +220,7 @@ export async function handleManagerChat(update: {
     }
   } catch (e) {
     const status = e instanceof HttpError ? e.status : 0;
-    await send(t.failed(status === 404 ? t.err.notFound : status === 403 ? t.err.noRights : status === 429 ? t.err.limit : t.err.generic));
+    await send(t.failed(status === 404 ? t.err.notFound : status === 403 ? t.err.noRights : status === 429 ? t.err.limit : status === 402 ? t.err.credits : t.err.generic));
     if (!(e instanceof HttpError)) console.error("manager chat", e);
     return "error";
   }

@@ -1,8 +1,8 @@
 "use client";
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "@phosphor-icons/react";
+import { ArrowLeft, CircleNotch, TelegramLogo } from "@phosphor-icons/react";
 import { LangSwitch, Logo } from "@/components/ui";
 import { useT } from "@/i18n/client";
 import { authClient } from "@/lib/auth-client";
@@ -17,6 +17,53 @@ function LoginInner() {
   const [busy, setBusy] = useState(false);
   const failed = params.get("error");
   const t = useT();
+
+  // Sign in with Telegram: the bot asks "is this you?" and this page waits for the answer (polls with a secret only it has).
+  const router = useRouter();
+  const [tgBusy, setTgBusy] = useState(false);
+  const [tgErr, setTgErr] = useState("");
+  const [tgLink, setTgLink] = useState("");
+  const pending = useRef<{ code: string; secret: string } | null>(null);
+  useEffect(() => {
+    if (!tgBusy) return;
+    const started = Date.now();
+    const timer = setInterval(async () => {
+      const p = pending.current;
+      if (!p) return;
+      try {
+        const r = await fetch(`/api/tglogin/${p.code}`, { method: "POST", body: JSON.stringify({ secret: p.secret }) });
+        const j = await r.json().catch(() => ({}));
+        if (r.ok && j.status === "ok") {
+          clearInterval(timer);
+          router.replace(safeNext(params.get("next")));
+          router.refresh();
+        } else if (!r.ok || Date.now() - started > 5 * 60_000) {
+          clearInterval(timer);
+          setTgBusy(false);
+          setTgErr(j.error || t.login.telegramFail);
+        }
+      } catch {
+        /* keep waiting */
+      }
+    }, 2000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tgBusy]);
+
+  async function tgSignIn() {
+    setTgErr("");
+    try {
+      const r = await fetch("/api/tglogin", { method: "POST" });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || t.login.telegramFail);
+      pending.current = { code: j.code, secret: j.secret };
+      setTgLink(j.link);
+      setTgBusy(true);
+      window.open(j.link, "_blank", "noopener");
+    } catch (e) {
+      setTgErr((e as Error).message);
+    }
+  }
 
   async function signIn() {
     setBusy(true);
@@ -54,6 +101,20 @@ function LoginInner() {
           </svg>
           {busy ? t.login.redirecting : t.login.google}
         </button>
+        <button onClick={tgSignIn} disabled={tgBusy} className="btn btn-lg mt-3 w-full gap-3">
+          {tgBusy ? <CircleNotch size={18} className="animate-spin" /> : <TelegramLogo size={20} weight="fill" className="text-[#2aabee]" />}
+          {t.login.telegram}
+        </button>
+        {tgBusy && (
+          <div className="mt-3 space-y-1.5 text-xs text-muted">
+            <p>{t.login.telegramWait}</p>
+            {/* a blocked pop-up (common on phones) must not leave the person stuck: the same link is right here */}
+            <a href={tgLink} target="_blank" rel="noreferrer" className="text-accent-2 hover:underline">
+              {t.login.telegramOpen}
+            </a>
+          </div>
+        )}
+        {tgErr && <p className="mt-3 text-sm text-danger">{tgErr}</p>}
       </div>
     </main>
   );

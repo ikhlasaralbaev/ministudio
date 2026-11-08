@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, timeAgo, uploadAsset } from "@/lib/client";
 import { useAttachments } from "@/components/Attachments";
-import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
+import { Sparkle, Gear, Database, Trash, Robot, Copy, UploadSimple } from "@phosphor-icons/react";
 import { TelegramLink } from "@/components/TelegramLink";
+import { TemplateGallery } from "@/components/TemplateGallery";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
 import { BuildingScreen } from "@/components/BuildingScreen";
@@ -65,6 +66,27 @@ export default function Dashboard() {
     }
   }
 
+  async function copy(p: Row) {
+    try {
+      await api(`/api/projects/${p._id}/duplicate`, { method: "POST" });
+      load();
+    } catch (e) {
+      alert((e as Error).message);
+    }
+  }
+
+  async function importFile(file: File | undefined) {
+    if (!file) return;
+    try {
+      const r = await fetch("/api/projects/import", { method: "POST", body: await file.text() });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.error || t.dash.importBad);
+      router.push(`/projects/${j._id}/studio`);
+    } catch (e) {
+      alert((e as Error).message || t.dash.importBad);
+    }
+  }
+
   async function remove(p: Row) {
     const typed = prompt(fmt(t.dash.confirm, { name: p.name }));
     if (typed === null) return;
@@ -100,7 +122,16 @@ export default function Dashboard() {
         </div>
       </section>
 
+      <TemplateGallery />
+
       <TelegramLink />
+
+      <div className="mx-auto -mt-4 mb-6 max-w-2xl text-center">
+        <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-muted hover:text-fg">
+          <UploadSimple size={14} /> {t.dash.importFile}
+          <input type="file" accept=".json,application/json" className="hidden" onChange={(e) => { void importFile(e.target.files?.[0]); e.target.value = ""; }} />
+        </label>
+      </div>
 
       {!rows ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -110,7 +141,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <Section title={t.dash.mine} rows={rows.filter((p) => p.permissions.isOwner)} empty={t.dash.empty} onRemove={remove} />
+          <Section title={t.dash.mine} rows={rows.filter((p) => p.permissions.isOwner)} empty={t.dash.empty} onRemove={remove} onCopy={copy} />
           {rows.some((p) => !p.permissions.isOwner) && (
             <Section title={t.dash.member} rows={rows.filter((p) => !p.permissions.isOwner)} onRemove={remove} />
           )}
@@ -120,7 +151,7 @@ export default function Dashboard() {
   );
 }
 
-function Section({ title, rows, empty, onRemove }: { title: string; rows: Row[]; empty?: string; onRemove: (p: Row) => void }) {
+function Section({ title, rows, empty, onRemove, onCopy }: { title: string; rows: Row[]; empty?: string; onRemove: (p: Row) => void; onCopy?: (p: Row) => void }) {
   const t = useT();
   return (
     <section className="mb-10">
@@ -161,6 +192,9 @@ function Section({ title, rows, empty, onRemove }: { title: string; rows: Row[];
                 <Link href={`/projects/${p._id}/studio`} className="btn btn-sm"><Sparkle /> {t.nav.studio}</Link>
                 <Link href={`/projects/${p._id}/settings`} className="btn btn-sm" title={t.nav.settings}><Gear /></Link>
                 <Link href={`/projects/${p._id}/data`} className="btn btn-sm" title={t.nav.data}><Database /></Link>
+                {onCopy && p.permissions.update && p.screens > 0 && (
+                  <button onClick={() => onCopy(p)} className="btn btn-sm" title={t.dash.copy}><Copy /></button>
+                )}
                 {p.permissions.deleteProject && (
                   <button onClick={() => onRemove(p)} className="btn btn-sm btn-danger ml-auto" title={t.dash.del}>
                     <Trash />

@@ -1,5 +1,7 @@
 import { createProject, projects, toDTO } from "@/lib/server/projects";
 import { nameFromIdea } from "@/lib/idea";
+import { buildTemplate, isTemplateId } from "@/lib/gallery";
+import { ObjectId } from "mongodb";
 import { requireUser } from "@/lib/server/access";
 import { effectivePermissions } from "@/lib/permissions";
 import { fail, handle, ok } from "@/lib/server/http";
@@ -29,6 +31,14 @@ export async function POST(req: Request) {
   return handle(async () => {
     const user = await requireUser();
     const body = await req.json().catch(() => ({}));
+    if (body.template !== undefined) {
+      // a ready-made starting point: no AI request, so it costs nothing
+      if (!isTemplateId(body.template)) return fail("Noma'lum shablon");
+      const doc = buildTemplate(body.template)!;
+      const id = await createProject(user.id, doc.name);
+      await (await projects()).updateOne({ _id: new ObjectId(id) }, { $set: { doc, updatedAt: new Date() } });
+      return ok({ _id: id }, 201);
+    }
     const idea = typeof body.idea === "string" ? body.idea.trim() : "";
     if (idea) {
       const id = await createProject(user.id, nameFromIdea(idea), { autoName: true, pendingIdea: idea });
