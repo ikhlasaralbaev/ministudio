@@ -11,6 +11,8 @@ import { AiPrompt } from "@/components/AiPrompt";
 import { BuildingScreen } from "@/components/BuildingScreen";
 import { useAttachments } from "@/components/Attachments";
 import { clearBuilding } from "@/lib/building";
+import { askNotify, notifyDone } from "@/lib/notifyClient";
+import { useT } from "@/i18n/client";
 import { ModelPicker } from "./ModelPicker";
 import { FRAME_H, PhoneFrame, SCREEN_H, SCREEN_W } from "./PhoneFrame";
 import { ChatPanel } from "./ChatPanel";
@@ -40,6 +42,7 @@ const EXAMPLES = [
 
 export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] } }) {
   const id = project._id;
+  const tr = useT();
   // Members without "update" get a view-only studio. The server rejects writes regardless; this keeps the UI honest.
   const readOnly = !project.permissions.update;
   // an idea from the dashboard is about to become the first app: show the building screen, not an empty prompt
@@ -167,9 +170,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   async function generate(prompt: string, refs?: string[]) {
     setLastIdea(prompt);
     setBusy("generate");
+    askNotify();
     try {
       const r = await runAi<{ doc: AppDoc }>(id, { mode: "generate", prompt, refs });
       commit(r.doc, undefined, true);
+      notifyDone(tr.notify.title, project.name);
       setScreenId(r.doc.screens[0].id);
       setSelectedId(null);
       // in vibe mode the chat shows the result; toasts are kept for errors only
@@ -187,9 +192,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   async function edit(prompt: string, nodeId: string | null, refs?: string[]) {
     if (!doc) return;
     setBusy(nodeId || "global");
+    askNotify();
     try {
       const r = await runAi<{ doc: AppDoc; message: string }>(id, { mode: "edit", prompt, nodeId, doc, refs });
       commit(r.doc, undefined, true);
+      notifyDone(tr.notify.title, tr.notify.body);
       if (!vibe) toast(r.message || "O'zgartirildi", "ok");
       // if a new screen appeared and the comment was global, jump to it
       const newScreen = r.doc.screens.find((s) => !doc.screens.some((o) => o.id === s.id));
@@ -230,6 +237,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     pollAi<{ doc: AppDoc }>(id, job.id)
       .then((r) => {
         commit(r.doc, undefined, true);
+        notifyDone(tr.notify.title, project.name);
         setScreenId((cur) => (r.doc.screens.some((s) => s.id === cur) ? cur : r.doc.screens[0].id));
         setSelectedId(null);
       })

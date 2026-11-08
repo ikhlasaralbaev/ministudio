@@ -57,6 +57,7 @@ const ru = {
   aiGenerated: (n: number, name: string) => `Приложение «${name}» создано: ${n} экр.`,
   aiDone: (msg: string) => `✅ <b>Готово</b>\n\n${msg}\n\nМожно написать следующую правку или опубликовать.`,
   aiError: (err: string) => `⚠️ <b>ИИ не справился</b>\n\n<code>${err}</code>\n\nПопробуйте переформулировать запрос.`,
+  notice: { ready: (n: string) => `✅ <b>${n}</b>: готово`, failed: (n: string) => `⚠️ <b>${n}</b>: не получилось, попробуйте ещё раз`, open: "🖥 Открыть" },
   published: (v: number, url: string, bot: string | null) => `🚀 <b>Опубликовано: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Бот: <b>@${bot}</b>` : ""}`,
   warnings: "⚠️ <b>Обратите внимание</b>",
   warn: {
@@ -147,6 +148,7 @@ const uz: BotDict = {
   aiGenerated: (n, name) => `«${name}» ilovasi yaratildi: ${n} ta ekran`,
   aiDone: (msg) => `✅ <b>Tayyor</b>\n\n${msg}\n\nKeyingi o‘zgarishni yozing yoki publish qiling.`,
   aiError: (err) => `⚠️ <b>AI uddalay olmadi</b>\n\n<code>${err}</code>\n\nSo‘rovni boshqacha yozib ko‘ring.`,
+  notice: { ready: (n) => `✅ <b>${n}</b>: tayyor`, failed: (n) => `⚠️ <b>${n}</b>: bo‘lmadi, qayta urinib ko‘ring`, open: "🖥 Ochish" },
   published: (v, url, bot) => `🚀 <b>Nashr qilindi: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
   warnings: "⚠️ <b>Diqqat</b>",
   warn: {
@@ -236,6 +238,7 @@ const en: BotDict = {
   aiGenerated: (n, name) => `App “${name}” created: ${n} screens`,
   aiDone: (msg) => `✅ <b>Done</b>\n\n${msg}\n\nSend the next change, or publish.`,
   aiError: (err) => `⚠️ <b>AI could not do it</b>\n\n<code>${err}</code>\n\nTry rephrasing the request.`,
+  notice: { ready: (n) => `✅ <b>${n}</b>: ready`, failed: (n) => `⚠️ <b>${n}</b>: it did not work, try again`, open: "🖥 Open" },
   published: (v, url, bot) => `🚀 <b>Published: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
   warnings: "⚠️ <b>Please note</b>",
   warn: {
@@ -325,6 +328,7 @@ const kaa: BotDict = {
   aiGenerated: (n, name) => `«${name}» ilovası jaratıldı: ${n} ekran`,
   aiDone: (msg) => `✅ <b>Tayın</b>\n\n${msg}\n\nKeyingi ózgeristi jazıń yamasa publish etiń.`,
   aiError: (err) => `⚠️ <b>AI orınlay almadı</b>\n\n<code>${err}</code>\n\nSorawdı basqasha jazıp kóriń.`,
+  notice: { ready: (n) => `✅ <b>${n}</b>: tayın`, failed: (n) => `⚠️ <b>${n}</b>: bolmadı, qayta urınıp kóriń`, open: "🖥 Ashıw" },
   published: (v, url, bot) => `🚀 <b>Járiyalandı: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
   warnings: "⚠️ <b>Itibar beriń</b>",
   warn: {

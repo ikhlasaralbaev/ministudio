@@ -10,6 +10,7 @@ import { HttpError } from "./http";
 import { envOf, projects, type ProjectRow } from "./projects";
 import { emptyUsage, recordPrompt, type Usage } from "./usage";
 import { isTelegramOnly } from "./tglink";
+import { notifyJobDone, shouldNotify } from "./notify";
 import type { SessionUser } from "./access";
 
 export type AiOutcome = { ok: true; result: Record<string, unknown> } | { ok: false; error: string };
@@ -29,6 +30,8 @@ export async function startAiJob(o: {
   doc?: unknown;
   /** Reference image asset ids of this project to show the model (max 5). */
   refs?: string[];
+  /** Announce the result in Telegram when it took long and no open page is watching (the web API sets it; the bot chat reports itself). */
+  notify?: boolean;
 }): Promise<{ jobId: string; done: Promise<AiOutcome> }> {
   const { project: p, user, perms, kind, prompt } = o;
   const id = p._id.toHexString();
@@ -92,16 +95,26 @@ export async function startAiJob(o: {
     }
   };
 
+  const announce = async (ok: boolean) => {
+    if (!o.notify) return;
+    const seen = (await jobs.findOne({ _id: jobId }).catch(() => null))?.seen;
+    if (!shouldNotify({ durationMs: Date.now() - started, seen })) return;
+    const name = ((await (await projects()).findOne({ _id: p._id }, { projection: { name: 1 } }).catch(() => null)) as { name?: string } | null)?.name || p.name;
+    await notifyJobDone({ userId: user.id, projectId: id, name, ok });
+  };
+
   // Not awaited: the caller gets the job id immediately and the job finishes in the background.
   const done: Promise<AiOutcome> = work().then(
     async (result) => {
       await jobs.updateOne({ _id: jobId }, { $set: { status: "done", result, finishedAt: new Date() } }).catch(() => {});
+      await announce(true);
       return { ok: true as const, result };
     },
     async (e) => {
       console.error("ai job", e);
       const error = (e as Error).message || "AI xatosi";
       await jobs.updateOne({ _id: jobId }, { $set: { status: "error", error, finishedAt: new Date() } }).catch(() => {});
+      await announce(false);
       return { ok: false as const, error };
     },
   );

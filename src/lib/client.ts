@@ -1,4 +1,5 @@
 "use client";
+import { watchLevel } from "./notifyClient";
 export async function api<T = any>(url: string, init?: RequestInit & { json?: unknown }): Promise<T> {
   const r = await fetch(url, {
     ...init,
@@ -38,7 +39,7 @@ export async function pollAi<T = any>(projectId: string, jobId: string, opts: { 
   while (Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, opts.intervalMs ?? 2000));
     try {
-      const j = await api<{ status: "running" | "done" | "error"; result?: T; error?: string }>(`/api/projects/${projectId}/ai/${jobId}`);
+      const j = await api<{ status: "running" | "done" | "error"; result?: T; error?: string }>(`/api/projects/${projectId}/ai/${jobId}?w=${watchLevel()}`);
       misses = 0;
       if (j.status === "done") return j.result as T;
       if (j.status === "error") throw new Error(j.error || "AI xatosi");

@@ -9,6 +9,7 @@ import { TelegramLink } from "@/components/TelegramLink";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
 import { BuildingScreen } from "@/components/BuildingScreen";
+import { askNotify } from "@/lib/notifyClient";
 import { markBuilding } from "@/lib/building";
 import { fmt } from "@/i18n/app";
 import { useT } from "@/i18n/client";
@@ -49,6 +50,7 @@ export default function Dashboard() {
 
   async function create() {
     if (idea.trim().length < 5) return;
+    askNotify(); // a click: the one moment the browser lets us ask to announce the finished app
     setBusy(true);
     try {
       // the project is named from the idea; Studio starts building the app as soon as it opens

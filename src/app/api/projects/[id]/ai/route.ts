@@ -24,6 +24,7 @@ export async function POST(req: Request, ctx: RouteContext<"/api/projects/[id]/a
       prompt,
       nodeId: typeof body.nodeId === "string" ? body.nodeId : null,
       doc: body.doc,
+      notify: true,
       refs: Array.isArray(body.refs) ? body.refs.filter((x: unknown): x is string => typeof x === "string").slice(0, 5) : undefined,
     });
     return ok({ jobId }, 202);

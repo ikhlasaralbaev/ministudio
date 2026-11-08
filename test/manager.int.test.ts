@@ -198,6 +198,26 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     await expect(linkTelegram(other, { id: 320320, firstName: "X", username: "x" })).rejects.toThrow(/boshqa akkauntga/);
   });
 
+  it("a long AI job is announced in Telegram unless an open page is watching; quick ones are not", async () => {
+    const { shouldNotify, notifyJobDone } = await import("@/lib/server/notify");
+    const { ensureTelegramUser } = await import("@/lib/server/tglink");
+    const now = Date.now();
+    expect(shouldNotify({ durationMs: 5_000 })).toBe(false); // quick: the person is still looking
+    expect(shouldNotify({ durationMs: 60_000 })).toBe(true); // long, nobody polling
+    expect(shouldNotify({ durationMs: 60_000, seen: { at: new Date(now - 3_000), w: 2 }, now })).toBe(false); // tab open and visible
+    expect(shouldNotify({ durationMs: 60_000, seen: { at: new Date(now - 3_000), w: 1 }, now })).toBe(false); // hidden tab shows its own notification
+    expect(shouldNotify({ durationMs: 60_000, seen: { at: new Date(now - 3_000), w: 0 }, now })).toBe(true); // hidden and silent
+    expect(shouldNotify({ durationMs: 60_000, seen: { at: new Date(now - 60_000), w: 2 }, now })).toBe(true); // the page went away
+
+    const u = (await ensureTelegramUser({ id: 777001, first_name: "Nur" })).id;
+    expect(await notifyJobDone({ userId: u, projectId: "6af0a4305977f50422c3f999", name: "Kafe <b>", ok: true })).toBe(true);
+    const m = calls.filter((c) => c.method === "sendMessage" && (c.body as { chat_id: number }).chat_id === 777001).at(-1)!.body as { text: string; reply_markup: { inline_keyboard: { web_app?: { url: string } }[][] } };
+    expect(m.text).toContain("Kafe &lt;b&gt;"); // escaped
+    expect(m.reply_markup.inline_keyboard[0][0].web_app?.url).toContain("%2Fprojects%2F6af0a4305977f50422c3f999%2Fstudio");
+    // an account without Telegram gets nothing
+    expect(await notifyJobDone({ userId: "000000000000000000000000", projectId: "x", name: "Y", ok: false })).toBe(false);
+  });
+
   it("link helpers: username and bot link are well-formed", async () => {
     const { newBotLink, suggestUsername } = await import("@/lib/server/manager");
     expect(suggestUsername("Lazzat Kafe!!")).toMatch(/^ms_lazzatkafe_[0-9a-f]{4}_bot$/);
