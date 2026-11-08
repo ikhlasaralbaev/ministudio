@@ -569,8 +569,8 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
             initial={{ opacity: 0, y: 14, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={SPRING.smooth}
-            className={`pointer-events-auto max-w-lg rounded-full px-4 py-2.5 text-sm font-medium shadow-[var(--shadow)] ${
-              t.kind === "err" ? "bg-danger text-white" : t.kind === "ok" ? "bg-ok text-white" : "glass text-fg"
+            className={`pointer-events-auto max-w-lg rounded-xl px-4 py-2.5 text-sm shadow-2xl ${
+              t.kind === "err" ? "bg-danger/90 text-white" : t.kind === "ok" ? "bg-ok/95 text-white" : "bg-panel-2 text-fg"
             }`}
           >
             {t.text}
@@ -1072,7 +1072,7 @@ function PublishModal({
   return (
     <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4 backdrop-blur-sm" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
       <motion.div
-        className="w-full max-w-md rounded-[28px] bg-panel p-6 shadow-[var(--sh)]"
+        className="w-full max-w-md rounded-2xl border border-line bg-panel p-6 shadow-[var(--shadow)]"
         onClick={(e) => e.stopPropagation()}
         initial={{ opacity: 0, scale: 0.94, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}

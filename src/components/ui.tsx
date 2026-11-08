@@ -17,8 +17,8 @@ type NavProject = Pick<ProjectDTO, "permissions" | "suspended"> & { ownerEmail?:
 export function Logo({ size = 28 }: { size?: number }) {
   return (
     <div
-      className="grid shrink-0 place-items-center bg-gradient-to-br from-accent to-pur text-white shadow-[0_2px_8px_color-mix(in_srgb,var(--accent)_35%,transparent)]"
-      style={{ width: size, height: size, borderRadius: size * 0.26 }}
+      className="grid shrink-0 place-items-center rounded-lg bg-gradient-to-br from-accent to-pur text-white"
+      style={{ width: size, height: size }}
     >
       <PaperPlaneTilt weight="fill" size={size * 0.58} />
     </div>
@@ -125,7 +125,7 @@ export function LangSwitch({ className = "" }: { className?: string }) {
   const setLocale = useSetLocale();
   const thumb = useId();
   return (
-    <div className={`flex items-center rounded-[9px] bg-panel-2 p-0.5 text-xs ${className}`} role="group" aria-label="Language">
+    <div className={`flex items-center rounded-md border border-line bg-bg p-0.5 text-xs ${className}`} role="group" aria-label="Language">
       <Translate size={13} className="mx-1.5 text-muted" />
       {LOCALES.map((l) => (
         <button
@@ -133,9 +133,9 @@ export function LangSwitch({ className = "" }: { className?: string }) {
           onClick={() => setLocale(l)}
           title={LOCALE_LABEL[l].name}
           aria-pressed={l === locale}
-          className={`relative rounded-[7px] px-2 py-1 font-semibold transition-colors active:scale-95 ${l === locale ? "text-fg" : "text-muted hover:text-fg"}`}
+          className={`relative rounded px-1.5 py-0.5 font-medium transition-colors active:scale-95 ${l === locale ? "text-fg" : "text-muted hover:text-fg"}`}
         >
-          {l === locale && <motion.span layoutId={thumb} className="absolute inset-0 rounded-[7px] bg-panel shadow-[0_1px_3px_rgba(0,0,0,0.18)]" transition={{ type: "spring", bounce: 0, duration: 0.3 }} />}
+          {l === locale && <motion.span layoutId={thumb} className="absolute inset-0 rounded bg-panel-2" transition={{ type: "spring", bounce: 0, duration: 0.3 }} />}
           <span className="relative">{LOCALE_LABEL[l].short}</span>
         </button>
       ))}

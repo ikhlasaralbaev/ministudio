@@ -41,14 +41,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
         key={it.href}
         href={it.href}
         title={it.label}
-        className={`relative flex items-center gap-2.5 rounded-[10px] px-2.5 py-2 text-sm font-medium transition-colors active:scale-[0.98] ${on ? "text-accent" : "text-muted hover:text-fg"} ${compact ? "justify-center" : ""}`}
+        className={`relative flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors ${on ? "text-fg" : "text-muted hover:text-fg"} ${compact ? "justify-center" : ""}`}
       >
         {on && (
           <motion.span
             layoutId={`nav-on-${compact ? "rail" : "full"}`}
-            className="absolute inset-0 rounded-[10px] bg-accent/12"
-            transition={{ type: "spring", bounce: 0, duration: 0.35 }}
-          />
+            className="absolute inset-0 rounded-md bg-panel-2"
+            transition={{ type: "spring", stiffness: 500, damping: 40 }}
+          >
+            <span className="absolute -left-2 top-1.5 bottom-1.5 w-0.5 rounded-full bg-accent" />
+          </motion.span>
         )}
         <span className="relative">{it.icon}</span>
         {!compact && <span className="relative truncate">{it.label}</span>}
@@ -77,12 +79,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
         {/* The menu is for moving between the sections of ONE project; the dashboard and admin pages have nothing to choose from. */}
         {scoped.length > 0 && (
           <aside
-            className={`scroll-thin glass flex shrink-0 gap-1 overflow-x-auto border-b border-line p-2 md:flex-col md:overflow-visible md:border-b-0 md:border-r ${
+            className={`scroll-thin flex shrink-0 gap-1 overflow-x-auto border-b border-line bg-panel p-2 md:flex-col md:overflow-visible md:border-b-0 md:border-r ${
               rail ? "md:w-14" : "md:w-56"
             }`}
           >
             {global.map((i) => link(i, rail))}
-            {!rail && <span className="mx-2.5 mt-4 hidden text-[11px] font-semibold uppercase tracking-[0.06em] text-muted md:block">{t.nav.project}</span>}
+            {!rail && <span className="mx-2 mt-3 hidden text-[11px] font-semibold uppercase tracking-wide text-muted md:block">{t.nav.project}</span>}
             <span className="mx-1 my-1 hidden border-t border-line md:block" />
             {scoped.map((i) => link(i, rail))}
           </aside>

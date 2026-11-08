@@ -81,7 +81,7 @@ function LoginInner() {
         <Link href="/" className="btn btn-sm"><ArrowLeft /> {t.login.back}</Link>
       </div>
       <div className="absolute right-4 top-4"><LangSwitch /></div>
-      <div className="rise relative w-full max-w-sm rounded-[28px] bg-panel p-9 text-center shadow-[var(--sh)]">
+      <div className="rise relative w-full max-w-sm rounded-xl border border-line bg-panel p-8 text-center shadow-[var(--shadow)]">
         <div className="mb-4 flex justify-center">
           <Logo size={48} />
         </div>
@@ -91,7 +91,7 @@ function LoginInner() {
         <button
           onClick={signIn}
           disabled={busy}
-          className="btn btn-lg w-full gap-3 !bg-fg !text-bg"
+          className="btn btn-lg w-full gap-3 !bg-white !text-black hover:!bg-white/90"
         >
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
