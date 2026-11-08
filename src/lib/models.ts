@@ -12,7 +12,7 @@ export const AI_MODELS: AiModel[] = [
   { id: "claude-opus-5-5", label: "Opus 5.5", hint: "Vaqtincha o‘chirilgan · $4 / $20", disabled: true },
   { id: "claude-sonnet-5-5", label: "Sonnet 5.5", hint: "Tez va sifatli · tavsiya etiladi · $2 / $10" },
   { id: "claude-haiku-5-5", label: "Haiku 5.5", hint: "Eng tez va arzon · oddiy tahrirlar · $0.10 / $0.50" },
-  { id: "claude-fable-5-1", label: "Fable 5.1", hint: "Eng yuqori sifat · sekin va qimmat · $10 / $50" },
+  { id: "claude-fable-5-1", label: "Fable 5.1", hint: "Vaqtincha o‘chirilgan · $10 / $50", disabled: true },
 ];
 
 export const DEFAULT_AI_MODEL = "claude-sonnet-5-5";

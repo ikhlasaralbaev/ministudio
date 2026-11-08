@@ -28,7 +28,7 @@ export interface HomeDict {
 const uz: HomeDict = {
   meta: { title: "MiniStudio: Telegram ilovalari yaratish platformasi", description: "Biznesingizni tasvirlang: AI menyu, savat, to‘lov va bot bilan ishlaydigan Telegram Mini App yaratadi." },
   nav: { studio: "Studio", features: "Imkoniyatlar", bots: "Botlar", ship: "Publish", login: "Kirish", start: "Bepul boshlash", cabinet: "Kabinet" },
-  pill: { tag: "Yangi", text: "Sonnet 5.5 va Fable 5.1 qo‘llab-quvvatlanadi" },
+  pill: { tag: "Yangi", text: "Sonnet 5.5 va Haiku 5.5 qo‘llab-quvvatlanadi" },
   h1a: "Telegram ilovalari uchun",
   h1b: "yaratish platformasi",
   lede: "Biznesingizni tasvirlang: AI menyu, savat, to‘lov va bot bilan ishlaydigan Mini App yaratadi. Tahrirlang va bir bosishda ishga tushiring.",
@@ -95,7 +95,7 @@ const uz: HomeDict = {
 const en: HomeDict = {
   meta: { title: "MiniStudio: a builder for Telegram apps", description: "Describe your business and AI builds a Telegram Mini App with menu, cart, payments and a bot." },
   nav: { studio: "Studio", features: "Features", bots: "Bots", ship: "Publish", login: "Sign in", start: "Start free", cabinet: "Dashboard" },
-  pill: { tag: "New", text: "Sonnet 5.5 and Fable 5.1 supported" },
+  pill: { tag: "New", text: "Sonnet 5.5 and Haiku 5.5 supported" },
   h1a: "The builder for",
   h1b: "Telegram apps",
   lede: "Describe your business: AI builds a Mini App with menu, cart, payments and a bot. Edit it and launch in one click.",
@@ -162,7 +162,7 @@ const en: HomeDict = {
 const ru: HomeDict = {
   meta: { title: "MiniStudio: платформа для Telegram-приложений", description: "Опишите бизнес, а ИИ создаст Telegram Mini App с меню, корзиной, оплатой и ботом." },
   nav: { studio: "Студия", features: "Возможности", bots: "Боты", ship: "Публикация", login: "Войти", start: "Начать бесплатно", cabinet: "Кабинет" },
-  pill: { tag: "Новое", text: "Поддерживаются Sonnet 5.5 и Fable 5.1" },
+  pill: { tag: "Новое", text: "Поддерживаются Sonnet 5.5 и Haiku 5.5" },
   h1a: "Платформа для создания",
   h1b: "Telegram-приложений",
   lede: "Опишите бизнес: ИИ создаст Mini App с меню, корзиной, оплатой и ботом. Отредактируйте и запустите одним нажатием.",
@@ -229,7 +229,7 @@ const ru: HomeDict = {
 const kaa: HomeDict = {
   meta: { title: "MiniStudio: Telegram ilovaların jaratıw platforması", description: "Biznesińizdi súwretleń: AI menyu, sebet, tólem hám bot menen islewshi Telegram Mini App jaratadı." },
   nav: { studio: "Studio", features: "Imkaniyatlar", bots: "Botlar", ship: "Publish", login: "Kiriw", start: "Biypul baslaw", cabinet: "Kabinet" },
-  pill: { tag: "Taza", text: "Sonnet 5.5 hám Fable 5.1 qollap-quwatlanadı" },
+  pill: { tag: "Taza", text: "Sonnet 5.5 hám Haiku 5.5 qollap-quwatlanadı" },
   h1a: "Telegram ilovaları ushın",
   h1b: "jaratıw platforması",
   lede: "Biznesińizdi súwretleń: AI menyu, sebet, tólem hám bot menen islewshi Mini App jaratadı. Dúzetiń hám bir basıwda iske túsiriń.",
