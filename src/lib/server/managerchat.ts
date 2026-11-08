@@ -44,14 +44,11 @@ async function setState(tgId: number, state: ChatState | null) {
 const BASE = () => publicUrl();
 const panel = (path: string) => ({ web_app: { url: `${BASE()}/tg?next=${encodeURIComponent(path)}` } });
 
-function menuMarkup(t: BotDict, opts?: { haveAccount?: boolean }): Markup {
+function menuMarkup(t: BotDict): Markup {
   return {
     inline_keyboard: [
       [{ text: t.btn.projects, callback_data: "p:list" }, { text: t.btn.newProject, callback_data: "p:new" }],
       [{ text: t.btn.panel, ...panel("/dashboard") }],
-      // An account that exists only here cannot see projects made on the site with Google: point it to the site, where
-      // "Link Telegram" on the dashboard merges the two.
-      ...(opts?.haveAccount ? [[{ text: t.btn.haveAccount, url: `${BASE()}/dashboard` }]] : []),
     ],
   };
 }
@@ -172,8 +169,12 @@ export async function handleManagerChat(update: {
     }
     if (cmd === "start" || cmd === "help" || cmd === "menu") {
       await setState(tgId, null);
-      await send(t.menu, menuMarkup(t, { haveAccount: isTelegramOnly(user.email) }));
+      await send(t.menu, menuMarkup(t));
       return "menu";
+    }
+    if (cmd === "account") {
+      await send(t.account, { inline_keyboard: [[{ text: t.btn.haveAccount, url: `${BASE()}/dashboard` }]] });
+      return "account";
     }
     if (cmd === "projects" || data === "p:list") return await listProjects(c);
     if (cmd === "new" || data === "p:new") {
@@ -233,8 +234,11 @@ async function listProjects({ user, t, send, tgId }: Ctx) {
     .limit(30)
     .toArray();
   const mine = list.filter((p) => effectivePermissions(p, user, false)).slice(0, 10);
+  // An account that exists only here cannot see projects made on the site with Google. The empty list is the moment
+  // that confuses such a person, so the hint lives here (not in the first menu): the site's "Link Telegram" merges them.
+  const siteHint = !mine.length && isTelegramOnly(user.email) ? [[{ text: t.btn.haveAccount, url: `${BASE()}/dashboard` }]] : [];
   await send(mine.length ? t.listTitle : t.noProjects, {
-    inline_keyboard: [...mine.map((p) => [{ text: p.name.slice(0, 40), callback_data: `p:${p._id.toHexString()}` }]), [{ text: t.btn.newProject, callback_data: "p:new" }]],
+    inline_keyboard: [...mine.map((p) => [{ text: p.name.slice(0, 40), callback_data: `p:${p._id.toHexString()}` }]), [{ text: t.btn.newProject, callback_data: "p:new" }], ...siteHint],
   });
   return "list";
 }

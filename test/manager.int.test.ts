@@ -251,7 +251,10 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(u.email).toBe("tg424242@telegram.invalid");
     expect(u.emailVerified).toBe(true);
     // a Telegram-only account is pointed to the site, where "Link Telegram" merges it with a Google account
+    expect(last().reply_markup!.inline_keyboard.flat().some((b) => "url" in b)).toBe(false); // not in the first menu
+    await say(424242, "/projects"); // empty list: here is the hint
     expect(last().reply_markup!.inline_keyboard.flat().some((b) => (b as { url?: string }).url === "https://panel.test/dashboard")).toBe(true);
+    expect(await say(424242, "/account")).toBe("account");
     await say(424242, "/start"); // again: still one account
     expect(await usersCol().countDocuments({ telegramId: 424242 } as never)).toBe(1);
   });

@@ -29,6 +29,7 @@ const ru = {
     haveAccount: "🔗 Уже есть аккаунт на сайте",
   },
   listTitle: "📁 <b>Ваши проекты</b>\n\nВыберите проект:",
+  account: "🔗 <b>Аккаунт на сайте</b>\n\nВойдите на сайте через Google и нажмите «Привязать Telegram» на главной: проекты появятся и здесь.",
   noProjects: "📁 <b>Проектов пока нет</b>\n\nНажмите «Новый проект», чтобы начать.",
   card: (c: { name: string; screens: number; version: number; bot: string | null; suspended: boolean }) =>
     [
@@ -118,6 +119,7 @@ const uz: BotDict = {
     haveAccount: "🔗 Saytda akkauntim bor",
   },
   listTitle: "📁 <b>Loyihalaringiz</b>\n\nLoyihani tanlang:",
+  account: "🔗 <b>Saytdagi akkaunt</b>\n\nSaytga Google bilan kiring va bosh sahifada «Telegramni ulash» tugmasini bosing: loyihalar shu yerda ham ko‘rinadi.",
   noProjects: "📁 <b>Hali loyiha yo‘q</b>\n\nBoshlash uchun «Yangi loyiha» tugmasini bosing.",
   card: (c) =>
     [
@@ -206,6 +208,7 @@ const en: BotDict = {
     haveAccount: "🔗 I already have a site account",
   },
   listTitle: "📁 <b>Your projects</b>\n\nPick a project:",
+  account: "🔗 <b>Site account</b>\n\nSign in on the site with Google and press “Link Telegram” on the dashboard: your projects will show up here too.",
   noProjects: "📁 <b>No projects yet</b>\n\nPress “New project” to start.",
   card: (c) =>
     [
@@ -294,6 +297,7 @@ const kaa: BotDict = {
     haveAccount: "🔗 Saytta akkauntım bar",
   },
   listTitle: "📁 <b>Joybarlarıńız</b>\n\nJoybardı tańlań:",
+  account: "🔗 <b>Saytdaǵı akkaunt</b>\n\nSaytqa Google menen kiriń hám bas bette «Telegramdı ulaw» túymesin basıń: joybarlar usı jerde de kórinedi.",
   noProjects: "📁 <b>Házirshe joybar joq</b>\n\nBaslaw ushın «Taza joybar» túymesin basıń.",
   card: (c) =>
     [
