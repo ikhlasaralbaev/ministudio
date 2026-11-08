@@ -1039,6 +1039,10 @@ function PublishModal({
             <BotCreator
               projectId={projectId}
               onConnected={() => api<{ botUsername?: string }>(`/api/projects/${projectId}`).then((p) => onBot(p.botUsername ?? null)).catch(() => {})}
+              onTokenSaved={(username) => {
+                onBot(username);
+                onClose(); // success: the bot is connected, nothing left to do in this window
+              }}
             />
           </div>
         )}

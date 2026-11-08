@@ -148,7 +148,8 @@ export async function setupManager(base: string) {
   };
   await tgApi(m.token, "setMyCommands", { commands: cmds("ru") });
   for (const l of ["uz", "en"] as const) await tgApi(m.token, "setMyCommands", { commands: cmds(l), language_code: l }).catch(() => {});
-  await tgApi(m.token, "setChatMenuButton", { menu_button: { type: "web_app", text: BOT_DICT.ru.menuButton, web_app: { url: `${base}/tg` } } }).catch(() => {});
+  // no Mini App panel anymore: the menu button is the plain command list again
+  await tgApi(m.token, "setChatMenuButton", { menu_button: { type: "commands" } }).catch(() => {});
   return { username: me.username, canManageBots: !!me.can_manage_bots, webhook: url };
 }
 

@@ -42,13 +42,14 @@ async function setState(tgId: number, state: ChatState | null) {
 }
 
 const BASE = () => publicUrl();
-const panel = (path: string) => ({ web_app: { url: `${BASE()}/tg?next=${encodeURIComponent(path)}` } });
+// The panel is the website (opened in the browser): Google sign-in there, then "Link Telegram" ties the two together.
+const site = (path: string) => ({ url: `${BASE()}${path}` });
 
 function menuMarkup(t: BotDict): Markup {
   return {
     inline_keyboard: [
       [{ text: t.btn.projects, callback_data: "p:list" }, { text: t.btn.newProject, callback_data: "p:new" }],
-      [{ text: t.btn.panel, ...panel("/dashboard") }],
+      [{ text: t.btn.panel, ...site("/dashboard") }],
     ],
   };
 }
@@ -61,7 +62,7 @@ function cardMarkup(t: BotDict, p: WithId<ProjectRow>, canEdit: boolean): Markup
   const id = p._id.toHexString();
   const rows: Record<string, unknown>[][] = [];
   if (canEdit) rows.push([{ text: t.btn.edit, callback_data: `a:${id}` }, { text: t.btn.publish, callback_data: `u:${id}` }]);
-  rows.push([{ text: t.btn.orders, callback_data: `o:${id}` }, { text: t.btn.openInPanel, ...panel(`/projects/${id}/studio`) }]);
+  rows.push([{ text: t.btn.orders, callback_data: `o:${id}` }, { text: t.btn.openInPanel, ...site(`/projects/${id}/studio`) }]);
   if (canEdit && !envOf(p).BOT_TOKEN) rows.push([{ text: t.btn.createBot, callback_data: `b:${id}` }]);
   rows.push([{ text: t.btn.back, callback_data: "p:list" }]);
   return { inline_keyboard: rows };
@@ -268,7 +269,7 @@ async function runAi({ user, t, send, tgId }: Ctx, id: string, prompt: string, r
     await send(`${t.aiDone(esc(summary))}${hasBot ? "" : `\n\n${t.nextBot}`}`, {
       // Publish comes first and always works (with or without a bot); creating the bot is a separate, optional step
       inline_keyboard: [
-        [{ text: t.btn.publish, callback_data: `u:${id}` }, { text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
+        [{ text: t.btn.publish, callback_data: `u:${id}` }, { text: t.btn.viewInPanel, ...site(`/projects/${id}/studio`) }],
         ...(hasBot ? [] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
       ],
     });
@@ -290,7 +291,7 @@ async function publish({ user, t, send }: Ctx, id: string) {
             ...(envOf(project).OWNER_CONFIRMED ? [] : [[{ text: t.btnBecomeOwner, url: `https://t.me/${r.botUsername}?start=owner_${ownerCode(id)}` }]]),
           ]
         : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
-      [{ text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
+      [{ text: t.btn.viewInPanel, ...site(`/projects/${id}/studio`) }],
     ],
   });
   return "published";
@@ -301,7 +302,7 @@ async function orders({ user, t, send }: Ctx, id: string) {
   const rows = await (await recordsCol()).find({ projectId: id }).sort({ createdAt: -1 }).limit(8).toArray();
   const name = esc(project.name);
   await send(rows.length ? `${t.ordersTitle(name)}\n\n${rows.map(recordHtml).join("\n\n")}` : t.noRecords(name), {
-    inline_keyboard: [[{ text: t.btn.allInPanel, ...panel(`/projects/${id}/data`) }]],
+    inline_keyboard: [[{ text: t.btn.allInPanel, ...site(`/projects/${id}/data`) }]],
   });
   return "orders";
 }

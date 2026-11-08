@@ -213,7 +213,7 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     expect(await notifyJobDone({ userId: u, projectId: "6af0a4305977f50422c3f999", name: "Kafe <b>", ok: true })).toBe(true);
     const m = calls.filter((c) => c.method === "sendMessage" && (c.body as { chat_id: number }).chat_id === 777001).at(-1)!.body as { text: string; reply_markup: { inline_keyboard: { web_app?: { url: string } }[][] } };
     expect(m.text).toContain("Kafe &lt;b&gt;"); // escaped
-    expect(m.reply_markup.inline_keyboard[0][0].web_app?.url).toContain("%2Fprojects%2F6af0a4305977f50422c3f999%2Fstudio");
+    expect((m.reply_markup.inline_keyboard[0][0] as { url?: string }).url).toMatch(/\/projects\/6af0a4305977f50422c3f999\/studio$/);
     // an account without Telegram gets nothing
     expect(await notifyJobDone({ userId: "000000000000000000000000", projectId: "x", name: "Y", ok: false })).toBe(false);
   });
@@ -271,7 +271,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(u.email).toBe("tg424242@telegram.invalid");
     expect(u.emailVerified).toBe(true);
     // a Telegram-only account is pointed to the site, where "Link Telegram" merges it with a Google account
-    expect(last().reply_markup!.inline_keyboard.flat().some((b) => "url" in b)).toBe(false); // not in the first menu
+    expect(last().reply_markup!.inline_keyboard.flat().some((b) => (b as { text: string }).text.includes("akkauntim") || (b as { text: string }).text.includes("аккаунт на сайте"))).toBe(false); // the "I have a site account" hint is not in the first menu
     await say(424242, "/projects"); // empty list: here is the hint
     expect(last().reply_markup!.inline_keyboard.flat().some((b) => (b as { url?: string }).url === "https://panel.test/dashboard")).toBe(true);
     expect(await say(424242, "/account")).toBe("account");
@@ -279,11 +279,12 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(await usersCol().countDocuments({ telegramId: 424242 } as never)).toBe(1);
   });
 
-  it("menu opens the panel inside Telegram through /tg", async () => {
+  it("the menu links to the website (no Mini App panel inside Telegram)", async () => {
     expect(await say(TGA, "/start")).toBe("menu");
-    const web = last().reply_markup!.inline_keyboard.flat().find((b) => "web_app" in b) as { web_app: { url: string } };
-    expect(web.web_app.url).toBe("https://panel.test/tg?next=%2Fdashboard");
-    expect(last().reply_markup!.inline_keyboard.flat().some((b) => "url" in b)).toBe(false); // linked accounts get no "link" hint
+    const btns = last().reply_markup!.inline_keyboard.flat();
+    expect(btns.some((b) => "web_app" in b)).toBe(false);
+    expect((btns.find((b) => "url" in b) as { url: string }).url).toBe("https://panel.test/dashboard");
+    expect(last().reply_markup!.inline_keyboard.flat().some((b) => (b as { text: string }).text.includes("аккаунт на сайте"))).toBe(false); // linked accounts get no "link" hint
   });
 
   it("one message is enough: the idea creates the project (named by the AI) and generates the app", async () => {

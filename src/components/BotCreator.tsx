@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle, CircleNotch, Robot, TelegramLogo } from "@phosphor-icons/react";
+import { CheckCircle, CircleNotch, Key, Robot, TelegramLogo } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
 
 interface TgState {
@@ -35,7 +35,7 @@ function StepRow({ n, done, active, title, sub }: { n: number; done: boolean; ac
  * you are in Telegram). Step 2: one tap opens Telegram's "create bot" screen; after you confirm, the platform receives
  * the bot's token itself.
  */
-export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: string; onConnected: () => void; onOwnerId?: (id: number) => void }) {
+export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: { projectId: string; onConnected: () => void; onTokenSaved?: (botUsername: string) => void; onOwnerId?: (id: number) => void }) {
   const [tg, setTg] = useState<TgState | null>(null);
   const [st, setSt] = useState<CreateState | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -101,6 +101,24 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
     }
   }
 
+  // An existing bot (made in BotFather): paste its token; it is checked with Telegram before anything is saved.
+  const [tokenOpen, setTokenOpen] = useState(false);
+  const [token, setToken] = useState("");
+  const [tokenBusy, setTokenBusy] = useState(false);
+  const [tokenErr, setTokenErr] = useState("");
+  async function saveToken() {
+    setTokenBusy(true);
+    setTokenErr("");
+    try {
+      const r = await api<{ botUsername: string }>(`/api/projects/${projectId}/bot/token`, { method: "POST", json: { token } });
+      onConnected();
+      onTokenSaved?.(r.botUsername);
+    } catch (e) {
+      setTokenErr((e as Error).message);
+      setTokenBusy(false);
+    }
+  }
+
   async function create() {
     setBusy(true);
     setErr("");
@@ -159,6 +177,44 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
       </button>
       {waitingNow && <p className="text-center text-xs text-muted">{step === 1 ? "Start, so‘ng «Ha, ulash» ni bosing" : "«Yaratish» ni bosing"}</p>}
       {err && <p className="text-danger">{err}</p>}
+      <div className="border-t border-line pt-3">
+        {!tokenOpen ? (
+          <button type="button" className="flex items-center gap-1.5 text-xs text-muted hover:text-fg" onClick={() => setTokenOpen(true)}>
+            <Key size={14} /> Mavjud bot tokenini kiritish
+          </button>
+        ) : (
+          <form
+            className="space-y-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (token.trim() && !tokenBusy) void saveToken();
+            }}
+          >
+            <input
+              autoFocus
+              value={token}
+              onChange={(e) => {
+                setToken(e.target.value);
+                setTokenErr("");
+              }}
+              placeholder="123456:ABC-DEF…"
+              spellCheck={false}
+              autoComplete="off"
+              className="w-full rounded-lg border border-line bg-bg px-3 py-2 font-mono text-xs outline-none focus:border-accent"
+            />
+            {tokenErr && <p className="text-xs text-danger">{tokenErr}</p>}
+            <div className="flex gap-2">
+              <button type="submit" className="btn btn-primary btn-sm flex-1 justify-center" disabled={!token.trim() || tokenBusy}>
+                {tokenBusy ? <CircleNotch size={14} className="animate-spin" /> : null}
+                {tokenBusy ? "Tekshirilmoqda…" : "Saqlash"}
+              </button>
+              <button type="button" className="btn btn-sm" disabled={tokenBusy} onClick={() => { setTokenOpen(false); setToken(""); setTokenErr(""); }}>
+                Bekor
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
       {onOwnerId && tg.linked && (
         <button type="button" className="text-xs text-muted hover:text-fg" onClick={() => onOwnerId(tg.linked!.id)}>
           Buyurtmalar shu Telegramga kelsin

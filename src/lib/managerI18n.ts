@@ -14,22 +14,22 @@ const ru = {
   btn: {
     projects: "📁 Проекты",
     newProject: "➕ Новый проект",
-    panel: "🖥 Открыть панель",
+    panel: "🌐 Открыть сайт",
     edit: "✏️ Изменить через ИИ",
     publish: "🚀 Опубликовать",
     orders: "📦 Заказы",
     createBot: "🤖 Создать бота",
-    openInPanel: "🖥 Открыть в панели",
+    openInPanel: "🌐 Открыть на сайте",
     back: "‹ Проекты",
-    allInPanel: "📊 Всё в панели",
-    viewInPanel: "🖥 Посмотреть в панели",
+    allInPanel: "📊 Всё на сайте",
+    viewInPanel: "🌐 Открыть на сайте",
     createBotNow: "🤖 Создать бота",
     yes: "✅ Да, привязать",
     no: "Нет",
     haveAccount: "🔗 Уже есть аккаунт на сайте",
   },
   listTitle: "📁 <b>Ваши проекты</b>\n\nВыберите проект:",
-  account: "🔗 <b>Аккаунт на сайте</b>\n\nВойдите на сайте через Google и нажмите «Привязать Telegram» на главной: проекты появятся и здесь.",
+  account: "🔗 <b>Аккаунт на сайте</b>\n\nВойдите на сайте через Google и нажмите «Привязать Telegram» на главной. Так вы сможете редактировать проекты на сайте, а они появятся и здесь.",
   noProjects: "📁 <b>Проектов пока нет</b>\n\nНажмите «Новый проект», чтобы начать.",
   card: (c: { name: string; screens: number; version: number; bot: string | null; suspended: boolean }) =>
     [
@@ -95,7 +95,6 @@ const ru = {
   langPrompt: "🌐 <b>Язык / Til / Language</b>\n\nВыберите язык бота:",
   langSet: "✅ Язык: <b>Русский</b>",
   commands: { start: "Главное меню", projects: "Мои проекты", new: "Новый проект", language: "Язык", cancel: "Отмена" },
-  menuButton: "Панель",
 };
 export type BotDict = typeof ru;
 
@@ -105,22 +104,22 @@ const uz: BotDict = {
   btn: {
     projects: "📁 Loyihalar",
     newProject: "➕ Yangi loyiha",
-    panel: "🖥 Panelni ochish",
+    panel: "🌐 Saytni ochish",
     edit: "✏️ AI bilan tahrirlash",
     publish: "🚀 Publish",
     orders: "📦 Buyurtmalar",
     createBot: "🤖 Bot yaratish",
-    openInPanel: "🖥 Panelda ochish",
+    openInPanel: "🌐 Saytda ochish",
     back: "‹ Loyihalar",
-    allInPanel: "📊 Hammasi panelda",
-    viewInPanel: "🖥 Panelda ko‘rish",
+    allInPanel: "📊 Hammasi saytda",
+    viewInPanel: "🌐 Saytda ochish",
     createBotNow: "🤖 Botni yaratish",
     yes: "✅ Ha, ulash",
     no: "Yo‘q",
     haveAccount: "🔗 Saytda akkauntim bor",
   },
   listTitle: "📁 <b>Loyihalaringiz</b>\n\nLoyihani tanlang:",
-  account: "🔗 <b>Saytdagi akkaunt</b>\n\nSaytga Google bilan kiring va bosh sahifada «Telegramni ulash» tugmasini bosing: loyihalar shu yerda ham ko‘rinadi.",
+  account: "🔗 <b>Saytdagi akkaunt</b>\n\nSaytga Google bilan kiring va bosh sahifada «Telegramni ulash» tugmasini bosing. Shunda loyihalarni saytda tahrirlay olasiz, ular shu yerda ham ko‘rinadi.",
   noProjects: "📁 <b>Hali loyiha yo‘q</b>\n\nBoshlash uchun «Yangi loyiha» tugmasini bosing.",
   card: (c) =>
     [
@@ -186,7 +185,6 @@ const uz: BotDict = {
   langPrompt: "🌐 <b>Язык / Til / Language</b>\n\nBot tilini tanlang:",
   langSet: "✅ Til: <b>O‘zbekcha</b>",
   commands: { start: "Bosh menyu", projects: "Loyihalarim", new: "Yangi loyiha", language: "Til", cancel: "Bekor qilish" },
-  menuButton: "Panel",
 };
 
 const en: BotDict = {
@@ -195,22 +193,22 @@ const en: BotDict = {
   btn: {
     projects: "📁 Projects",
     newProject: "➕ New project",
-    panel: "🖥 Open panel",
+    panel: "🌐 Open the site",
     edit: "✏️ Edit with AI",
     publish: "🚀 Publish",
     orders: "📦 Orders",
     createBot: "🤖 Create bot",
-    openInPanel: "🖥 Open in panel",
+    openInPanel: "🌐 Open on the site",
     back: "‹ Projects",
-    allInPanel: "📊 Everything in the panel",
-    viewInPanel: "🖥 View in panel",
+    allInPanel: "📊 Everything on the site",
+    viewInPanel: "🌐 Open on the site",
     createBotNow: "🤖 Create the bot",
     yes: "✅ Yes, link",
     no: "No",
     haveAccount: "🔗 I already have a site account",
   },
   listTitle: "📁 <b>Your projects</b>\n\nPick a project:",
-  account: "🔗 <b>Site account</b>\n\nSign in on the site with Google and press “Link Telegram” on the dashboard: your projects will show up here too.",
+  account: "🔗 <b>Site account</b>\n\nSign in on the site with Google and press “Link Telegram” on the dashboard. That way you can edit projects on the site, and they show up here too.",
   noProjects: "📁 <b>No projects yet</b>\n\nPress “New project” to start.",
   card: (c) =>
     [
@@ -276,7 +274,6 @@ const en: BotDict = {
   langPrompt: "🌐 <b>Язык / Til / Language</b>\n\nChoose the bot’s language:",
   langSet: "✅ Language: <b>English</b>",
   commands: { start: "Main menu", projects: "My projects", new: "New project", language: "Language", cancel: "Cancel" },
-  menuButton: "Panel",
 };
 
 const kaa: BotDict = {
@@ -285,22 +282,22 @@ const kaa: BotDict = {
   btn: {
     projects: "📁 Joybarlar",
     newProject: "➕ Taza joybar",
-    panel: "🖥 Paneldi ashıw",
+    panel: "🌐 Saytti ashıw",
     edit: "✏️ AI menen dúzetiw",
     publish: "🚀 Publish",
     orders: "📦 Buyırtpalar",
     createBot: "🤖 Bot jaratıw",
-    openInPanel: "🖥 Panelde ashıw",
+    openInPanel: "🌐 Saytta ashıw",
     back: "‹ Joybarlar",
-    allInPanel: "📊 Hámmesi panelde",
-    viewInPanel: "🖥 Panelde kóriw",
+    allInPanel: "📊 Hámmesi saytta",
+    viewInPanel: "🌐 Saytta ashıw",
     createBotNow: "🤖 Bottı jaratıw",
     yes: "✅ Awa, ulaw",
     no: "Yaq",
     haveAccount: "🔗 Saytta akkauntım bar",
   },
   listTitle: "📁 <b>Joybarlarıńız</b>\n\nJoybardı tańlań:",
-  account: "🔗 <b>Saytdaǵı akkaunt</b>\n\nSaytqa Google menen kiriń hám bas bette «Telegramdı ulaw» túymesin basıń: joybarlar usı jerde de kórinedi.",
+  account: "🔗 <b>Saytdaǵı akkaunt</b>\n\nSaytqa Google menen kiriń hám bas bette «Telegramdı ulaw» túymesin basıń. Solay etip joybarlardı saytta dúzete alasız, olar usı jerde de kórinedi.",
   noProjects: "📁 <b>Házirshe joybar joq</b>\n\nBaslaw ushın «Taza joybar» túymesin basıń.",
   card: (c) =>
     [
@@ -366,7 +363,6 @@ const kaa: BotDict = {
   langPrompt: "🌐 <b>Язык / Til / Language</b>\n\nBot tilin tańlań:",
   langSet: "✅ Til: <b>Qaraqalpaqsha</b>",
   commands: { start: "Bas menyu", projects: "Joybarlarım", new: "Taza joybar", language: "Til", cancel: "Biykarlaw" },
-  menuButton: "Panel",
 };
 
 export const BOT_DICT: Record<BotLang, BotDict> = { ru, uz, en, kaa };

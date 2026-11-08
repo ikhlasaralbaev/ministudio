@@ -37,7 +37,7 @@ export async function notifyJobDone(o: { userId: string; projectId: string; name
       chat_id: link.id,
       parse_mode: "HTML",
       text: o.ok ? t.notice.ready(name) : t.notice.failed(name),
-      reply_markup: { inline_keyboard: [[{ text: t.notice.open, web_app: { url: `${publicUrl()}/tg?next=${encodeURIComponent(`/projects/${o.projectId}/studio`)}` } }]] },
+      reply_markup: { inline_keyboard: [[{ text: t.notice.open, url: `${publicUrl()}/projects/${o.projectId}/studio` }]] },
     });
     return true;
   } catch {

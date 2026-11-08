@@ -120,14 +120,13 @@ through it: keep it as secret as `APP_SECRET`.
 ### Manager bot as a chat console and Telegram sign-in
 After the one-time Google sign-in and "Telegramni ulash" on the site, the manager bot works as a console:
 `/start` menu, `/projects`, `/new`, `/language`, then plain-language prompts to the AI (generate, then edit), Publish, the latest
-orders and "create the bot" - all as that account, with its project rights. The bot's menu button and the "Panel"
-buttons open the panel inside Telegram through `/tg`: the Mini App's signed `initData` (max 5 min old, checked with the
-manager bot token) is exchanged for a normal session of the linked account. It never creates accounts, so a person
-must sign in with Google and link Telegram once. (Google sign-in itself does not work inside Telegram's browser,
-which is why `/tg` exists.)
+orders and "create the bot" - all as that account, with its project rights. The "Site" buttons are plain links to the
+website (the panel no longer opens inside Telegram). A person who only has a Telegram-made account signs in on the site
+with Google and presses "Telegramni ulash": the two accounts merge. The `/tg` page (Mini App `initData` sign-in) is
+still in the code but nothing in the bot opens it.
 
 After deploying this, press *Webhook o'rnatish va tekshirish* in the admin page once more: it also sets the bot's
-command menu and menu button.
+command menu and resets the menu button (the old "Panel" Mini App button goes away).
 
 The manager bot's messages are HTML-formatted and in Russian by default; `/language` switches a Telegram user to
 Uzbek, English or Karakalpak (kept in `manager_prefs`). Texts live in `src/lib/managerI18n.ts`; every dynamic value is
