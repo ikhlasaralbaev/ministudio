@@ -17,7 +17,7 @@ export async function GET(_req: Request, ctx: RouteContext<"/api/projects/[id]/b
       hasBot: !!env.BOT_TOKEN,
       botUsername: p.botUsername ?? null,
       // one tap on this link (Start in the bot) makes the person the owner who receives order notifications
-      ownerReady: !!env.OWNER_CHAT_ID,
+      ownerReady: !!env.OWNER_CONFIRMED,
       ownerLink: perms.update && p.botUsername ? `https://t.me/${p.botUsername}?start=owner_${ownerCode(id)}` : null,
       claim: c ? { status: c.status, createdAt: c.createdAt, botUsername: c.botUsername ?? null } : null,
     });

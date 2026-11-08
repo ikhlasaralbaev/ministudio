@@ -280,7 +280,7 @@ async function publish({ user, t, send }: Ctx, id: string) {
         ? [
             [{ text: t.btnOpenBot, url: `https://t.me/${r.botUsername}` }],
             // no owner yet: one tap (Start with the owner code) connects whoever presses it as the owner
-            ...(envOf(project).OWNER_CHAT_ID ? [] : [[{ text: t.btnBecomeOwner, url: `https://t.me/${r.botUsername}?start=owner_${ownerCode(id)}` }]]),
+            ...(envOf(project).OWNER_CONFIRMED ? [] : [[{ text: t.btnBecomeOwner, url: `https://t.me/${r.botUsername}?start=owner_${ownerCode(id)}` }]]),
           ]
         : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
       [{ text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],

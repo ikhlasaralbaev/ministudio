@@ -69,6 +69,9 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     expect(p.envEnc).not.toContain("CHILD-TOKEN"); // encrypted at rest
     expect(p).toMatchObject({ botUsername: "my_kafe_bot", managedBotId: 9001 });
     expect((await latestClaim(id))?.status).toBe("done");
+    // the creator is the owner right away (private chat id == Telegram user id), confirmed on their first Start
+    expect(envOf(p).OWNER_CHAT_ID).toBe("555");
+    expect(envOf(p).OWNER_CONFIRMED).toBeUndefined();
 
     // the creator is told in the chat; the project is not published yet, so the button offers Publish
     const dm = calls.filter((c) => c.method === "sendMessage" && (c.body as { chat_id: number }).chat_id === 555).at(-1)!.body as { text: string; reply_markup: { inline_keyboard: { text: string; callback_data?: string }[][] } };

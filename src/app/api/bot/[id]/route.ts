@@ -65,8 +65,11 @@ export async function POST(req: Request, ctx: RouteContext<"/api/bot/[id]">) {
         const user = linked ? await sessionUserById(linked.id).catch(() => null) : null;
         becomeOwner = !!user && !!effectivePermissions(p, user, false)?.update;
       }
-      if (becomeOwner) {
+      // Owner preset at creation (the creator's id): confirm once on their first Start.
+      const presetOwner = !becomeOwner && env.OWNER_CHAT_ID === String(chatId) && !env.OWNER_CONFIRMED;
+      if (becomeOwner || presetOwner) {
         env.OWNER_CHAT_ID = String(chatId);
+        env.OWNER_CONFIRMED = "1";
         await (await projects()).updateOne({ _id: p._id }, { $set: { envEnc: encryptEnv(env) } });
         await tgApi(token, "sendMessage", {
           chat_id: chatId,

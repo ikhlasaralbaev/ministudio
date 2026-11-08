@@ -279,6 +279,8 @@ import type { Perms } from "./permissions";
 export interface ProjectEnv {
   BOT_TOKEN?: string;
   OWNER_CHAT_ID?: string;
+  /** Set once the owner pressed Start in the bot (before that OWNER_CHAT_ID may be preset from the bot creator). */
+  OWNER_CONFIRMED?: string;
   CLICK_SERVICE_ID?: string;
   CLICK_MERCHANT_ID?: string;
   CLICK_SECRET_KEY?: string;

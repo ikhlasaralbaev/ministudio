@@ -101,7 +101,10 @@ export async function handleManagedBot(mb: ManagedBotUpdate): Promise<string> {
   const p = await getProject(projectId);
   if (!p) return "ignored: project gone";
   const token = await tgApi<string>(m.token, "getManagedBotToken", { user_id: botId });
-  const env = { ...envOf(p), BOT_TOKEN: token };
+  const env: Record<string, string> = { ...envOf(p), BOT_TOKEN: token };
+  // The person who created the bot is its owner: in a private chat the chat id equals the Telegram user id, so no extra
+  // step is needed. (Telegram only delivers messages after they press Start; the bot confirms the link on that first Start.)
+  if (!env.OWNER_CHAT_ID) env.OWNER_CHAT_ID = String(creator);
   await (await projects()).updateOne(
     { _id: p._id },
     { $set: { envEnc: encryptEnv(env), botUsername: mb.bot?.username ?? p.botUsername, managedBotId: botId, updatedAt: new Date() } } as never,
