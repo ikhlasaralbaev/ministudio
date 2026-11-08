@@ -1,4 +1,5 @@
 "use client";
+import { shownEmail } from "@/lib/display";
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
@@ -131,8 +132,8 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
             <li className="flex items-center gap-3 py-3">
               <Avatar image={data.owner.image} email={data.owner.email} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm">{data.owner.name || data.owner.email}</p>
-                <p className="truncate text-xs text-muted">{data.owner.email}</p>
+                <p className="truncate text-sm">{data.owner.name || shownEmail(data.owner.email)}</p>
+                <p className="truncate text-xs text-muted">{shownEmail(data.owner.email)}</p>
               </div>
               <span className="rounded bg-accent/15 px-2 py-0.5 text-xs text-accent-2">Ega</span>
             </li>
@@ -146,11 +147,11 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
                 <Avatar image={m.image} email={m.email} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">
-                    {m.name || m.email}
+                    {m.name || shownEmail(m.email)}
                     {isMe && <span className="ml-2 text-xs text-muted">(siz)</span>}
                   </p>
                   <p className="truncate text-xs text-muted">
-                    {m.email}
+                    {shownEmail(m.email)}
                     {m.userId === null && <span className="ml-2 text-warn">kirishini kutmoqda</span>}
                   </p>
                 </div>

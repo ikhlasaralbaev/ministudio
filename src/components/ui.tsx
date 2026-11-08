@@ -1,4 +1,5 @@
 "use client";
+import { shownEmail } from "@/lib/display";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PaperPlaneTilt, SignOut, Translate } from "@phosphor-icons/react";
@@ -42,7 +43,7 @@ export function ProjectNav({
       </div>
       {project?.permissions.viaAdmin && (
         <div className="shrink-0 bg-warn/15 px-4 py-1.5 text-center text-xs text-warn">
-          {fmt(t.banner.admin, { email: project.ownerEmail || t.banner.owner })}
+          {fmt(t.banner.admin, { email: shownEmail(project.ownerEmail) || t.banner.owner })}
         </div>
       )}
       {project?.suspended && (
@@ -76,7 +77,7 @@ export function UserMenu({ me }: { me: Me }) {
   const router = useRouter();
   const t = useT();
   // accounts made from Telegram alone have a placeholder email: show the name instead
-  const label = me.email.endsWith("@telegram.invalid") ? me.name : me.email;
+  const label = me.email.endsWith("@telegram.invalid") ? me.name : me.email; // placeholder email is never shown
   async function signOut() {
     meCache = null;
     await authClient.signOut();

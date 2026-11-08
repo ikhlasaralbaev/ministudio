@@ -179,10 +179,15 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     await rawDb().collection("session").insertOne({ userId: tgOnly, token: "t" });
 
     const google = (await usersCol().insertOne({ email: "sher@gmail.com", name: "Sher" } as never)).insertedId.toHexString();
+    // both accounts are members of one project, and the Google one is the owner of another one the Telegram one joined
+    await (await projects()).insertOne({ name: "Ikkalasi", slug: "hk2", doc: null, publishedVersion: 0, ownerId: "someone", members: [{ userId: tgOnly, email: "", access: "view" }, { userId: google, email: "sher@gmail.com", access: "update" }], createdAt: new Date(), updatedAt: new Date() } as never);
+    await (await projects()).insertOne({ name: "Egasi", slug: "hk3", doc: null, publishedVersion: 0, ownerId: google, members: [{ userId: tgOnly, email: "", access: "view" }], createdAt: new Date(), updatedAt: new Date() } as never);
     await linkTelegram(google, { id: 320320, firstName: "Sher", username: "sher" }); // proved from Telegram itself
 
     expect((await getProject(pid))?.ownerId).toBe(google); // projects moved
     expect((await (await projects()).findOne({ slug: "hk1" }))?.members?.[0].userId).toBe(google); // memberships too
+    expect((await (await projects()).findOne({ slug: "hk2" }))?.members).toHaveLength(1); // no duplicate member
+    expect((await (await projects()).findOne({ slug: "hk3" }))?.members).toHaveLength(0); // the owner is never also a member
     expect(await rawDb().collection("usage").countDocuments({ userId: google })).toBe(1); // usage history
     expect(await rawDb().collection("session").countDocuments({ userId: tgOnly })).toBe(0); // old sessions gone
     expect(await usersCol().countDocuments({ email: "tg320320@telegram.invalid" })).toBe(0); // placeholder deleted
@@ -245,6 +250,8 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     const u = (await usersCol().findOne({ telegramId: 424242 } as never)) as unknown as { email: string; emailVerified: boolean };
     expect(u.email).toBe("tg424242@telegram.invalid");
     expect(u.emailVerified).toBe(true);
+    // a Telegram-only account is pointed to the site, where "Link Telegram" merges it with a Google account
+    expect(last().reply_markup!.inline_keyboard.flat().some((b) => (b as { url?: string }).url === "https://panel.test/dashboard")).toBe(true);
     await say(424242, "/start"); // again: still one account
     expect(await usersCol().countDocuments({ telegramId: 424242 } as never)).toBe(1);
   });
@@ -253,6 +260,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(await say(TGA, "/start")).toBe("menu");
     const web = last().reply_markup!.inline_keyboard.flat().find((b) => "web_app" in b) as { web_app: { url: string } };
     expect(web.web_app.url).toBe("https://panel.test/tg?next=%2Fdashboard");
+    expect(last().reply_markup!.inline_keyboard.flat().some((b) => "url" in b)).toBe(false); // linked accounts get no "link" hint
   });
 
   it("one message is enough: the idea creates the project (named by the AI) and generates the app", async () => {

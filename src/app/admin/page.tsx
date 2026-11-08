@@ -1,4 +1,5 @@
 "use client";
+import { shownEmail } from "@/lib/display";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, timeAgo } from "@/lib/client";
@@ -101,7 +102,7 @@ function Users() {
   const l = useList<UserRow>("/api/admin/users");
   async function toggle(u: UserRow) {
     const ban = !u.banned;
-    if (!confirm(ban ? `${u.email} bloklansinmi? Barcha sessiyalari darhol tugaydi.` : `${u.email} blokdan chiqarilsinmi?`)) return;
+    if (!confirm(ban ? `${shownEmail(u.email)} bloklansinmi? Barcha sessiyalari darhol tugaydi.` : `${shownEmail(u.email)} blokdan chiqarilsinmi?`)) return;
     try {
       await api(`/api/admin/users/${u.id}`, { method: "PATCH", json: { banned: ban } });
       l.reload();
@@ -129,11 +130,11 @@ function Users() {
               <tr key={u.id} className={u.banned ? "opacity-60" : ""}>
                 <td className={td}>
                   <p className="font-medium">
-                    {u.name || u.email}
+                    {u.name || shownEmail(u.email)}
                     {u.isAdmin && <span className="ml-2 rounded bg-accent/15 px-1.5 py-0.5 text-[11px] text-accent-2">admin</span>}
                     {u.banned && <span className="ml-2 rounded bg-danger/15 px-1.5 py-0.5 text-[11px] text-danger">bloklangan</span>}
                   </p>
-                  <p className="text-xs text-muted">{u.email}</p>
+                  <p className="text-xs text-muted">{shownEmail(u.email)}</p>
                 </td>
                 <td className={td + " text-muted"}>{u.createdAt ? timeAgo(u.createdAt) : "—"}</td>
                 <td className={td}>{u.projects}</td>
@@ -211,7 +212,7 @@ function Projects() {
                 </td>
                 <td className={td}>
                   {p.owner ? (
-                    <span className="text-muted">{p.owner.email}</span>
+                    <span className="text-muted">{shownEmail(p.owner.email)}</span>
                   ) : (
                     <span className="rounded bg-warn/15 px-1.5 py-0.5 text-[11px] text-warn">Egasiz</span>
                   )}

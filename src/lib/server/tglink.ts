@@ -78,6 +78,19 @@ export async function mergeTelegramAccount(targetUserId: string, fromUserId: str
   const d = await db();
   await d.collection("projects").updateMany({ ownerId: fromUserId }, { $set: { ownerId: targetUserId } });
   await d.collection("projects").updateMany({ "members.userId": fromUserId }, { $set: { "members.$[m].userId": targetUserId } }, { arrayFilters: [{ "m.userId": fromUserId }] });
+  // The same person can now appear twice in a project (as the target and as the absorbed account), or as owner and
+  // member: keep one entry each and never list the owner as a member.
+  const col = d.collection("projects");
+  for (const pr of await col.find({ "members.userId": targetUserId }).toArray()) {
+    const seen = new Set<string>();
+    const members = ((pr.members as { userId?: string | null }[]) || []).filter((m) => {
+      if (m.userId !== targetUserId) return true;
+      if (pr.ownerId === targetUserId || seen.has(targetUserId)) return false;
+      seen.add(targetUserId);
+      return true;
+    });
+    await col.updateOne({ _id: pr._id }, { $set: { members } });
+  }
   for (const c of ["usage", "ai_jobs", "bot_claims", "audit"]) {
     await d.collection(c).updateMany({ userId: fromUserId }, { $set: { userId: targetUserId } });
   }

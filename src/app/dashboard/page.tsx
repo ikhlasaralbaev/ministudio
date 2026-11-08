@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api, timeAgo, uploadAsset } from "@/lib/client";
 import { useAttachments } from "@/components/Attachments";
 import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
+import { TelegramLink } from "@/components/TelegramLink";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
 import { BuildingScreen } from "@/components/BuildingScreen";
@@ -96,6 +97,8 @@ export default function Dashboard() {
           {err && <p className="mt-3 text-center text-sm text-danger">{err}</p>}
         </div>
       </section>
+
+      <TelegramLink />
 
       {!rows ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

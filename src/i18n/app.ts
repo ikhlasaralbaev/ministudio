@@ -21,6 +21,7 @@ const uz = {
     hint: "Odatda 30–90 soniya. Sahifani yopmasangiz ham bo‘ladi — hammasi saqlanadi.",
     phrases: ["G‘oyangizni o‘ylab ko‘ryapman…", "Ekranlarni loyihalayapman…", "Ranglar va shriftlarni tanlayapman…", "Hammasini joy-joyiga qo‘yayapman…", "Ilova mantiqini pishiryapman…", "Ma’lumotlar va katalogni tayyorlayapman…", "Bezayapman…", "Hammasi joyidami, tekshiryapman…", "Deyarli tayyor…"],
   },
+  tg: { title: "Telegramni ulang", hint: "Botda loyihalaringiz ham ko‘rinadi. Aks holda bot alohida akkaunt ochadi.", btn: "Telegramni ulash", waiting: "Telegramda «Start» va «Ha, ulash» tugmalarini bosing…" },
   login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
 };
 
@@ -45,6 +46,7 @@ const en: AppDict = {
     hint: "Usually 30–90 seconds. You can leave the page open — everything is saved.",
     phrases: ["Thinking through your idea…", "Establishing the screens…", "Mixing colors and fonts…", "Arranging everything neatly…", "Cooking up the app logic…", "Preparing the data and catalog…", "Adding polish…", "Double-checking everything…", "Almost there…"],
   },
+  tg: { title: "Link Telegram", hint: "Your projects will show up in the bot too. Otherwise the bot opens a separate account.", btn: "Link Telegram", waiting: "Press “Start” and “Yes, link” in Telegram…" },
   login: { failed: "Sign-in was rejected. Your account may be blocked.", google: "Sign in with Google", redirecting: "Redirecting…", back: "Home" },
 };
 
@@ -67,6 +69,7 @@ const ru: AppDict = {
     hint: "Обычно 30–90 секунд. Страницу можно не закрывать — всё сохранится.",
     phrases: ["Обдумываю вашу идею…", "Проектирую экраны…", "Подбираю цвета и шрифты…", "Раскладываю всё по полочкам…", "Варю логику приложения…", "Готовлю данные и каталог…", "Навожу красоту…", "Проверяю, всё ли на месте…", "Почти готово…"],
   },
+  tg: { title: "Привяжите Telegram", hint: "Проекты будут видны и в боте. Иначе бот откроет отдельный аккаунт.", btn: "Привязать Telegram", waiting: "Нажмите «Start» и «Да, привязать» в Telegram…" },
   login: { failed: "Вход отклонён. Возможно, ваш аккаунт заблокирован.", google: "Войти через Google", redirecting: "Перенаправляем…", back: "На главную" },
 };
 
@@ -89,6 +92,7 @@ const kaa: AppDict = {
     hint: "Odatda 30–90 sekund. Betti jabıwdıń keregi joq — hámmesi saqlanadı.",
     phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Ilova logikasın pisirip atırman…", "Maǵlıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
   },
+  tg: { title: "Telegramdı ulań", hint: "Joybarlarıńız botta da kórinedi. Ápiwayı halda bot bólek akkaunt ashadı.", btn: "Telegramdı ulaw", waiting: "Telegramda «Start» hám «Awa, ulaw» túymelerin basıń…" },
   login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
 };
 

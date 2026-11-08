@@ -10,7 +10,7 @@ import { recordsCol } from "./appdata";
 import { publishProject } from "./publish";
 import { ownerCode, rateLimited } from "./runtime";
 import { escapeHtml as esc, tgApi } from "./telegram";
-import { ensureTelegramUser } from "./tglink";
+import { ensureTelegramUser, isTelegramOnly } from "./tglink";
 import { looksLikeIdea, nameFromIdea } from "../idea";
 import { sessionUserById } from "./users";
 import { createClaim, managerConfig, newBotLink } from "./manager";
@@ -44,11 +44,14 @@ async function setState(tgId: number, state: ChatState | null) {
 const BASE = () => publicUrl();
 const panel = (path: string) => ({ web_app: { url: `${BASE()}/tg?next=${encodeURIComponent(path)}` } });
 
-function menuMarkup(t: BotDict): Markup {
+function menuMarkup(t: BotDict, opts?: { haveAccount?: boolean }): Markup {
   return {
     inline_keyboard: [
       [{ text: t.btn.projects, callback_data: "p:list" }, { text: t.btn.newProject, callback_data: "p:new" }],
       [{ text: t.btn.panel, ...panel("/dashboard") }],
+      // An account that exists only here cannot see projects made on the site with Google: point it to the site, where
+      // "Link Telegram" on the dashboard merges the two.
+      ...(opts?.haveAccount ? [[{ text: t.btn.haveAccount, url: `${BASE()}/dashboard` }]] : []),
     ],
   };
 }
@@ -169,7 +172,7 @@ export async function handleManagerChat(update: {
     }
     if (cmd === "start" || cmd === "help" || cmd === "menu") {
       await setState(tgId, null);
-      await send(t.menu, menuMarkup(t));
+      await send(t.menu, menuMarkup(t, { haveAccount: isTelegramOnly(user.email) }));
       return "menu";
     }
     if (cmd === "projects" || data === "p:list") return await listProjects(c);
