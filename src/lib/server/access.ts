@@ -55,7 +55,15 @@ export async function requireProject(
   id: string,
   need: Need,
 ): Promise<{ project: WithId<ProjectRow>; user: SessionUser; perms: Perms }> {
-  const user = await requireUser();
+  return projectForUser(await requireUser(), id, need);
+}
+
+/** Same rules as requireProject for a user who is not in the current request's session (e.g. acting through Telegram). */
+export async function projectForUser(
+  user: SessionUser,
+  id: string,
+  need: Need,
+): Promise<{ project: WithId<ProjectRow>; user: SessionUser; perms: Perms }> {
   const project = await getProject(id);
   const perms = project ? effectivePermissions(project, user, user.isAdmin) : null;
   if (!project || !perms) throw new HttpError("Topilmadi", 404);

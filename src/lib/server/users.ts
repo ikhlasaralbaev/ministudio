@@ -26,3 +26,12 @@ export async function usersByIds(ids: string[]): Promise<Map<string, UserLite>> 
   const list = oids.length ? await usersCol().find({ _id: { $in: oids } }).toArray() : [];
   return new Map(list.map((u) => [u._id.toHexString(), lite(u)]));
 }
+
+/** A platform user as the permission checks see them (banned accounts are refused). */
+export async function sessionUserById(userId: string): Promise<{ id: string; email: string; name: string; image?: string | null; isAdmin: boolean } | null> {
+  if (!ObjectId.isValid(userId)) return null;
+  const u = await usersCol().findOne({ _id: new ObjectId(userId) });
+  if (!u || u.banned) return null;
+  const { isPlatformAdmin } = await import("./access");
+  return { id: u._id.toHexString(), email: normalizeEmail(u.email), name: u.name, image: u.image, isAdmin: isPlatformAdmin(u.email) };
+}

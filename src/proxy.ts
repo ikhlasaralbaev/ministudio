@@ -10,6 +10,8 @@ const PUBLIC = [
   /^\/api\/rt\//,
   /^\/api\/bot\//,
   /^\/api\/manager\/webhook$/,
+  /^\/api\/tg\/signin$/,
+  /^\/tg$/, // Telegram Mini App entry (signs in with Telegram initData)
   /^\/api\/pay\//,
   /^\/api\/auth\//,
   /^\/login(\/|$)/,

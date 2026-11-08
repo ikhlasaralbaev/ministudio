@@ -1,10 +1,7 @@
-import { customAlphabet } from "nanoid";
-import { projects, toDTO } from "@/lib/server/projects";
+import { createProject, projects, toDTO } from "@/lib/server/projects";
 import { requireUser } from "@/lib/server/access";
 import { effectivePermissions } from "@/lib/permissions";
 import { fail, handle, ok } from "@/lib/server/http";
-
-const slugId = customAlphabet("abcdefghijkmnpqrstuvwxyz23456789", 8);
 
 /** Projects the user owns or is a member of (admins see everything in /admin, not here). */
 export async function GET() {
@@ -31,18 +28,7 @@ export async function POST(req: Request) {
     const user = await requireUser();
     const { name } = await req.json().catch(() => ({}));
     if (!name || typeof name !== "string") return fail("Loyiha nomini kiriting");
-    const now = new Date();
-    const row = {
-      name: name.slice(0, 80),
-      slug: slugId(),
-      doc: null,
-      publishedVersion: 0,
-      ownerId: user.id,
-      members: [],
-      createdAt: now,
-      updatedAt: now,
-    };
-    const r = await (await projects()).insertOne(row);
-    return ok({ _id: r.insertedId.toHexString() }, 201);
+    const id = await createProject(user.id, name);
+    return ok({ _id: id }, 201);
   });
 }

@@ -5,6 +5,7 @@ import { decryptEnv } from "./crypto";
 import { tgApi } from "./telegram";
 import type { AppDoc, ProjectDTO } from "../types";
 import { z } from "zod";
+import { customAlphabet } from "nanoid";
 import { normalizeEmail, type Grant, type Member, type Perms } from "../permissions";
 
 export interface ProjectRow {
@@ -123,4 +124,22 @@ export async function deleteProjectCascade(p: WithId<ProjectRow>): Promise<void>
     d.collection<{ _id: string }>("counters").deleteMany({ _id: { $regex: `^${hex}:` } }),
   ]);
   await d.collection("projects").deleteOne({ _id: p._id });
+}
+
+const slugId = customAlphabet("abcdefghijkmnpqrstuvwxyz23456789", 8);
+
+/** A new empty project owned by `ownerId`. Returns its id. */
+export async function createProject(ownerId: string, name: string): Promise<string> {
+  const now = new Date();
+  const r = await (await projects()).insertOne({
+    name: name.trim().slice(0, 80),
+    slug: slugId(),
+    doc: null,
+    publishedVersion: 0,
+    ownerId,
+    members: [],
+    createdAt: now,
+    updatedAt: now,
+  });
+  return r.insertedId.toHexString();
 }

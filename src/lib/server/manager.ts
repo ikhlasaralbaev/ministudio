@@ -9,6 +9,7 @@ import { botSecret } from "./runtime";
 import { connectBot } from "./botconnect";
 import { consumeLinkCode, linkTelegram, peekLinkCode } from "./tglink";
 import { HttpError } from "./http";
+import { handleManagerChat } from "./managerchat";
 
 /**
  * The platform's "manager bot": a Telegram bot with Bot Management Mode enabled (done once in BotFather). With it a
@@ -115,6 +116,16 @@ export async function setupManager(base: string) {
   const me = await tgApi<{ username: string; can_manage_bots?: boolean }>(m.token, "getMe");
   const url = `${base}/api/manager/webhook`;
   await tgApi(m.token, "setWebhook", { url, secret_token: managerSecret(), drop_pending_updates: false });
+  // The chat console: command menu, and the menu button opens the panel inside Telegram (signs in with Telegram).
+  await tgApi(m.token, "setMyCommands", {
+    commands: [
+      { command: "start", description: "Bosh menyu" },
+      { command: "projects", description: "Loyihalarim" },
+      { command: "new", description: "Yangi loyiha" },
+      { command: "cancel", description: "Bekor qilish" },
+    ],
+  });
+  await tgApi(m.token, "setChatMenuButton", { menu_button: { type: "web_app", text: "Panel", web_app: { url: `${base}/tg` } } }).catch(() => {});
   return { username: me.username, canManageBots: !!me.can_manage_bots, webhook: url };
 }
 
@@ -164,11 +175,7 @@ export async function handleManagerUpdate(update: {
         : { chat_id: chatId, text: "Havola eskirgan yoki yaroqsiz. Platformada «Telegramni ulash» ni qayta bosing." }).catch(() => {});
       return owner ? "link: asked to confirm" : "link: bad code";
     }
-    await tgApi(m.token, "sendMessage", {
-      chat_id: chatId,
-      text: "Bu MiniStudio platformasining yordamchi boti. Bot yaratish uchun platformadagi «Bot yaratish» tugmasidan foydalaning.",
-    }).catch(() => {});
-    return "greeted";
+    return handleManagerChat(update);
   }
 
   const cb = update.callback_query;
@@ -198,5 +205,6 @@ export async function handleManagerUpdate(update: {
       return "link: failed";
     }
   }
+  if (cb) return handleManagerChat(update);
   return "ignored";
 }
