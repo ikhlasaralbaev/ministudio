@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckCircle, LinkBreak, Robot, TelegramLogo } from "@phosphor-icons/react";
+import { CheckCircle, CircleNotch, Robot, TelegramLogo } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
 
 interface TgState {
@@ -14,6 +14,20 @@ interface CreateState {
   ownerReady?: boolean;
   ownerLink?: string | null;
   claim: { status: "pending" | "done"; createdAt: string; botUsername: string | null } | null;
+}
+
+function StepRow({ n, done, active, title, sub }: { n: number; done: boolean; active: boolean; title: string; sub?: string }) {
+  return (
+    <li className={`flex items-center gap-3 ${!done && !active ? "opacity-50" : ""}`}>
+      <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-xs font-semibold ${done ? "bg-ok/15 text-ok" : "bg-accent/15 text-accent-2"}`}>
+        {done ? <CheckCircle weight="fill" size={16} /> : n}
+      </span>
+      <span className="min-w-0 flex-1 truncate">
+        {title}
+        {sub && <span className="ml-1.5 text-muted">{sub}</span>}
+      </span>
+    </li>
+  );
 }
 
 /**
@@ -102,62 +116,54 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
     }
   }
 
-  if (err && (!tg || !st)) return <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">Bot yaratish bo&apos;limi yuklanmadi: {err}</p>;
+  if (err && (!tg || !st)) return <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">Yuklanmadi: {err}</p>;
   if (!tg || !st || !st.enabled) return null;
   if (st.hasBot) {
     return (
-      <div className="space-y-2 rounded-lg border border-ok/40 bg-ok/10 p-3 text-sm">
-        <p className="flex items-center gap-2 text-ok">
-          <CheckCircle weight="fill" size={18} /> Bot ulangan{st.botUsername ? <a className="font-medium underline" target="_blank" href={`https://t.me/${st.botUsername}`}>@{st.botUsername}</a> : null}
-        </p>
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-panel-2 p-3 text-sm">
+        <CheckCircle weight="fill" size={20} className="shrink-0 text-ok" />
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">
+            Bot ulandi{" "}
+            {st.botUsername && (
+              <a className="text-accent-2 hover:underline" target="_blank" rel="noreferrer" href={`https://t.me/${st.botUsername}`}>
+                @{st.botUsername}
+              </a>
+            )}
+          </p>
+          {!st.ownerReady && st.ownerLink && <p className="text-xs text-muted">Buyurtmalar kelishi uchun botda Start bosing</p>}
+        </div>
         {!st.ownerReady && st.ownerLink && (
-          <>
-            <p className="text-muted">Buyurtma xabarlari sizga kelishi uchun botda bir marta <b className="text-fg">Start</b> bosing:</p>
-            <a href={st.ownerLink} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
-              <TelegramLogo weight="fill" /> Buyurtmalarni olish (Start)
-            </a>
-          </>
+          <a href={st.ownerLink} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+            <TelegramLogo weight="fill" /> Start
+          </a>
         )}
       </div>
     );
   }
+
+  const waitingNow = linking || waiting;
+  const step = !tg.linked ? 1 : 2;
   return (
-    <div className="space-y-3 rounded-lg border border-accent/40 bg-accent/10 p-4 text-sm">
-      <p className="flex items-center gap-2 font-medium">
-        <Robot weight="fill" size={18} className="text-accent-2" /> Botni platformaning o&apos;zidan yarating
-      </p>
-      <p className="text-muted">BotFather&apos;ga kirish va token ko&apos;chirish shart emas. Telegramda bir marta tasdiqlaysiz, token o&apos;zi ulanadi.</p>
-      {!tg.linked ? (
-        <div className="space-y-2">
-          <p>1. Telegram akkauntingizni ulang (platforma sizni Telegramda tanishi uchun):</p>
-          <button type="button" className="btn btn-primary" disabled={linking} onClick={startLink}>
-            <TelegramLogo weight="fill" /> {linking ? "Telegramda tasdiqlashni kutyapman…" : "Telegramni ulash"}
-          </button>
-          {linking && <p className="text-xs text-muted">Ochilgan Telegram oynasida <b>Start</b> bosing, so&apos;ng «Ha, ulash» tugmasini bosing. Bu yerda o&apos;zi yangilanadi.</p>}
-        </div>
-      ) : (
-        <div className="space-y-2.5">
-          <p className="flex flex-wrap items-center gap-2 text-muted">
-            <TelegramLogo weight="fill" className="text-accent-2" /> Ulangan: <b className="text-fg">{tg.linked.name || tg.linked.username}</b>
-            {tg.linked.username && <span>@{tg.linked.username}</span>}
-            <button type="button" className="btn btn-sm" onClick={() => api("/api/me/telegram", { method: "DELETE" }).then(load)}>
-              <LinkBreak /> Ajratish
-            </button>
-            {onOwnerId && (
-              <button type="button" className="btn btn-sm" onClick={() => onOwnerId(tg.linked!.id)} title="Buyurtma xabarlari shu Telegram'ga boradi (botda bir marta Start bosing)">
-                Egasi shu akkaunt
-              </button>
-            )}
-          </p>
-          <p>2. Botni yarating:</p>
-          <button type="button" className="btn btn-primary" disabled={busy || waiting} onClick={create}>
-            <Robot weight="fill" /> {waiting ? "Telegramda tasdiqlashni kutyapman…" : "Bot yaratish"}
-          </button>
-          {waiting && <p className="text-xs text-muted">Telegram ochilgan oynada «Yaratish»ni bosing. Bot tayyor bo&apos;lgach, bu yerda o&apos;zi paydo bo&apos;ladi (5 daqiqagacha kutiladi).</p>}
-        </div>
-      )}
+    <div className="space-y-4 rounded-xl border border-line bg-panel-2 p-4 text-sm">
+      <div className="flex items-center gap-2 font-medium">
+        <Robot weight="fill" size={18} className="text-accent-2" /> Telegram bot yaratish
+      </div>
+      <ol className="space-y-2.5">
+        <StepRow n={1} active={step === 1} done={!!tg.linked} title={tg.linked ? "Telegram ulangan" : "Telegramni ulash"} sub={tg.linked ? tg.linked.name || (tg.linked.username ? `@${tg.linked.username}` : "") : undefined} />
+        <StepRow n={2} active={step === 2} done={false} title="Bot yaratish" />
+      </ol>
+      <button type="button" className="btn btn-primary w-full justify-center" disabled={busy || waitingNow} onClick={step === 1 ? startLink : create}>
+        {waitingNow ? <CircleNotch size={16} className="animate-spin" /> : step === 1 ? <TelegramLogo weight="fill" /> : <Robot weight="fill" />}
+        {waitingNow ? "Telegramda tasdiqlang…" : step === 1 ? "Telegramni ulash" : "Bot yaratish"}
+      </button>
+      {waitingNow && <p className="text-center text-xs text-muted">{step === 1 ? "Start, so‘ng «Ha, ulash» ni bosing" : "«Yaratish» ni bosing"}</p>}
       {err && <p className="text-danger">{err}</p>}
-      <p className="text-xs text-muted">Yoki BotFather&apos;dan olingan tokenni Sozlamalar sahifasida qo&apos;lda kiriting.</p>
+      {onOwnerId && tg.linked && (
+        <button type="button" className="text-xs text-muted hover:text-fg" onClick={() => onOwnerId(tg.linked!.id)}>
+          Buyurtmalar shu Telegramga kelsin
+        </button>
+      )}
     </div>
   );
 }

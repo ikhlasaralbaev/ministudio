@@ -28,6 +28,11 @@ export async function api<T = any>(url: string, init?: RequestInit & { json?: un
  */
 export async function runAi<T = any>(projectId: string, json: unknown, opts: { intervalMs?: number; timeoutMs?: number } = {}): Promise<T> {
   const { jobId } = await api<{ jobId: string }>(`/api/projects/${projectId}/ai`, { method: "POST", json });
+  return pollAi<T>(projectId, jobId, opts);
+}
+
+/** Waits for a job that is already running (also used to resume after a page refresh). */
+export async function pollAi<T = any>(projectId: string, jobId: string, opts: { intervalMs?: number; timeoutMs?: number } = {}): Promise<T> {
   const deadline = Date.now() + (opts.timeoutMs ?? 7 * 60_000);
   let misses = 0;
   while (Date.now() < deadline) {

@@ -306,6 +306,8 @@ export interface ProjectDTO {
   /** Idea typed when the project was created; Studio starts generating from it. */
   pendingIdea?: string;
   pendingRefs?: string[];
+  /** An AI job that is still running for this project (set on GET, so a refresh can resume waiting). */
+  activeJob?: { id: string; kind: "generate" | "edit" } | null;
   /** Public URL of the project logo, if one was uploaded. */
   logoUrl?: string;
 }

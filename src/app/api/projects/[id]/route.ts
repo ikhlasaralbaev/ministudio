@@ -5,6 +5,7 @@ import { actor, audit } from "@/lib/server/audit";
 import { fail, handle, ok } from "@/lib/server/http";
 import { usersByIds } from "@/lib/server/users";
 import { AI_MODELS } from "@/lib/models";
+import { db } from "@/lib/server/db";
 
 export async function GET(_: Request, ctx: RouteContext<"/api/projects/[id]">) {
   return handle(async () => {
@@ -12,7 +13,12 @@ export async function GET(_: Request, ctx: RouteContext<"/api/projects/[id]">) {
     const { project: p, perms } = await requireProject(id, "read");
     const env = envOf(p);
     const owner = p.ownerId ? (await usersByIds([p.ownerId])).get(p.ownerId) : null;
-    return ok({ ...toDTO(p, perms), ownerEmail: owner?.email ?? null, envKeys: Object.keys(env).filter((k) => env[k]) });
+    // An AI job still running (the page was refreshed mid-build): the studio resumes waiting for it instead of showing an empty prompt.
+    const job = perms.update
+      ? await (await db()).collection("ai_jobs").findOne({ projectId: id, status: "running", createdAt: { $gt: new Date(Date.now() - 6 * 60_000) } }, { sort: { createdAt: -1 } })
+      : null;
+    const activeJob = job ? { id: String(job._id), kind: job.kind === "generate" ? "generate" : "edit" } : null;
+    return ok({ ...toDTO(p, perms), activeJob, ownerEmail: owner?.email ?? null, envKeys: Object.keys(env).filter((k) => env[k]) });
   });
 }
 

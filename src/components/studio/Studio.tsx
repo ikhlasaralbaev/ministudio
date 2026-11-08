@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { RocketLaunch, Sparkle, Warning } from "@phosphor-icons/react";
 import type { AppDoc, Op, ProjectDTO, UINode } from "@/lib/types";
 import { applyOps, cloneWithNewIds, findNode, findParent, newId, nodePath } from "@/lib/doc";
-import { api, runAi, uploadAsset } from "@/lib/client";
+import { api, pollAi, runAi, uploadAsset } from "@/lib/client";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
@@ -43,7 +43,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   // Members without "update" get a view-only studio. The server rejects writes regardless; this keeps the UI honest.
   const readOnly = !project.permissions.update;
   // an idea from the dashboard is about to become the first app: show the building screen, not an empty prompt
-  const [starting, setStarting] = useState(!!project.pendingIdea && !project.doc);
+  const [starting, setStarting] = useState((!!project.pendingIdea || project.activeJob?.kind === "generate") && !project.doc);
   const [lastIdea, setLastIdea] = useState("");
   const [doc, setDocRaw] = useState<AppDoc | null>(project.doc);
   const past = useRef<AppDoc[]>([]);
@@ -208,7 +208,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   useEffect(() => {
     const idea = project.pendingIdea;
     const refs = project.pendingRefs;
-    if (!idea || doc || readOnly) {
+    if ((!idea && project.activeJob?.kind !== "generate") || doc || readOnly) {
       clearBuilding();
       setStarting(false);
     }
@@ -217,6 +217,29 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     api(`/api/projects/${id}`, { method: "PATCH", json: { pendingIdea: null } })
       .catch(() => {})
       .then(() => generate(idea, refs));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // The page was refreshed while an AI job was running: keep the loading state and pick up its result.
+  const resumed = useRef(false);
+  useEffect(() => {
+    const job = project.activeJob;
+    if (!job || readOnly || resumed.current) return;
+    resumed.current = true;
+    setBusy(job.kind === "generate" ? "generate" : "global");
+    pollAi<{ doc: AppDoc }>(id, job.id)
+      .then((r) => {
+        commit(r.doc, undefined, true);
+        setScreenId((cur) => (r.doc.screens.some((s) => s.id === cur) ? cur : r.doc.screens[0].id));
+        setSelectedId(null);
+      })
+      .catch((e) => toast((e as Error).message, "err"))
+      .finally(() => {
+        setBusy(null);
+        setStarting(false);
+        clearBuilding();
+        setHistoryTick((t) => t + 1);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -987,12 +1010,12 @@ function PublishModal({
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const warnings = res.botUsername ? res.warnings : res.warnings.filter((w) => !/Bot token|OWNER_CHAT_ID/.test(w));
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
       <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-6" onClick={(e) => e.stopPropagation()}>
         <div className="mb-1 text-3xl text-accent-2"><RocketLaunch weight="duotone" className="mx-auto" /></div>
-        <h2 className="text-lg font-semibold">v{res.version} e&apos;lon qilindi</h2>
-        <p className="mb-4 text-sm text-muted">Ilova jonli. O&apos;zgarishlar keyingi Publish&apos;gacha studiyada qoladi.</p>
+        <h2 className="mb-4 text-lg font-semibold">Ilova e&apos;lon qilindi <span className="text-sm font-normal text-muted">v{res.version}</span></h2>
         {res.botUsername && (
           <a
             href={`https://t.me/${res.botUsername}`}
@@ -1027,9 +1050,10 @@ function PublishModal({
             ↗
           </a>
         </div>
-        {res.warnings.length > 0 && (
+        {/* without a bot, the bot card above already says what is missing: do not repeat it as warnings */}
+        {warnings.length > 0 && (
           <ul className="mt-4 space-y-1.5 text-[13px] text-warn">
-            {res.warnings.map((w) => (
+            {warnings.map((w) => (
               <li key={w}><Warning className="mr-1 inline" />{w}</li>
             ))}
           </ul>

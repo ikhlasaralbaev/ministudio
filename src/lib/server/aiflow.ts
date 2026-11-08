@@ -57,7 +57,7 @@ export async function startAiJob(o: {
   const jobs = (await db()).collection("ai_jobs");
   await jobs.createIndex({ createdAt: 1 }, { expireAfterSeconds: 86400 });
   const jobId = new ObjectId();
-  await jobs.insertOne({ _id: jobId, projectId: id, userId: user.id, status: "running", createdAt: new Date() });
+  await jobs.insertOne({ _id: jobId, projectId: id, userId: user.id, status: "running", kind, createdAt: new Date() });
 
   const started = Date.now();
   // Every request lands in the prompt history: who asked what, the model, tokens, time and outcome.
