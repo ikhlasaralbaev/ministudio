@@ -5,6 +5,8 @@ import { z } from "zod";
 import { ActionSchema, CollectionSchema, type AppDoc, type Op, type UINode } from "@/lib/types";
 import { describeAction } from "./describe";
 import { BotEditor } from "./BotEditor";
+import { LogoUploader } from "@/components/AssetUploader";
+import { useParams } from "next/navigation";
 import { CollectionEditor, StateEditor } from "./DataEditors";
 
 const inp =
@@ -365,7 +367,8 @@ export function NodeInspector({
   );
 }
 
-export function AppInspector({ doc, apply }: { doc: AppDoc; apply: (ops: Op[], coalesceKey?: string) => void }) {
+export function AppInspector({ doc, apply, onAiEdit }: { doc: AppDoc; apply: (ops: Op[], coalesceKey?: string) => void; onAiEdit?: (prompt: string) => void }) {
+  const { id: projectId } = useParams<{ id: string }>();
   const t = doc.theme;
   return (
     <div>
@@ -373,6 +376,17 @@ export function AppInspector({ doc, apply }: { doc: AppDoc; apply: (ops: Op[], c
         <Row label="Nomi">
           <Txt value={doc.name} onChange={(v) => apply([{ op: "rename", name: v }], "name")} />
         </Row>
+      </Section>
+      <Section title="Logo">
+        <LogoUploader
+          projectId={projectId}
+          canEdit
+          onApply={
+            onAiEdit
+              ? () => onAiEdit("Loyiha logosini ilovaning sarlavhasiga yoki bosh ekraniga qo'y (kichik, cho'zmasdan) va asosiy rangni logo rangiga moslab yangila.")
+              : undefined
+          }
+        />
       </Section>
       <Section title="Mavzu">
         <Row label="Asosiy rang">

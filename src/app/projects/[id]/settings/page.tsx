@@ -6,6 +6,7 @@ import { api } from "@/lib/client";
 import { Field, inputCls, ProjectNav } from "@/components/ui";
 import { Members } from "@/components/Members";
 import { BotCreator } from "@/components/BotCreator";
+import { LogoUploader } from "@/components/AssetUploader";
 import type { ProjectDTO } from "@/lib/types";
 
 interface EnvResp {
@@ -126,6 +127,10 @@ function SettingsInner() {
             <Field label="Nomi">
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
             </Field>
+            <div className="mt-4">
+              <span className="mb-1 block text-xs font-medium text-muted">Logo</span>
+              <LogoUploader projectId={id} canEdit={canEdit} />
+            </div>
           </section>
 
           {groups.map((g) => (

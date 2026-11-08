@@ -32,7 +32,7 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/projects/[id]"
       if (!r.success) return fail("Hujjat noto'g'ri: " + r.error.issues[0]?.message);
       set.doc = r.data;
     }
-    await (await projects()).updateOne({ _id: p._id }, { $set: set, ...(body.pendingIdea === null ? { $unset: { pendingIdea: "" } } : {}) });
+    await (await projects()).updateOne({ _id: p._id }, { $set: set, ...(body.pendingIdea === null ? { $unset: { pendingIdea: "", pendingRefs: "" } } : {}) });
     if (perms.viaAdmin)
       await audit({ ...actor(user, true), action: "project.update", projectId: id, details: { fields: Object.keys(set) } });
     return ok({ ok: true, updatedAt: set.updatedAt });

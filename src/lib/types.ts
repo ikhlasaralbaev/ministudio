@@ -303,4 +303,7 @@ export interface ProjectDTO {
   aiModel: string | null;
   /** Idea typed when the project was created; Studio starts generating from it. */
   pendingIdea?: string;
+  pendingRefs?: string[];
+  /** Public URL of the project logo, if one was uploaded. */
+  logoUrl?: string;
 }

@@ -155,6 +155,9 @@ interface TgMessage {
   chat?: { id?: number };
   from?: { id?: number; first_name?: string; username?: string };
   text?: string;
+  caption?: string;
+  photo?: { file_id: string; file_size?: number }[];
+  document?: { file_id: string; mime_type?: string; file_size?: number };
 }
 interface TgCallback {
   id: string;

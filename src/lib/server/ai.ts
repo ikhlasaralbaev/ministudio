@@ -81,6 +81,30 @@ export function lint(doc: AppDoc, opts: { noEmoji?: boolean } = {}): string[] {
   return errs;
 }
 
+/** What the person attached: reference images (shown to the model) and the project logo (described in text). */
+export interface AiExtras {
+  images?: { mediaType: "image/jpeg"; data: string }[];
+  logo?: { src: string; width: number; height: number; color: string | null } | null;
+}
+
+/** The user message: reference images first (when any), then the text with a short note about images and logo. */
+export function userContent(text: string, x?: AiExtras): Anthropic.MessageParam["content"] {
+  const notes: string[] = [];
+  if (x?.images?.length)
+    notes.push(`The ${x.images.length} attached image(s) are REFERENCES (a design, screenshot, mood or palette the user likes): take their layout, style, colors and mood as inspiration; do not copy text or branding literally.`);
+  if (x?.logo)
+    notes.push(
+      `The project has a LOGO at Image src "${x.logo.src}" (${x.logo.width}x${x.logo.height}${x.logo.color ? `, dominant color ${x.logo.color}` : ""}). ` +
+        `Show it in the app (header/home hero, aspect "${x.logo.width}/${x.logo.height}", small, never stretched)${x.logo.color ? ` and use ${x.logo.color} as the primary accent unless the user chose another color` : ""}.`,
+    );
+  const full = notes.length ? `${text}\n\n${notes.join("\n")}` : text;
+  if (!x?.images?.length) return full;
+  return [
+    ...x.images.map((i) => ({ type: "image" as const, source: { type: "base64" as const, media_type: i.mediaType, data: i.data } })),
+    { type: "text" as const, text: full },
+  ];
+}
+
 async function callTool<T>(opts: {
   system: string;
   messages: Msg[];
@@ -162,6 +186,7 @@ export async function generateApp(
   envHints: string[],
   projectName?: string,
   model?: string | null,
+  extras?: AiExtras,
 ): Promise<{ doc: AppDoc; usage: Usage }> {
   if (mock()) {
     await new Promise((r) => setTimeout(r, 600));
@@ -192,10 +217,13 @@ export async function generateApp(
     messages: [
       {
         role: "user",
-        content: `Example of a good, complete app (a cafe) for reference of the format and quality:\n${example}\n\n` +
-          `Configured integrations for this project: ${envHints.length ? envHints.join(", ") : "none (bot token may be added later)"}.\n` +
-          `Use "pay" actions only if CLICK or PAYME is configured; otherwise save orders with dbInsert + notifyOwner.\n\n` +
-          `App name: ${projectName || "(choose one)"}\nNow build this app:\n${prompt}`,
+        content: userContent(
+          `Example of a good, complete app (a cafe) for reference of the format and quality:\n${example}\n\n` +
+            `Configured integrations for this project: ${envHints.length ? envHints.join(", ") : "none (bot token may be added later)"}.\n` +
+            `Use "pay" actions only if CLICK or PAYME is configured; otherwise save orders with dbInsert + notifyOwner.\n\n` +
+            `App name: ${projectName || "(choose one)"}\nNow build this app:\n${prompt}`,
+          extras,
+        ),
       },
     ],
     parse: (input) => {
@@ -247,6 +275,7 @@ export async function editApp(
   comment: string,
   nodeId?: string | null,
   model?: string | null,
+  extras?: AiExtras,
 ): Promise<EditResult & { usage: Usage }> {
   if (mock()) return { ...mockEdit(doc, comment, nodeId), usage: emptyUsage("mock", true) };
   const target = nodeId ? findNode(doc, nodeId) : null;
@@ -283,7 +312,7 @@ export async function editApp(
     messages: [
       {
         role: "user",
-        content: `Current app document:\n${JSON.stringify(doc)}\n\n${selection}\nComment: ${comment}`,
+        content: userContent(`Current app document:\n${JSON.stringify(doc)}\n\n${selection}\nComment: ${comment}`, extras),
       },
     ],
     parse: (input) => {

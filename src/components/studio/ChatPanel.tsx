@@ -1,7 +1,8 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Sparkle } from "@phosphor-icons/react";
-import { api, timeAgo } from "@/lib/client";
+import { api, timeAgo, uploadAsset } from "@/lib/client";
+import { AttachButton, AttachThumbs, imageDropProps, useAttachments } from "@/components/Attachments";
 import { AI_MODELS } from "@/lib/models";
 
 export interface PromptItem {
@@ -69,12 +70,14 @@ export function ChatPanel({
   readOnly: boolean;
   refreshKey: number;
   meId: string | null;
-  onSend: (text: string) => void;
+  onSend: (text: string, refs?: string[]) => void;
 }) {
   const [items, setItems] = useState<PromptItem[] | null>(null);
   const [err, setErr] = useState("");
   const [text, setText] = useState("");
   const [pending, setPending] = useState<string | null>(null);
+  const attach = useAttachments();
+  const [uploading, setUploading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -104,12 +107,28 @@ export function ChatPanel({
     el.style.height = Math.min(el.scrollHeight, 180) + "px";
   }, [text]);
 
-  function send(t = text) {
+  async function send(t = text) {
     const v = t.trim();
-    if (!v || busy || readOnly) return;
+    if (!v || busy || readOnly || uploading) return;
     setPending(v);
     setText("");
-    onSend(v);
+    // attached reference images are uploaded first, then handed to the AI with the message
+    let refs: string[] | undefined;
+    if (attach.items.length) {
+      setUploading(true);
+      try {
+        refs = [];
+        for (const x of attach.items) refs.push((await uploadAsset(projectId, x.file, "reference")).id);
+        attach.clear();
+      } catch (e) {
+        setErr((e as Error).message);
+        setPending(null);
+        setUploading(false);
+        return;
+      }
+      setUploading(false);
+    }
+    onSend(v, refs);
   }
 
   const totals = (items || []).reduce(
@@ -193,7 +212,7 @@ export function ChatPanel({
               ))}
             </div>
           )}
-          <div className={`rounded-2xl border border-line bg-panel-2 p-2 focus-within:border-accent/60 ${busy ? "ai-working" : ""}`}>
+          <div className={`rounded-2xl border border-line bg-panel-2 p-2 focus-within:border-accent/60 ${busy ? "ai-working" : ""}`} {...imageDropProps(attach, busy)}>
             <textarea
               ref={inputRef}
               rows={1}
@@ -209,13 +228,15 @@ export function ChatPanel({
               placeholder={hasDoc ? "Nimani o'zgartiramiz?" : "Ilovangizni tasvirlab bering…"}
               className="block max-h-[180px] w-full resize-none bg-transparent px-2 py-1.5 text-[14px] outline-none placeholder:text-muted/60"
             />
-            <div className="flex items-center justify-between px-1 pt-1">
-              <span className="text-[11px] text-muted">
+            <AttachThumbs a={attach} />
+            <div className="flex items-center justify-between gap-2 px-1 pt-1">
+              <AttachButton onFiles={attach.add} disabled={busy || uploading} />
+              <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
                 {totals.n ? `${totals.n} so'rov · ${num(totals.tokens)} token` : "↵ yuborish · ⇧↵ yangi qator"}
               </span>
               <button
                 onClick={() => send()}
-                disabled={busy || !text.trim()}
+                disabled={busy || uploading || !text.trim()}
                 className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-white hover:bg-primary-2 disabled:opacity-40"
                 title="Yuborish"
               >

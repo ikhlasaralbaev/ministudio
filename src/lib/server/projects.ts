@@ -24,6 +24,10 @@ export interface ProjectRow {
   autoName?: boolean;
   /** An idea typed on the dashboard that Studio turns into the first app as soon as it opens. */
   pendingIdea?: string;
+  /** Reference images uploaded with that idea; Studio hands them to the AI for the first generation. */
+  pendingRefs?: string[];
+  /** The uploaded logo (asset id). */
+  logoAssetId?: string;
   ownerId?: string | null;
   members?: Member[];
   aiModel?: string | null;
@@ -67,6 +71,8 @@ export function toDTO(p: WithId<ProjectRow>, perms: Perms): ProjectDTO {
     suspended: !!p.suspended,
     aiModel: p.aiModel ?? null,
     pendingIdea: p.pendingIdea,
+    pendingRefs: p.pendingRefs,
+    logoUrl: p.logoAssetId ? `/api/assets/${p.logoAssetId}` : undefined,
   };
 }
 
@@ -124,6 +130,7 @@ export async function deleteProjectCascade(p: WithId<ProjectRow>): Promise<void>
   if (token) await tgApi(token, "deleteWebhook").catch(() => {});
   await Promise.all([
     d.collection("records").deleteMany({ projectId: hex }),
+    d.collection("assets").deleteMany({ projectId: hex }),
     d.collection("payments").deleteMany({ projectId: hex }),
     d.collection("tg_users").deleteMany({ projectId: hex }),
     d.collection<{ _id: string }>("counters").deleteMany({ _id: { $regex: `^${hex}:` } }),

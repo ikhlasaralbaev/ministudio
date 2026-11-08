@@ -3,6 +3,7 @@ import { ObjectId, type WithId } from "mongodb";
 import { AppDocSchema, type AppDoc } from "../types";
 import type { Perms } from "../permissions";
 import { AiError, editApp, generateApp, pickModel } from "./ai";
+import { aiImages, logoInfo } from "./assets";
 import { actor, audit } from "./audit";
 import { db } from "./db";
 import { HttpError } from "./http";
@@ -26,6 +27,8 @@ export async function startAiJob(o: {
   nodeId?: string | null;
   /** edit: the caller's current doc (may contain unsaved edits); defaults to the stored draft. */
   doc?: unknown;
+  /** Reference image asset ids of this project to show the model (max 5). */
+  refs?: string[];
 }): Promise<{ jobId: string; done: Promise<AiOutcome> }> {
   const { project: p, user, perms, kind, prompt } = o;
   const id = p._id.toHexString();
@@ -48,6 +51,9 @@ export async function startAiJob(o: {
     if (used >= limit) throw new HttpError("Kunlik AI limiti tugadi. Ertaga urinib ko'ring.", 429);
   }
 
+  // attachments: references (images) and the logo (a text note), both only from THIS project
+  const extras = { images: await aiImages(id, o.refs), logo: await logoInfo(id, p.logoAssetId) };
+
   const jobs = (await db()).collection("ai_jobs");
   await jobs.createIndex({ createdAt: 1 }, { expireAfterSeconds: 86400 });
   const jobId = new ObjectId();
@@ -64,7 +70,7 @@ export async function startAiJob(o: {
         const env = envOf(p);
         const hints = [env.BOT_TOKEN && "Telegram bot", env.CLICK_SERVICE_ID && "Click payments", env.PAYME_MERCHANT_ID && "Payme payments"].filter(Boolean) as string[];
         // a project named from the idea lets the AI pick the real name
-        const { doc, usage } = await generateApp(prompt, hints, p.autoName ? "" : p.name, p.aiModel);
+        const { doc, usage } = await generateApp(prompt, hints, p.autoName ? "" : p.name, p.aiModel, extras);
         const message = `Ilova tayyor: ${doc.screens.length} ta ekran`;
         await (await projects()).updateOne(
           { _id: p._id },
@@ -74,7 +80,7 @@ export async function startAiJob(o: {
         if (perms.viaAdmin) await audit({ ...actor(user, true), action: "ai.generate", projectId: id });
         return { doc, message };
       }
-      const { usage, ...res } = await editApp(editDoc!, prompt, nodeId, p.aiModel);
+      const { usage, ...res } = await editApp(editDoc!, prompt, nodeId, p.aiModel, extras);
       await (await projects()).updateOne({ _id: p._id }, { $set: { doc: res.doc, updatedAt: new Date() } });
       await record("ok", usage, { message: res.message, opsCount: res.ops.length });
       if (perms.viaAdmin) await audit({ ...actor(user, true), action: "ai.edit", projectId: id });

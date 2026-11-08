@@ -2,7 +2,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { api, timeAgo } from "@/lib/client";
+import { api, timeAgo, uploadAsset } from "@/lib/client";
+import { useAttachments } from "@/components/Attachments";
 import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
@@ -30,6 +31,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [idea, setIdea] = useState("");
+  const attach = useAttachments();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -50,6 +52,8 @@ export default function Dashboard() {
     try {
       // the project is named from the idea; Studio starts building the app as soon as it opens
       const r = await api<{ _id: string }>("/api/projects", { method: "POST", json: { idea } });
+      // reference images go with the idea: Studio shows them to the AI for the first generation
+      for (const x of attach.items) await uploadAsset(r._id, x.file, "reference", true).catch(() => {});
       markBuilding(); // the loading screen stays up through the page change
       router.push(`/projects/${r._id}/studio`);
     } catch (e) {
@@ -87,6 +91,7 @@ export default function Dashboard() {
             examples={t.dash.examples}
             footerLeft="⌘ + Enter"
             autoFocus
+            attach={attach}
           />
           {err && <p className="mt-3 text-center text-sm text-danger">{err}</p>}
         </div>

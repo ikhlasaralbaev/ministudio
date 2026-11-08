@@ -1,4 +1,5 @@
 // Integration test against a real MongoDB (runs only when MONGODB_TEST_URI is set). Telegram calls are mocked.
+import sharp from "sharp";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 const uri = process.env.MONGODB_TEST_URI;
@@ -9,6 +10,7 @@ vi.mock("@/lib/server/telegram", async (orig) => ({
     calls.push({ method, body });
     if (method === "getManagedBotToken") return "777:CHILD-TOKEN";
     if (method === "getMe") return { username: "mock_bot" };
+    if (method === "getFile") return { file_path: "photos/a.png", file_size: (body as { file_id: string }).file_id === "big" ? 9_000_000 : 1000 };
     return {};
   },
 }));
@@ -20,8 +22,14 @@ vi.mock("@/lib/server/ai", async (orig) => {
   const doc = { name: "Kafe", theme: { primary: "#e8590c", background: "#fff", text: "#111", radius: 12, font: "x" }, state: {}, collections: [], screens: [{ id: "s1", type: "Screen", name: "Bosh", children: [] }], bot: { welcomeText: "a", buttonText: "b" } };
   return {
     ...real,
-    generateApp: async (_p: string, _h: string[], name?: string) => ({ doc: { ...doc, name: name || "Gul Bazar" }, usage: usage() }),
-    editApp: async (d: unknown) => ({ doc: d, message: "Narxlar qalinlashtirildi", ops: [{ op: "rename", name: "x" }], usage: usage() }),
+    generateApp: async (_p: string, _h: string[], name?: string, _m?: unknown, extras?: unknown) => {
+      (globalThis as { __ai?: unknown[] }).__ai = [...((globalThis as { __ai?: unknown[] }).__ai || []), { kind: "generate", extras }];
+      return { doc: { ...doc, name: name || "Gul Bazar" }, usage: usage() };
+    },
+    editApp: async (d: unknown, _c?: string, _n?: unknown, _m?: unknown, extras?: unknown) => {
+      (globalThis as { __ai?: unknown[] }).__ai = [...((globalThis as { __ai?: unknown[] }).__ai || []), { kind: "edit", extras }];
+      return { doc: d, message: "Narxlar qalinlashtirildi", ops: [{ op: "rename", name: "x" }], usage: usage() };
+    },
   };
 });
 
@@ -251,11 +259,9 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
     expect(await say(TGA, "gul do'koni uchun katalog va yetkazib berish")).toBe("ai generate started");
     expect(last().text).toMatch(/ИИ работает/);
-    const row = (await (await projects()).findOne({ ownerId: ids.A, autoName: true }))!;
-    ids.P = row._id.toHexString();
-    expect(row.name).toContain("gul do'koni"); // placeholder name from the idea until the AI names it
-
     await waitFor(() => last().text.includes("Готово"));
+    const row = (await (await projects()).findOne({ ownerId: ids.A, name: "Gul Bazar" }))!;
+    ids.P = row._id.toHexString();
     expect(last().text).toContain("Приложение «Gul Bazar» создано: 1 экр.");
     const after = (await getProject(ids.P))!;
     expect(after.name).toBe("Gul Bazar"); // the AI's name replaced the placeholder
@@ -409,5 +415,119 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
     await start(TGB); // once an owner exists nobody else can take over by pressing Start
     expect(envOf((await getProject(pid))!).OWNER_CHAT_ID).toBe(String(TGA));
+  });
+});
+
+describe.skipIf(!uri)("photos in the manager bot (MongoDB, Telegram and AI mocked)", () => {
+  const TG = 770001;
+  const aiCalls = () => ((globalThis as { __ai?: { kind: string; extras?: { images?: unknown[]; logo?: { src: string } | null } }[] }).__ai || []);
+  const sentTo = () => calls.filter((c) => c.method === "sendMessage").map((c) => c.body as { text: string; reply_markup?: { inline_keyboard: { text: string; callback_data?: string }[][] } });
+  const last = () => sentTo().at(-1)!;
+  const waitFor = async (pred: () => boolean) => {
+    for (let i = 0; i < 100 && !pred(); i++) await new Promise((r) => setTimeout(r, 20));
+  };
+  const photo = async (extra: { caption?: string; id?: string } = {}) => {
+    const { handleManagerUpdate } = await import("@/lib/server/manager");
+    return handleManagerUpdate({ message: { chat: { id: TG }, from: { id: TG, first_name: "P" }, photo: [{ file_id: "small", file_size: 100 }, { file_id: extra.id || "ok", file_size: 1000 }], caption: extra.caption } });
+  };
+  const say = async (text: string) => {
+    const { handleManagerUpdate } = await import("@/lib/server/manager");
+    return handleManagerUpdate({ message: { chat: { id: TG }, from: { id: TG, first_name: "P" }, text } });
+  };
+  const press = async (data: string) => {
+    const { handleManagerUpdate } = await import("@/lib/server/manager");
+    return handleManagerUpdate({ callback_query: { id: "c", data, from: { id: TG, first_name: "P" }, message: { chat: { id: TG }, message_id: 1 } } });
+  };
+  /** The newest project of this Telegram user (the instant AI mock may already have renamed it). */
+  const myProject = async () => {
+    const { usersCol } = await import("@/lib/server/users");
+    const { projects } = await import("@/lib/server/projects");
+    const u = (await usersCol().findOne({ telegramId: TG } as never)) as unknown as { _id: { toHexString(): string } };
+    return (await (await projects()).find({ ownerId: u._id.toHexString() }).sort({ createdAt: -1 }).limit(1).next())!;
+  };
+
+  beforeAll(async () => {
+    process.env.MONGODB_URI = uri;
+    process.env.MONGODB_DB = "ministudio_photos_test";
+    process.env.APP_SECRET = "test-secret-test-secret-1234";
+    process.env.TELEGRAM_MANAGER_BOT_TOKEN = "1:MANAGER";
+    process.env.TELEGRAM_MANAGER_BOT_USERNAME = "ms_manager_bot";
+    process.env.PUBLIC_URL = "https://panel.test";
+    const png = await sharp({ create: { width: 90, height: 60, channels: 4, background: { r: 220, g: 60, b: 20, alpha: 1 } } }).png().toBuffer();
+    vi.stubGlobal("fetch", async (url: string) => (String(url).includes("/file/bot") ? new Response(new Uint8Array(png)) : new Response("{}")));
+  });
+  afterAll(async () => {
+    vi.unstubAllGlobals();
+    const { rawDb } = await import("@/lib/server/db");
+    await rawDb().dropDatabase();
+  });
+
+  it("a photo before any project waits as a reference; the idea that follows is built from it", async () => {
+    const { getProject } = await import("@/lib/server/projects");
+    const { listAssets } = await import("@/lib/server/assets");
+    expect(await photo()).toBe("photo for idea");
+    expect(last().text).toContain("Референсов: 1");
+    await say("кофейня в Нукусе с меню и доставкой");
+    await waitFor(() => last().text.includes("Готово"));
+    const id = (await myProject())._id.toHexString();
+    const refs = (await listAssets(id)).filter((a) => a.kind === "reference");
+    expect(refs).toHaveLength(1); // the staged photo was promoted into this project
+    const call = aiCalls().at(-1)!;
+    expect(call.kind).toBe("generate");
+    expect(call.extras?.images).toHaveLength(1);
+    expect((await getProject(id))?.doc).toBeTruthy();
+  });
+
+  it("a photo while an app is open asks what it is; 'logo' saves it and offers to apply it", async () => {
+    const { getProject } = await import("@/lib/server/projects");
+    const id = (await myProject())._id.toHexString();
+    await say(`/cancel`);
+    await press(`a:${id}`); // AI mode for that project
+    expect(await photo()).toBe("photo staged");
+    const kb = last().reply_markup!.inline_keyboard[0];
+    expect(kb.map((b) => b.callback_data)).toEqual([expect.stringMatching(/^ig:[a-f0-9]{24}:l$/), expect.stringMatching(/^ig:[a-f0-9]{24}:r$/)]);
+
+    expect(await press(kb[0].callback_data!)).toBe("logo saved");
+    expect(last().text).toContain("Логотип сохранён");
+    expect(last().text).toContain("#dc3c14");
+    const p = (await getProject(id))!;
+    expect(p.logoAssetId).toBeTruthy();
+    const apply = last().reply_markup!.inline_keyboard[0][0];
+    expect(apply.callback_data).toBe(`ia:${id}`);
+
+    const before = aiCalls().length;
+    await press(apply.callback_data!); // "apply to the app": an AI edit that knows about the logo
+    await waitFor(() => aiCalls().length > before);
+    const call = aiCalls().at(-1)!;
+    expect(call.kind).toBe("edit");
+    expect(call.extras?.logo?.src).toBe(`/api/assets/${p.logoAssetId}`);
+  });
+
+  it("'reference' without a caption waits for the instruction; with a caption it runs at once", async () => {
+    await photo();
+    await press(last().reply_markup!.inline_keyboard[0][1].callback_data!); // reference
+    expect(last().text).toContain("Референс добавлен");
+    let before = aiCalls().length;
+    await say("сделай такие же карточки как на фото");
+    await waitFor(() => aiCalls().length > before);
+    expect(aiCalls().at(-1)!.extras?.images).toHaveLength(1);
+    await say("ещё правка без картинки");
+    await waitFor(() => aiCalls().length > before + 1);
+    expect(aiCalls().at(-1)!.extras?.images).toHaveLength(0); // the reference was used once
+
+    before = aiCalls().length;
+    await photo({ caption: "сделай фон темнее" });
+    await press(last().reply_markup!.inline_keyboard[0][1].callback_data!);
+    await waitFor(() => aiCalls().length > before);
+    expect(aiCalls().at(-1)).toMatchObject({ kind: "edit" });
+    expect(aiCalls().at(-1)!.extras?.images).toHaveLength(1); // the caption was the request, the photo its reference
+  });
+
+  it("an oversized photo is refused politely; someone else's staged photo cannot be used", async () => {
+    expect(await photo({ id: "big" })).toBe("photo too big");
+    expect(last().text).toContain("5 МБ");
+    const { stageAsset } = await import("@/lib/server/assets");
+    const sid = await stageAsset({ projectId: null, input: await sharp({ create: { width: 10, height: 10, channels: 3, background: "#fff" } }).png().toBuffer(), by: "someone-else" });
+    expect(await press(`ig:${sid}:l`)).toBe("photo gone");
   });
 });

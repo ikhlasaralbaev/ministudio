@@ -132,3 +132,13 @@ command menu and menu button.
 The manager bot's messages are HTML-formatted and in Russian by default; `/language` switches a Telegram user to
 Uzbek, English or Karakalpak (kept in `manager_prefs`). Texts live in `src/lib/managerI18n.ts`; every dynamic value is
 HTML-escaped before it goes into a message.
+
+## Images: logos and references
+Uploaded images live in the MongoDB `assets` collection (so `deploy/backup.sh` backs them up). They are decoded and
+re-encoded with `sharp` on upload: logos → PNG ≤ 512px (transparency kept), references → JPEG ≤ 1568px, metadata stripped,
+5 MB upload limit, SVG refused. A project keeps one logo (a new one replaces it) and at most 8 references (oldest go first).
+`GET /api/assets/<id>`: logos are public (the published mini app shows them), references need access to the project.
+References go to the AI as vision input (max 5 per request, a few thousand tokens each); the logo is described to the AI
+(address, size, dominant color). In the manager bot, a photo asks "logo or reference" (Telegram's 20 MB download limit applies
+first; photos are staged for 24 h while waiting for the answer). `sharp` is a direct dependency and listed in
+`serverExternalPackages`; the Docker image installs its Linux binary through `npm ci`.

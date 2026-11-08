@@ -3,12 +3,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { RocketLaunch, Sparkle, Warning } from "@phosphor-icons/react";
 import type { AppDoc, Op, ProjectDTO, UINode } from "@/lib/types";
 import { applyOps, cloneWithNewIds, findNode, findParent, newId, nodePath } from "@/lib/doc";
-import { api, runAi } from "@/lib/client";
+import { api, runAi, uploadAsset } from "@/lib/client";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
 import { AiPrompt } from "@/components/AiPrompt";
 import { BuildingScreen } from "@/components/BuildingScreen";
+import { useAttachments } from "@/components/Attachments";
 import { clearBuilding } from "@/lib/building";
 import { ModelPicker } from "./ModelPicker";
 import { FRAME_H, PhoneFrame, SCREEN_H, SCREEN_W } from "./PhoneFrame";
@@ -163,11 +164,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   }, [doc, screenId, selectedId]);
 
   /* ---------- AI ---------- */
-  async function generate(prompt: string) {
+  async function generate(prompt: string, refs?: string[]) {
     setLastIdea(prompt);
     setBusy("generate");
     try {
-      const r = await runAi<{ doc: AppDoc }>(id, { mode: "generate", prompt });
+      const r = await runAi<{ doc: AppDoc }>(id, { mode: "generate", prompt, refs });
       commit(r.doc, undefined, true);
       setScreenId(r.doc.screens[0].id);
       setSelectedId(null);
@@ -183,11 +184,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     }
   }
 
-  async function edit(prompt: string, nodeId: string | null) {
+  async function edit(prompt: string, nodeId: string | null, refs?: string[]) {
     if (!doc) return;
     setBusy(nodeId || "global");
     try {
-      const r = await runAi<{ doc: AppDoc; message: string }>(id, { mode: "edit", prompt, nodeId, doc });
+      const r = await runAi<{ doc: AppDoc; message: string }>(id, { mode: "edit", prompt, nodeId, doc, refs });
       commit(r.doc, undefined, true);
       if (!vibe) toast(r.message || "O'zgartirildi", "ok");
       // if a new screen appeared and the comment was global, jump to it
@@ -206,6 +207,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const autoStarted = useRef(false);
   useEffect(() => {
     const idea = project.pendingIdea;
+    const refs = project.pendingRefs;
     if (!idea || doc || readOnly) {
       clearBuilding();
       setStarting(false);
@@ -214,7 +216,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     autoStarted.current = true;
     api(`/api/projects/${id}`, { method: "PATCH", json: { pendingIdea: null } })
       .catch(() => {})
-      .then(() => generate(idea));
+      .then(() => generate(idea, refs));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -410,7 +412,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
               readOnly={readOnly}
               refreshKey={historyTick}
               meId={meId}
-              onSend={(t) => (doc ? edit(t, null) : generate(t))}
+              onSend={(t, refs) => (doc ? edit(t, null, refs) : generate(t, refs))}
             />
           </aside>
           {doc ? (
@@ -439,6 +441,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         <BuildingScreen />
       ) : !doc ? (
         <EmptyState
+          projectId={id}
           initial={lastIdea}
           busy={false}
           onGenerate={generate}
@@ -496,7 +499,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
                 onShift={shift}
               />
             ) : (
-              <AppInspector doc={doc} apply={apply} />
+              <AppInspector doc={doc} apply={apply} onAiEdit={(p) => void edit(p, null)} />
             )}
             </fieldset>
           </aside>
@@ -556,15 +559,18 @@ function EmptyState({
   onGenerate,
   envKeys,
   picker,
+  projectId,
 }: {
   /** what the person typed last time (kept after a failed attempt, so they can retry or edit it) */
   initial: string;
   busy: boolean;
-  onGenerate: (p: string) => void;
+  onGenerate: (p: string, refs?: string[]) => void;
   envKeys: string[];
   picker: React.ReactNode;
+  projectId: string;
 }) {
   const [prompt, setPrompt] = useState(initial);
+  const attach = useAttachments();
   return (
     <div className="canvas-dots grid flex-1 place-items-center overflow-auto p-6">
       <div className="w-full max-w-2xl">
@@ -573,7 +579,14 @@ function EmptyState({
         <AiPrompt
           value={prompt}
           onChange={setPrompt}
-          onSubmit={() => onGenerate(prompt)}
+          onSubmit={async () => {
+            // reference images are uploaded first, then the AI gets them with the prompt
+            const ids: string[] = [];
+            for (const x of attach.items) ids.push((await uploadAsset(projectId, x.file, "reference")).id);
+            attach.clear();
+            onGenerate(prompt, ids);
+          }}
+          attach={attach}
           busy={busy}
           busyLabel="AI chizmoqda… 30–90 s"
           submitLabel="Yaratish"

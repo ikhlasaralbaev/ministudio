@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp, Sparkle } from "@phosphor-icons/react";
+import { AttachButton, AttachThumbs, imageDropProps, type Attachments } from "@/components/Attachments";
 
 /** Types the given lines one after another, like an assistant suggesting ideas (paused while `on` is false). */
 function useTypewriter(lines: string[], on: boolean) {
@@ -48,6 +49,7 @@ export function AiPrompt({
   minLength = 5,
   rows = 3,
   autoFocus = false,
+  attach,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -63,6 +65,8 @@ export function AiPrompt({
   minLength?: number;
   rows?: number;
   autoFocus?: boolean;
+  /** Reference images (paperclip, paste, drop). The parent uploads them when it submits. */
+  attach?: Attachments;
 }) {
   const [focus, setFocus] = useState(false);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -78,7 +82,7 @@ export function AiPrompt({
   }, [value]);
 
   return (
-    <div className="ai-wrap" data-busy={busy}>
+    <div className="ai-wrap" data-busy={busy} {...(attach ? imageDropProps(attach, busy) : {})}>
       <div className="ai-glow" aria-hidden />
       <div className="ai-border">
         <div className="ai-inner">
@@ -136,7 +140,10 @@ export function AiPrompt({
             </div>
           )}
 
+          {attach && <AttachThumbs a={attach} />}
+
           <div className="flex items-center gap-2 border-t border-line/70 px-3 py-2.5">
+            {attach && <AttachButton onFiles={attach.add} disabled={busy} />}
             <span className="min-w-0 flex-1 truncate text-xs text-muted">{footerLeft}</span>
             {extra}
             <button type="button" disabled={!can} onClick={onSubmit} className="ai-send">
