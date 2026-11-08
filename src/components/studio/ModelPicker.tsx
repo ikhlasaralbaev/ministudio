@@ -63,8 +63,9 @@ export function ModelPicker({
             <button
               key={m.id}
               type="button"
-              onClick={() => pick(m.id)}
-              className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left hover:bg-panel-2 ${m.id === current.id ? "bg-panel-2" : ""}`}
+              onClick={() => !m.disabled && pick(m.id)}
+              disabled={m.disabled}
+              className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left ${m.disabled ? "cursor-not-allowed opacity-45" : "hover:bg-panel-2"} ${m.id === current.id ? "bg-panel-2" : ""}`}
             >
               <span className="mt-0.5 w-3 text-accent-2">{m.id === current.id ? "✓" : ""}</span>
               <span>

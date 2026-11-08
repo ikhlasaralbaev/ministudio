@@ -60,9 +60,9 @@ describe("generateApp tool calling", () => {
   it("uses the model chosen for the project", async () => {
     script = [toolUse(cafeTemplate("X"))];
     const { generateApp } = await import("@/lib/server/ai");
-    const { usage: u } = await generateApp("kafe", [], "X", "claude-opus-5-5");
-    expect(calls[0].model).toBe("claude-opus-5-5");
-    expect(u.model).toBe("claude-opus-5-5");
+    const { usage: u } = await generateApp("kafe", [], "X", "claude-haiku-5-5");
+    expect(calls[0].model).toBe("claude-haiku-5-5");
+    expect(u.model).toBe("claude-haiku-5-5");
   });
 
   it("gives up with a clear error after the retries are spent", async () => {

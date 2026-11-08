@@ -30,7 +30,7 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/projects/[id]"
     const set: Record<string, unknown> = { updatedAt: new Date() };
     if (typeof body.name === "string" && body.name.trim()) set.name = body.name.trim().slice(0, 80);
     if (body.aiModel !== undefined) {
-      if (!AI_MODELS.some((m) => m.id === body.aiModel)) return fail("Noma'lum model");
+      if (!AI_MODELS.some((m) => m.id === body.aiModel && !m.disabled)) return fail("Noma'lum model");
       set.aiModel = body.aiModel;
     }
     if (body.doc !== undefined) {
