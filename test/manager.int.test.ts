@@ -8,6 +8,7 @@ vi.mock("@/lib/server/telegram", async (orig) => ({
   tgApi: async (_t: string, method: string, body?: unknown) => {
     calls.push({ method, body });
     if (method === "getManagedBotToken") return "777:CHILD-TOKEN";
+    if (method === "getMe") return { username: "mock_bot" };
     return {};
   },
 }));
@@ -216,8 +217,10 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(last().text).toContain("Приложение создано: 1 экр.");
     expect((await getProject(ids.P))?.doc?.screens).toHaveLength(1);
     // no bot yet: the result points at the next step and offers "create bot" next to Publish
-    expect(last().text).toContain("Следующий шаг");
-    expect(last().reply_markup!.inline_keyboard.flat().map((b) => b.callback_data)).toEqual(expect.arrayContaining([`b:${ids.P}`, `u:${ids.P}`]));
+    expect(last().text).toContain("опубликуйте приложение");
+    const kb = last().reply_markup!.inline_keyboard;
+    expect(kb[0][0].callback_data).toBe(`u:${ids.P}`); // Publish is the first button: it does not wait for a bot
+    expect(kb.flat().map((b) => b.callback_data)).toContain(`b:${ids.P}`);
 
     // the project now has an app: the next message is an edit
     expect(await say(TGA, "narxlarni qalinroq qil")).toBe("ai edit started");
@@ -295,5 +298,22 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     await press(TGA, `b:${ids.P}`);
     const btn = last().reply_markup!.inline_keyboard.flat()[0] as { url: string };
     expect(btn.url).toMatch(/^https:\/\/t\.me\/newbot\/ms_manager_bot\/ms_[a-z0-9]+_[0-9a-f]{4}_bot\?name=Lazzat%20Kafe$/);
+  });
+
+  it("publishing works without a bot first, and every later publish goes to the bot once it exists", async () => {
+    const { encryptEnv } = await import("@/lib/server/crypto");
+    const { projects } = await import("@/lib/server/projects");
+    // v1 was published without a bot (previous test). Now the bot gets connected...
+    await (await projects()).updateOne({ slug: { $exists: true }, _id: new (await import("mongodb")).ObjectId(ids.P) }, { $set: { envEnc: encryptEnv({ BOT_TOKEN: "42:BOT" }) } });
+    const before = calls.length;
+    // ...and the next publish (v2) updates that bot: webhook, menu button, commands
+    expect(await press(TGA, `u:${ids.P}`)).toBe("published");
+    const sentCalls = calls.slice(before).map((c) => c.method);
+    expect(sentCalls).toEqual(expect.arrayContaining(["getMe", "setWebhook", "setChatMenuButton", "setMyCommands"]));
+    expect((calls.slice(before).find((c) => c.method === "setWebhook")!.body as { url: string }).url).toBe(`https://panel.test/api/bot/${ids.P}`);
+    expect(last().text).toContain("Опубликовано: v2");
+    const kb = last().reply_markup!.inline_keyboard.flat() as { text: string; url?: string; callback_data?: string }[];
+    expect(kb.find((b) => b.url)?.url).toBe("https://t.me/mock_bot"); // "open the bot" instead of "create bot"
+    expect(kb.map((b) => b.callback_data)).not.toContain(`b:${ids.P}`);
   });
 });

@@ -231,9 +231,10 @@ async function runAi({ user, t, send, tgId }: Ctx, id: string, prompt: string) {
     const doc = r.result.doc as { screens?: unknown[] } | undefined;
     const summary = kind === "generate" ? t.aiGenerated(doc?.screens?.length || 0) : String(r.result.message || "OK");
     await send(`${t.aiDone(esc(summary))}${hasBot ? "" : `\n\n${t.nextBot}`}`, {
+      // Publish comes first and always works (with or without a bot); creating the bot is a separate, optional step
       inline_keyboard: [
-        ...(hasBot ? [] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
         [{ text: t.btn.publish, callback_data: `u:${id}` }, { text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
+        ...(hasBot ? [] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
       ],
     });
   });

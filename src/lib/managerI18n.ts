@@ -46,7 +46,7 @@ const ru = {
   working: "⏳ <b>ИИ работает…</b>\nОбычно 30–90 секунд. Напишу, когда будет готово.",
   busy: "⏱ Слишком много запросов. Попробуйте чуть позже.",
   cancelled: "Отменено.",
-  nextBot: "🤖 <b>Следующий шаг:</b> создайте бота — тогда приложение будет открываться прямо в Telegram.",
+  nextBot: "🚀 <b>Следующий шаг:</b> опубликуйте приложение — оно сразу откроется по ссылке. Чтобы оно открывалось прямо в Telegram, создайте бота: это можно сделать до или после публикации.",
   botConnected: (bot: string, name: string, live: boolean) =>
     `🤖 <b>Бот @${bot} создан и подключён</b>\n\nПроект: <b>${name}</b>\n${live ? "Приложение уже работает в боте." : "Осталось опубликовать приложение — нажмите кнопку ниже."}`,
   btnOpenBot: "🤖 Открыть бота",
@@ -120,7 +120,7 @@ const uz: BotDict = {
   working: "⏳ <b>AI ishlayapti…</b>\nOdatda 30–90 soniya. Tayyor bo‘lgach yozaman.",
   busy: "⏱ So‘rovlar juda ko‘p. Birozdan keyin urinib ko‘ring.",
   cancelled: "Bekor qilindi.",
-  nextBot: "🤖 <b>Keyingi qadam:</b> bot yarating — shunda ilova to‘g‘ridan-to‘g‘ri Telegram ichida ochiladi.",
+  nextBot: "🚀 <b>Keyingi qadam:</b> ilovani publish qiling — u darhol havola orqali ochiladi. Telegram ichida ochilishi uchun bot yarating: buni publishdan oldin ham, keyin ham qilsa bo‘ladi.",
   botConnected: (bot, name, live) =>
     `🤖 <b>@${bot} boti yaratildi va ulandi</b>\n\nLoyiha: <b>${name}</b>\n${live ? "Ilova botda allaqachon ishlayapti." : "Endi ilovani publish qilish qoldi — quyidagi tugmani bosing."}`,
   btnOpenBot: "🤖 Botni ochish",
@@ -193,7 +193,7 @@ const en: BotDict = {
   working: "⏳ <b>AI is working…</b>\nUsually 30–90 seconds. I’ll write when it’s ready.",
   busy: "⏱ Too many requests. Please try again a little later.",
   cancelled: "Cancelled.",
-  nextBot: "🤖 <b>Next step:</b> create the bot — then the app opens right inside Telegram.",
+  nextBot: "🚀 <b>Next step:</b> publish the app — it opens by link right away. To open it inside Telegram, create a bot: you can do that before or after publishing.",
   botConnected: (bot, name, live) =>
     `🤖 <b>Bot @${bot} created and connected</b>\n\nProject: <b>${name}</b>\n${live ? "The app is already live in the bot." : "Now publish the app — press the button below."}`,
   btnOpenBot: "🤖 Open the bot",
@@ -266,7 +266,7 @@ const kaa: BotDict = {
   working: "⏳ <b>AI islep atır…</b>\nOdatda 30–90 sekund. Tayın bolǵanda jazaman.",
   busy: "⏱ Sorawlar júdá kóp. Birazdan keyin urınıp kóriń.",
   cancelled: "Biykarlandı.",
-  nextBot: "🤖 <b>Keyingi qádem:</b> bot jaratıń — sonda ilova tuwrıdan-tuwrı Telegram ishinde ashıladı.",
+  nextBot: "🚀 <b>Keyingi qádem:</b> ilovanı publish etiń — ol derhal siltew arqalı ashıladı. Telegram ishinde ashılıwı ushın bot jaratıń: buni publishten aldın da, keyin de islewge boladı.",
   botConnected: (bot, name, live) =>
     `🤖 <b>@${bot} botı jaratıldı hám ulandı</b>\n\nJoybar: <b>${name}</b>\n${live ? "Ilova botta aldınan islep tur." : "Endi ilovanı publish etiw qaldı — tómendegi túymeni basıń."}`,
   btnOpenBot: "🤖 Botti ashıw",
