@@ -308,3 +308,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ai-wrap:focus-within .ai-border, .ai-wrap[data-busy="true"] .ai-border, .ai-spark, .ai-dots i, .ai-bar, .ai-caret::after { animation: none; }
 }
+
+/* ---------- "building your app" screen ---------- */
+.build-orb { position: relative; display: grid; place-items: center; width: 92px; height: 92px; border-radius: 50%; }
+.build-orb::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #2f81f7, #a371f7, #f778ba, #2f81f7); animation: build-spin 5s linear infinite; }
+.build-orb::after { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: radial-gradient(circle at 30% 25%, #a371f7, #2f81f7 70%); animation: build-pulse 2.2s ease-in-out infinite; }
+.build-glow { position: absolute; top: -34px; width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(from 90deg, #2f81f7, #a371f7, #f778ba, #2f81f7); filter: blur(46px); opacity: 0.32; animation: build-spin 9s linear infinite; pointer-events: none; }
+@keyframes build-spin { to { transform: rotate(360deg); } }
+@keyframes build-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(0.9); } }
+.build-phrase { animation: build-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes build-in { from { opacity: 0; transform: translateY(10px); filter: blur(3px); } }
+@media (prefers-reduced-motion: reduce) { .build-orb::before, .build-orb::after, .build-glow, .build-phrase { animation: none; } }

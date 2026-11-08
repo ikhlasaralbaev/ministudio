@@ -8,6 +8,8 @@ import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
 import { AiPrompt } from "@/components/AiPrompt";
+import { BuildingScreen } from "@/components/BuildingScreen";
+import { clearBuilding } from "@/lib/building";
 import { ModelPicker } from "./ModelPicker";
 import { FRAME_H, PhoneFrame, SCREEN_H, SCREEN_W } from "./PhoneFrame";
 import { ChatPanel } from "./ChatPanel";
@@ -39,6 +41,9 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const id = project._id;
   // Members without "update" get a view-only studio. The server rejects writes regardless; this keeps the UI honest.
   const readOnly = !project.permissions.update;
+  // an idea from the dashboard is about to become the first app: show the building screen, not an empty prompt
+  const [starting, setStarting] = useState(!!project.pendingIdea && !project.doc);
+  const [lastIdea, setLastIdea] = useState("");
   const [doc, setDocRaw] = useState<AppDoc | null>(project.doc);
   const past = useRef<AppDoc[]>([]);
   const future = useRef<AppDoc[]>([]);
@@ -49,6 +54,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("edit");
   const [busy, setBusy] = useState<null | "generate" | "global" | string>(null);
+  const building = busy === "generate" || starting;
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [save, setSave] = useState<"saved" | "saving" | "dirty" | "error">("saved");
   const [publishing, setPublishing] = useState(false);
@@ -158,6 +164,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
 
   /* ---------- AI ---------- */
   async function generate(prompt: string) {
+    setLastIdea(prompt);
     setBusy("generate");
     try {
       const r = await runAi<{ doc: AppDoc }>(id, { mode: "generate", prompt });
@@ -170,6 +177,8 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       toast((e as Error).message, "err");
     } finally {
       setBusy(null);
+      setStarting(false);
+      clearBuilding();
       setHistoryTick((t) => t + 1);
     }
   }
@@ -197,6 +206,10 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const autoStarted = useRef(false);
   useEffect(() => {
     const idea = project.pendingIdea;
+    if (!idea || doc || readOnly) {
+      clearBuilding();
+      setStarting(false);
+    }
     if (autoStarted.current || !idea || doc || readOnly) return;
     autoStarted.current = true;
     api(`/api/projects/${id}`, { method: "PATCH", json: { pendingIdea: null } })
@@ -417,14 +430,17 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
               clean
             />
           ) : (
-            <VibePlaceholder busy={busy === "generate"} />
+            building ? <BuildingScreen /> : <VibePlaceholder busy={false} />
           )}
         </div>
       ) : !doc && readOnly ? (
         <div className="canvas-dots grid flex-1 place-items-center p-6 text-muted">Ilova hali yaratilmagan.</div>
+      ) : !doc && building ? (
+        <BuildingScreen />
       ) : !doc ? (
         <EmptyState
-          busy={busy === "generate"}
+          initial={lastIdea}
+          busy={false}
           onGenerate={generate}
           envKeys={project.envKeys}
           picker={<ModelPicker projectId={id} value={aiModel} onChange={setAiModel} onError={(m) => toast(m, "err")} />}
@@ -535,17 +551,20 @@ function VibePlaceholder({ busy }: { busy: boolean }) {
 }
 
 function EmptyState({
+  initial,
   busy,
   onGenerate,
   envKeys,
   picker,
 }: {
+  /** what the person typed last time (kept after a failed attempt, so they can retry or edit it) */
+  initial: string;
   busy: boolean;
   onGenerate: (p: string) => void;
   envKeys: string[];
   picker: React.ReactNode;
 }) {
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initial);
   return (
     <div className="canvas-dots grid flex-1 place-items-center overflow-auto p-6">
       <div className="w-full max-w-2xl">

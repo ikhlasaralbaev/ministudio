@@ -6,6 +6,8 @@ import { api, timeAgo } from "@/lib/client";
 import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
+import { BuildingScreen } from "@/components/BuildingScreen";
+import { markBuilding } from "@/lib/building";
 import { fmt } from "@/i18n/app";
 import { useT } from "@/i18n/client";
 import type { Perms } from "@/lib/permissions";
@@ -48,6 +50,7 @@ export default function Dashboard() {
     try {
       // the project is named from the idea; Studio starts building the app as soon as it opens
       const r = await api<{ _id: string }>("/api/projects", { method: "POST", json: { idea } });
+      markBuilding(); // the loading screen stays up through the page change
       router.push(`/projects/${r._id}/studio`);
     } catch (e) {
       setErr((e as Error).message);
@@ -68,6 +71,7 @@ export default function Dashboard() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {busy && <BuildingScreen fullscreen />}
       <section className="rise mb-8">
         <h1 className="mb-1 text-center text-2xl font-semibold tracking-tight sm:text-3xl">{t.dash.ideaTitle}</h1>
         <p className="mx-auto mb-5 max-w-xl text-center text-sm text-muted">{t.dash.ideaHint}</p>

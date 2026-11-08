@@ -16,6 +16,11 @@ const uz = {
     confirm: "“{name}” loyihasi, uning buyurtmalari va to‘lovlari butunlay o‘chiriladi. Qaytarib bo‘lmaydi.\n\nTasdiqlash uchun loyiha nomini yozing:",
     mismatch: "Nom mos kelmadi, loyiha o‘chirilmadi.",
   },
+  build: {
+    title: "Ilovangizni yaratyapman",
+    hint: "Odatda 30–90 soniya. Sahifani yopmasangiz ham bo‘ladi — hammasi saqlanadi.",
+    phrases: ["G‘oyangizni o‘ylab ko‘ryapman…", "Ekranlarni loyihalayapman…", "Ranglar va shriftlarni tanlayapman…", "Hammasini joy-joyiga qo‘yyapman…", "Ilova mantiqini pishiryapman…", "Ma’lumotlar va katalogni tayyorlayapman…", "Bezayapman…", "Hammasi joyidami, tekshiryapman…", "Deyarli tayyor…"],
+  },
   login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
 };
 
@@ -35,6 +40,11 @@ const en: AppDict = {
     confirm: "Project “{name}”, its orders and payments will be deleted permanently. This cannot be undone.\n\nType the project name to confirm:",
     mismatch: "The name did not match, the project was not deleted.",
   },
+  build: {
+    title: "Building your app",
+    hint: "Usually 30–90 seconds. You can leave the page open — everything is saved.",
+    phrases: ["Thinking through your idea…", "Establishing the screens…", "Mixing colors and fonts…", "Arranging everything neatly…", "Cooking up the app logic…", "Preparing the data and catalog…", "Adding polish…", "Double-checking everything…", "Almost there…"],
+  },
   login: { failed: "Sign-in was rejected. Your account may be blocked.", google: "Sign in with Google", redirecting: "Redirecting…", back: "Home" },
 };
 
@@ -52,6 +62,11 @@ const ru: AppDict = {
     confirm: "Проект «{name}», его заказы и платежи будут удалены навсегда. Отменить нельзя.\n\nДля подтверждения введите название проекта:",
     mismatch: "Название не совпало, проект не удалён.",
   },
+  build: {
+    title: "Создаю ваше приложение",
+    hint: "Обычно 30–90 секунд. Страницу можно не закрывать — всё сохранится.",
+    phrases: ["Обдумываю вашу идею…", "Проектирую экраны…", "Подбираю цвета и шрифты…", "Раскладываю всё по полочкам…", "Варю логику приложения…", "Готовлю данные и каталог…", "Навожу красоту…", "Проверяю, всё ли на месте…", "Почти готово…"],
+  },
   login: { failed: "Вход отклонён. Возможно, ваш аккаунт заблокирован.", google: "Войти через Google", redirecting: "Перенаправляем…", back: "На главную" },
 };
 
@@ -68,6 +83,11 @@ const kaa: AppDict = {
     published: "v{n} járiyalanǵan", unpublished: "járiyalanbaǵan", del: "Óshiriw",
     confirm: "“{name}” joybarı, onıń buyırtpaları hám tólemleri pútkilley óshiriledi. Qaytarıp bolmaydı.\n\nRastlaw ushın joybar atın jazıń:",
     mismatch: "Atı sáykes kelmedi, joybar óshirilmedi.",
+  },
+  build: {
+    title: "Ilovańızdı jaratıp atırman",
+    hint: "Odatda 30–90 sekund. Betti jabıwdıń keregi joq — hámmesi saqlanadı.",
+    phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Ilova logikasın pisirip atırman…", "Mag‘lıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
   },
   login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
 };
