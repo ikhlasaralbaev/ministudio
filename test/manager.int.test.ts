@@ -60,6 +60,12 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     expect(p.envEnc).not.toContain("CHILD-TOKEN"); // encrypted at rest
     expect(p).toMatchObject({ botUsername: "my_kafe_bot", managedBotId: 9001 });
     expect((await latestClaim(id))?.status).toBe("done");
+
+    // the creator is told in the chat; the project is not published yet, so the button offers Publish
+    const dm = calls.filter((c) => c.method === "sendMessage" && (c.body as { chat_id: number }).chat_id === 555).at(-1)!.body as { text: string; reply_markup: { inline_keyboard: { text: string; callback_data?: string }[][] } };
+    expect(dm.text).toContain("@my_kafe_bot");
+    expect(dm.text).toContain("Осталось опубликовать");
+    expect(dm.reply_markup.inline_keyboard[0][0].callback_data).toBe(`u:${id}`);
   });
 
   it("a bot from someone without a pending claim is ignored (no token is fetched)", async () => {
@@ -209,6 +215,9 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     await waitFor(() => last().text.includes("Готово"));
     expect(last().text).toContain("Приложение создано: 1 экр.");
     expect((await getProject(ids.P))?.doc?.screens).toHaveLength(1);
+    // no bot yet: the result points at the next step and offers "create bot" next to Publish
+    expect(last().text).toContain("Следующий шаг");
+    expect(last().reply_markup!.inline_keyboard.flat().map((b) => b.callback_data)).toEqual(expect.arrayContaining([`b:${ids.P}`, `u:${ids.P}`]));
 
     // the project now has an app: the next message is an edit
     expect(await say(TGA, "narxlarni qalinroq qil")).toBe("ai edit started");
@@ -224,6 +233,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
     expect(await press(TGA, `u:${ids.P}`)).toBe("published");
     expect(last().text).toMatch(/Опубликовано: v1<\/b>\n\n🔗 https:\/\/panel\.test\/app\//);
+    expect(last().reply_markup!.inline_keyboard.flat().map((b) => b.callback_data)).toContain(`b:${ids.P}`); // still no bot: offer to create one
 
     const { recordsCol } = await import("@/lib/server/appdata");
     await (await recordsCol()).insertOne({ projectId: ids.P, collection: "orders", number: 1001, data: { customer: "Ali", total: 76000, note: "" }, tgUser: null, createdAt: new Date() } as never);

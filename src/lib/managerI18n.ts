@@ -46,6 +46,10 @@ const ru = {
   working: "⏳ <b>ИИ работает…</b>\nОбычно 30–90 секунд. Напишу, когда будет готово.",
   busy: "⏱ Слишком много запросов. Попробуйте чуть позже.",
   cancelled: "Отменено.",
+  nextBot: "🤖 <b>Следующий шаг:</b> создайте бота — тогда приложение будет открываться прямо в Telegram.",
+  botConnected: (bot: string, name: string, live: boolean) =>
+    `🤖 <b>Бот @${bot} создан и подключён</b>\n\nПроект: <b>${name}</b>\n${live ? "Приложение уже работает в боте." : "Осталось опубликовать приложение — нажмите кнопку ниже."}`,
+  btnOpenBot: "🤖 Открыть бота",
   aiGenerated: (n: number) => `Приложение создано: ${n} экр.`,
   aiDone: (msg: string) => `✅ <b>Готово</b>\n\n${msg}\n\nМожно написать следующую правку или опубликовать.`,
   aiError: (err: string) => `⚠️ <b>ИИ не справился</b>\n\n<code>${err}</code>\n\nПопробуйте переформулировать запрос.`,
@@ -116,6 +120,10 @@ const uz: BotDict = {
   working: "⏳ <b>AI ishlayapti…</b>\nOdatda 30–90 soniya. Tayyor bo‘lgach yozaman.",
   busy: "⏱ So‘rovlar juda ko‘p. Birozdan keyin urinib ko‘ring.",
   cancelled: "Bekor qilindi.",
+  nextBot: "🤖 <b>Keyingi qadam:</b> bot yarating — shunda ilova to‘g‘ridan-to‘g‘ri Telegram ichida ochiladi.",
+  botConnected: (bot, name, live) =>
+    `🤖 <b>@${bot} boti yaratildi va ulandi</b>\n\nLoyiha: <b>${name}</b>\n${live ? "Ilova botda allaqachon ishlayapti." : "Endi ilovani publish qilish qoldi — quyidagi tugmani bosing."}`,
+  btnOpenBot: "🤖 Botni ochish",
   aiGenerated: (n) => `Ilova yaratildi: ${n} ta ekran`,
   aiDone: (msg) => `✅ <b>Tayyor</b>\n\n${msg}\n\nKeyingi o‘zgarishni yozing yoki publish qiling.`,
   aiError: (err) => `⚠️ <b>AI uddalay olmadi</b>\n\n<code>${err}</code>\n\nSo‘rovni boshqacha yozib ko‘ring.`,
@@ -185,6 +193,10 @@ const en: BotDict = {
   working: "⏳ <b>AI is working…</b>\nUsually 30–90 seconds. I’ll write when it’s ready.",
   busy: "⏱ Too many requests. Please try again a little later.",
   cancelled: "Cancelled.",
+  nextBot: "🤖 <b>Next step:</b> create the bot — then the app opens right inside Telegram.",
+  botConnected: (bot, name, live) =>
+    `🤖 <b>Bot @${bot} created and connected</b>\n\nProject: <b>${name}</b>\n${live ? "The app is already live in the bot." : "Now publish the app — press the button below."}`,
+  btnOpenBot: "🤖 Open the bot",
   aiGenerated: (n) => `App created: ${n} screens`,
   aiDone: (msg) => `✅ <b>Done</b>\n\n${msg}\n\nSend the next change, or publish.`,
   aiError: (err) => `⚠️ <b>AI could not do it</b>\n\n<code>${err}</code>\n\nTry rephrasing the request.`,
@@ -254,6 +266,10 @@ const kaa: BotDict = {
   working: "⏳ <b>AI islep atır…</b>\nOdatda 30–90 sekund. Tayın bolǵanda jazaman.",
   busy: "⏱ Sorawlar júdá kóp. Birazdan keyin urınıp kóriń.",
   cancelled: "Biykarlandı.",
+  nextBot: "🤖 <b>Keyingi qádem:</b> bot jaratıń — sonda ilova tuwrıdan-tuwrı Telegram ishinde ashıladı.",
+  botConnected: (bot, name, live) =>
+    `🤖 <b>@${bot} botı jaratıldı hám ulandı</b>\n\nJoybar: <b>${name}</b>\n${live ? "Ilova botta aldınan islep tur." : "Endi ilovanı publish etiw qaldı — tómendegi túymeni basıń."}`,
+  btnOpenBot: "🤖 Botti ashıw",
   aiGenerated: (n) => `Ilova jaratıldı: ${n} ekran`,
   aiDone: (msg) => `✅ <b>Tayın</b>\n\n${msg}\n\nKeyingi ózgeristi jazıń yamasa publish etiń.`,
   aiError: (err) => `⚠️ <b>AI orınlay almadı</b>\n\n<code>${err}</code>\n\nSorawdı basqasha jazıp kóriń.`,

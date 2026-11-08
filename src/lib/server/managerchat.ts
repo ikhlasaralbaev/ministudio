@@ -221,6 +221,7 @@ async function runAi({ user, t, send, tgId }: Ctx, id: string, prompt: string) {
   }
   const { project, perms } = await projectForUser(user, id, "update");
   const kind = project.doc ? "edit" : "generate";
+  const hasBot = !!envOf(project).BOT_TOKEN;
   const { done } = await startAiJob({ project, user, perms, kind, prompt });
   await send(t.working);
   // Not awaited: the webhook must answer Telegram quickly. The reply is sent when the job finishes.
@@ -229,8 +230,11 @@ async function runAi({ user, t, send, tgId }: Ctx, id: string, prompt: string) {
     // "generate" reports in the chat language; an edit's summary comes from the AI in the language the user wrote in
     const doc = r.result.doc as { screens?: unknown[] } | undefined;
     const summary = kind === "generate" ? t.aiGenerated(doc?.screens?.length || 0) : String(r.result.message || "OK");
-    await send(t.aiDone(esc(summary)), {
-      inline_keyboard: [[{ text: t.btn.publish, callback_data: `u:${id}` }, { text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }]],
+    await send(`${t.aiDone(esc(summary))}${hasBot ? "" : `\n\n${t.nextBot}`}`, {
+      inline_keyboard: [
+        ...(hasBot ? [] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
+        [{ text: t.btn.publish, callback_data: `u:${id}` }, { text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
+      ],
     });
   });
   return `ai ${kind} started`;
@@ -240,7 +244,13 @@ async function publish({ user, t, send }: Ctx, id: string) {
   const { project, perms } = await projectForUser(user, id, "update");
   const r = await publishProject({ p: project, user, perms, base: BASE() });
   const warn = r.warnings.slice(0, 5).map((w) => `• ${esc(localizeWarning(t, w))}`).join("\n");
-  await send(`${t.published(r.version, esc(r.url), r.botUsername)}${warn ? `\n\n${t.warnings}\n${warn}` : ""}`);
+  const hasBot = !!r.botUsername;
+  await send(`${t.published(r.version, esc(r.url), r.botUsername)}${warn ? `\n\n${t.warnings}\n${warn}` : ""}`, {
+    inline_keyboard: [
+      ...(hasBot ? [[{ text: t.btnOpenBot, url: `https://t.me/${r.botUsername}` }]] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
+      [{ text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
+    ],
+  });
   return "published";
 }
 

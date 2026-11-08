@@ -108,6 +108,17 @@ export async function handleManagedBot(mb: ManagedBotUpdate): Promise<string> {
   );
   if (p.publishedDoc) await connectBot({ p: { ...p, botUsername: mb.bot?.username ?? p.botUsername }, doc: p.publishedDoc, env, base: publicUrl() });
   if (claim) await (await claims()).updateOne({ _id: claim._id }, { $set: { status: "done", doneAt: new Date(), botUsername: mb.bot?.username } });
+  // Close the loop in the chat: tell the creator the bot is connected (and offer Publish if the app is not live yet).
+  if (claim && mb.bot?.username) {
+    const t = BOT_DICT[await getBotLang(creator)];
+    const live = !!p.publishedDoc;
+    await tgApi(m.token, "sendMessage", {
+      chat_id: creator,
+      parse_mode: "HTML",
+      text: t.botConnected(escapeHtml(mb.bot.username), escapeHtml(p.name), live),
+      reply_markup: { inline_keyboard: [live ? [{ text: t.btnOpenBot, url: `https://t.me/${mb.bot.username}` }] : [{ text: t.btn.publish, callback_data: `u:${projectId}` }]] },
+    }).catch(() => {});
+  }
   return `connected bot ${mb.bot?.username ?? botId} to project ${projectId}`;
 }
 
