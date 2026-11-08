@@ -81,7 +81,7 @@ export function AiPrompt({
     <div className="ai-wrap" data-busy={busy}>
       <div className="ai-glow" aria-hidden />
       <div className="ai-border">
-        <div className="rounded-2xl bg-panel">
+        <div className="ai-inner">
           <div className="flex items-center gap-2 px-4 pt-3 text-[12px] font-medium text-muted">
             <span className="grid h-6 w-6 place-items-center rounded-full bg-gradient-to-br from-accent to-pur text-white">
               <Sparkle weight="fill" size={13} className="ai-spark" />
@@ -154,7 +154,7 @@ export function AiPrompt({
               )}
             </button>
           </div>
-          {busy && <div className="ai-bar rounded-b-2xl" />}
+          {busy && <div className="ai-bar" />}
         </div>
       </div>
     </div>

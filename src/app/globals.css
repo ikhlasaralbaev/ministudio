@@ -274,12 +274,15 @@ body {
 /* ---------- AI prompt box: a glowing, "alive" input ---------- */
 .ai-wrap { position: relative; isolation: isolate; }
 .ai-glow {
-  position: absolute; inset: -12px; z-index: -1; border-radius: 28px; pointer-events: none;
+  position: absolute; inset: -12px; z-index: -1; border-radius: calc(var(--ai-r) + 12px); pointer-events: none;
   background: conic-gradient(from 200deg, #2f81f7, #a371f7, #f778ba, #2f81f7);
   filter: blur(30px); opacity: 0.16; transition: opacity 0.5s;
 }
 .ai-wrap:focus-within .ai-glow, .ai-wrap[data-busy="true"] .ai-glow { opacity: 0.42; }
-.ai-border { padding: 1px; border-radius: 17px; background: var(--line); transition: background 0.3s; }
+/* the inner panel's radius is the border's minus its 1px thickness, so the corners follow each other exactly */
+.ai-wrap { --ai-r: 16px; }
+.ai-border { padding: 1px; border-radius: var(--ai-r); background: var(--line); transition: background 0.3s; }
+.ai-inner { border-radius: calc(var(--ai-r) - 1px); background: var(--panel); overflow: hidden; }
 .ai-wrap:focus-within .ai-border, .ai-wrap[data-busy="true"] .ai-border {
   background: linear-gradient(110deg, #2f81f7, #a371f7, #f778ba, #2f81f7);
   background-size: 300% 100%; animation: ai-flow 5s linear infinite;
