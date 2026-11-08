@@ -4,12 +4,14 @@ import { ObjectId } from "mongodb";
 import { db } from "./db";
 import { encryptEnv } from "./crypto";
 import { envOf, getProject, projects, publicUrl } from "./projects";
-import { tgApi } from "./telegram";
+import { escapeHtml, tgApi } from "./telegram";
 import { botSecret } from "./runtime";
 import { connectBot } from "./botconnect";
 import { consumeLinkCode, linkTelegram, peekLinkCode } from "./tglink";
 import { HttpError } from "./http";
 import { handleManagerChat } from "./managerchat";
+import { getBotLang } from "./managerprefs";
+import { BOT_DICT } from "../managerI18n";
 
 /**
  * The platform's "manager bot": a Telegram bot with Bot Management Mode enabled (done once in BotFather). With it a
@@ -116,16 +118,21 @@ export async function setupManager(base: string) {
   const me = await tgApi<{ username: string; can_manage_bots?: boolean }>(m.token, "getMe");
   const url = `${base}/api/manager/webhook`;
   await tgApi(m.token, "setWebhook", { url, secret_token: managerSecret(), drop_pending_updates: false });
-  // The chat console: command menu, and the menu button opens the panel inside Telegram (signs in with Telegram).
-  await tgApi(m.token, "setMyCommands", {
-    commands: [
-      { command: "start", description: "Bosh menyu" },
-      { command: "projects", description: "Loyihalarim" },
-      { command: "new", description: "Yangi loyiha" },
-      { command: "cancel", description: "Bekor qilish" },
-    ],
-  });
-  await tgApi(m.token, "setChatMenuButton", { menu_button: { type: "web_app", text: "Panel", web_app: { url: `${base}/tg` } } }).catch(() => {});
+  // The chat console: command menu (Russian by default, plus Uzbek and English for those Telegram UI languages),
+  // and the menu button opens the panel inside Telegram (it signs in with Telegram).
+  const cmds = (l: "ru" | "uz" | "en") => {
+    const c = BOT_DICT[l].commands;
+    return [
+      { command: "start", description: c.start },
+      { command: "projects", description: c.projects },
+      { command: "new", description: c.new },
+      { command: "language", description: c.language },
+      { command: "cancel", description: c.cancel },
+    ];
+  };
+  await tgApi(m.token, "setMyCommands", { commands: cmds("ru") });
+  for (const l of ["uz", "en"] as const) await tgApi(m.token, "setMyCommands", { commands: cmds(l), language_code: l }).catch(() => {});
+  await tgApi(m.token, "setChatMenuButton", { menu_button: { type: "web_app", text: BOT_DICT.ru.menuButton, web_app: { url: `${base}/tg` } } }).catch(() => {});
   return { username: me.username, canManageBots: !!me.can_manage_bots, webhook: url };
 }
 
@@ -162,17 +169,20 @@ export async function handleManagerUpdate(update: {
 
   const msg = update.message;
   const chatId = msg?.chat?.id;
+  const html = { parse_mode: "HTML" as const };
   if (msg && chatId) {
     const code = /^\/start\s+link_([a-f0-9]{36})\s*$/.exec(msg.text || "")?.[1];
     if (code) {
+      const t = BOT_DICT[await getBotLang(msg.from?.id)];
       const owner = await peekLinkCode(code);
       await tgApi(m.token, "sendMessage", owner
         ? {
             chat_id: chatId,
-            text: `MiniStudio akkaunti ${maskEmail(owner.email)} ga ushbu Telegram'ni ulaysizmi?\n\nBu siz emas bo'lsa, «Yo'q» ni bosing.`,
-            reply_markup: { inline_keyboard: [[{ text: "Ha, ulash", callback_data: `lk:${code}` }, { text: "Yo'q", callback_data: "lk:no" }]] },
+            ...html,
+            text: t.link.confirm(escapeHtml(maskEmail(owner.email))),
+            reply_markup: { inline_keyboard: [[{ text: t.btn.yes, callback_data: `lk:${code}` }, { text: t.btn.no, callback_data: "lk:no" }]] },
           }
-        : { chat_id: chatId, text: "Havola eskirgan yoki yaroqsiz. Platformada «Telegramni ulash» ni qayta bosing." }).catch(() => {});
+        : { chat_id: chatId, ...html, text: t.link.expired }).catch(() => {});
       return owner ? "link: asked to confirm" : "link: bad code";
     }
     return handleManagerChat(update);
@@ -180,28 +190,29 @@ export async function handleManagerUpdate(update: {
 
   const cb = update.callback_query;
   if (cb?.data?.startsWith("lk:")) {
+    const t = BOT_DICT[await getBotLang(cb.from.id)];
     const chat = cb.message?.chat?.id;
     const done = (text: string) =>
       Promise.all([
         tgApi(m.token, "answerCallbackQuery", { callback_query_id: cb.id }).catch(() => {}),
-        chat && cb.message?.message_id ? tgApi(m.token, "editMessageText", { chat_id: chat, message_id: cb.message.message_id, text }).catch(() => {}) : null,
+        chat && cb.message?.message_id ? tgApi(m.token, "editMessageText", { chat_id: chat, message_id: cb.message.message_id, text, ...html }).catch(() => {}) : null,
       ]);
     const code = cb.data.slice(3);
     if (code === "no") {
-      await done("Bekor qilindi.");
+      await done(t.link.declined);
       return "link: declined";
     }
     const userId = await consumeLinkCode(code);
     if (!userId) {
-      await done("Havola eskirgan yoki allaqachon ishlatilgan.");
+      await done(t.link.expired);
       return "link: expired";
     }
     try {
       await linkTelegram(userId, { id: cb.from.id, firstName: cb.from.first_name || "", username: cb.from.username || "" });
-      await done("✅ Telegram ulandi. Platformaga qaytib, davom eting.");
+      await done(t.link.linked);
       return "link: linked";
     } catch (e) {
-      await done(e instanceof HttpError ? `Ulanmadi: ${e.message}` : "Ulanmadi. Qayta urinib ko'ring.");
+      await done(t.link.failed(e instanceof HttpError && e.status === 409 ? t.link.alreadyUsed : t.err.generic));
       return "link: failed";
     }
   }

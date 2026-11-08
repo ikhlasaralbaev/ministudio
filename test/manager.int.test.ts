@@ -184,7 +184,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
   it("an unlinked Telegram account is told how to link, nothing else happens", async () => {
     expect(await say(424242, "/start")).toBe("not linked");
-    expect(last().text).toMatch(/ulanmagan/);
+    expect(last().text).toMatch(/Telegram ещё не привязан/);
   });
 
   it("menu opens the panel inside Telegram through /tg", async () => {
@@ -196,18 +196,18 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
   it("creating a project by chat, then generating the app with a prompt", async () => {
     const { getProject } = await import("@/lib/server/projects");
     await press(TGA, "p:new");
-    expect(last().text).toMatch(/nomini yozing/);
+    expect(last().text).toMatch(/Новый проект/);
     expect(await say(TGA, "Lazzat Kafe")).toBe("project created");
     const { projects } = await import("@/lib/server/projects");
     const row = (await (await projects()).findOne({ name: "Lazzat Kafe" }))!;
     ids.P = row._id.toHexString();
     expect(row.ownerId).toBe(ids.A);
-    expect(last().text).toMatch(/tasvirlang/);
+    expect(last().text).toMatch(/Опишите приложение/);
 
     expect(await say(TGA, "gul do'koni katalogi")).toBe("ai generate started");
-    expect(last().text).toMatch(/AI ishlayapti/);
-    await waitFor(() => last().text.includes("Ilova tayyor"));
-    expect(last().text).toContain("Ilova tayyor: 1 ta ekran");
+    expect(last().text).toMatch(/ИИ работает/);
+    await waitFor(() => last().text.includes("Готово"));
+    expect(last().text).toContain("Приложение создано: 1 экр.");
     expect((await getProject(ids.P))?.doc?.screens).toHaveLength(1);
 
     // the project now has an app: the next message is an edit
@@ -218,22 +218,22 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
   it("project card, publish, and latest records", async () => {
     await press(TGA, `p:${ids.P}`);
-    expect(last().text).toMatch(/Lazzat Kafe[\s\S]*1 ta ekran[\s\S]*Nashr: yo'q[\s\S]*Bot: ulanmagan/);
+    expect(last().text).toMatch(/<b>Lazzat Kafe<\/b>[\s\S]*<b>1<\/b> экр\.[\s\S]*Публикация: <i>нет<\/i>[\s\S]*Бот: <i>не подключён<\/i>/);
     const labels = last().reply_markup!.inline_keyboard.flat().map((b) => b.text);
-    expect(labels).toEqual(expect.arrayContaining(["AI bilan tahrirlash", "Publish", "Buyurtmalar", "Bot yaratish"]));
+    expect(labels).toEqual(expect.arrayContaining(["✏️ Изменить через ИИ", "🚀 Опубликовать", "📦 Заказы", "🤖 Создать бота"]));
 
     expect(await press(TGA, `u:${ids.P}`)).toBe("published");
-    expect(last().text).toMatch(/Nashr qilindi: v1\nhttps:\/\/panel\.test\/app\//);
+    expect(last().text).toMatch(/Опубликовано: v1<\/b>\n\n🔗 https:\/\/panel\.test\/app\//);
 
     const { recordsCol } = await import("@/lib/server/appdata");
     await (await recordsCol()).insertOne({ projectId: ids.P, collection: "orders", number: 1001, data: { customer: "Ali", total: 76000, note: "" }, tgUser: null, createdAt: new Date() } as never);
     await press(TGA, `o:${ids.P}`);
-    expect(last().text).toContain("#1001 orders: Ali · 76000");
+    expect(last().text).toContain("<b>#1001</b> orders\n<i>Ali · 76000</i>");
   });
 
   it("another account cannot see or act on this project", async () => {
     expect(await press(TGB, `p:${ids.P}`)).toBe("error");
-    expect(last().text).toMatch(/Topilmadi/);
+    expect(last().text).toMatch(/Проект не найден/);
     expect(await press(TGB, `u:${ids.P}`)).toBe("error");
     expect(await press(TGB, `a:${ids.P}`)).toBe("error");
   });
@@ -244,6 +244,41 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     await press(TGA, `a:${ids.P}`);
     await say(TGA, "/cancel");
     expect(await say(TGA, "salom")).toBe("menu (no state)"); // no longer treated as an AI prompt
+  });
+
+  it("messages are HTML-formatted and project names cannot inject markup", async () => {
+    const { projects } = await import("@/lib/server/projects");
+    const id = (await (await projects()).insertOne({ name: "<b>Evil</b> & Co", slug: "evil1", doc: null, publishedVersion: 0, ownerId: ids.A, createdAt: new Date(), updatedAt: new Date() } as never)).insertedId.toHexString();
+    await press(TGA, `p:${id}`);
+    const body = calls.filter((c) => c.method === "sendMessage").at(-1)!.body as { parse_mode: string; text: string };
+    expect(body.parse_mode).toBe("HTML");
+    expect(body.text).toContain("&lt;b&gt;Evil&lt;/b&gt; &amp; Co");
+    expect(body.text).not.toContain("<b>Evil</b>");
+  });
+
+  it("Russian by default; /language switches (even before linking) and the choice is remembered", async () => {
+    const stranger = 515151; // not linked to any account
+    await say(stranger, "/language");
+    const row = last().reply_markup!.inline_keyboard[0] as { text: string; callback_data: string }[];
+    expect(row.map((b) => b.callback_data)).toEqual(["l:ru", "l:uz", "l:en", "l:kaa"]);
+
+    await press(stranger, "l:uz");
+    const texts = sentTo().slice(-2).map((m) => m.text);
+    expect(texts[0]).toContain("Til: <b>O‘zbekcha</b>");
+    expect(texts[1]).toContain("Telegram ilovalari konstruktori");
+    await say(stranger, "salom");
+    expect(last().text).toContain("Telegram hali ulanmagan"); // remembered
+    await press(stranger, "l:ru");
+    await say(stranger, "привет");
+    expect(last().text).toContain("Telegram ещё не привязан");
+  });
+
+  it("known server warnings are shown in the chat language", async () => {
+    const { localizeWarning } = await import("@/lib/server/managerchat");
+    const { BOT_DICT } = await import("@/lib/managerI18n");
+    expect(localizeWarning(BOT_DICT.ru, "Bot token kiritilmagan — ilova faqat havola orqali ochiladi")).toBe(BOT_DICT.ru.warn.noToken);
+    expect(localizeWarning(BOT_DICT.en, "Egasi (OWNER_CHAT_ID) ulanmagan — x")).toBe(BOT_DICT.en.warn.noOwner);
+    expect(localizeWarning(BOT_DICT.ru, "Telegram sendMessage: boom")).toBe("Telegram sendMessage: boom");
   });
 
   it("creating a bot sends the Telegram link as a button", async () => {
