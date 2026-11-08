@@ -9,8 +9,7 @@ export const BOT_LANG_NAME: Record<BotLang, string> = { ru: "🇷🇺 Русск
 export const isBotLang = (v: unknown): v is BotLang => typeof v === "string" && (BOT_LANGS as readonly string[]).includes(v);
 
 const ru = {
-  notLinked: (site: string) =>
-    `🔗 <b>Telegram ещё не привязан</b>\n\nЧтобы управлять проектами из чата, привяжите Telegram к аккаунту на сайте:\n\n1. Откройте ${site} и войдите через Google\n2. Откройте любой проект → <b>Настройки</b> → <b>Привязать Telegram</b>\n3. Вернитесь сюда и нажмите /start`,
+  blocked: "⛔️ Ваш аккаунт заблокирован.",
   menu: `<b>MiniStudio</b> — конструктор Telegram-приложений\n\nСоздавайте приложение, правьте его обычными словами и публикуйте прямо из чата.\n\n📁 /projects — ваши проекты\n➕ /new — новый проект\n🌐 /language — язык\n❌ /cancel — отмена`,
   btn: {
     projects: "📁 Проекты",
@@ -39,8 +38,8 @@ const ru = {
       `🤖 Бот: ${c.bot ? `<b>@${c.bot}</b>` : "<i>не подключён</i>"}`,
       ...(c.suspended ? ["", "⛔️ Остановлен администратором"] : []),
     ].join("\n"),
-  askName: "➕ <b>Новый проект</b>\n\nНапишите название, например: <i>Lazzat Kafe</i>\n\nОтмена: /cancel",
-  projectCreated: (name: string) => `✅ <b>Проект создан:</b> ${name}`,
+  askIdea: "➕ <b>Новый проект</b>\n\nНапишите одним сообщением, что нужно создать — я сделаю приложение.\n\n<i>Например: цветочный магазин в Нукусе — каталог, доставка и оплата Click</i>\n\nОтмена: /cancel",
+  shortIdea: "💡 Опишите идею подробнее — одним сообщением, хотя бы в паре фраз.\n\n<i>Например: кофейня в Ташкенте с меню, заказом и доставкой</i>",
   askPromptNew: "✏️ <b>Опишите приложение</b>\n\nНапишите обычными словами, что нужно сделать.\n\n<i>Например: цветочный магазин в Нукусе — каталог, доставка и оплата Click</i>\n\nВыйти из режима: /cancel",
   askPromptEdit: (name: string) => `✏️ <b>${name}</b>\n\nНапишите, что изменить — обычными словами.\n\n<i>Например: сделай цены крупнее и жирнее</i>\n\nВыйти из режима: /cancel`,
   working: "⏳ <b>ИИ работает…</b>\nОбычно 30–90 секунд. Напишу, когда будет готово.",
@@ -53,7 +52,7 @@ const ru = {
   ownerHint: "🔔 <b>Получать заказы:</b> нажмите кнопку ниже и затем <b>Start</b> в боте — уведомления будут приходить вам сюда.",
   ownerLinked: "✅ <b>Вы подключены как владелец</b>\n\nНовые заказы и платежи будут приходить сюда.",
   btnBecomeOwner: "🔔 Получать заказы (Start)",
-  aiGenerated: (n: number) => `Приложение создано: ${n} экр.`,
+  aiGenerated: (n: number, name: string) => `Приложение «${name}» создано: ${n} экр.`,
   aiDone: (msg: string) => `✅ <b>Готово</b>\n\n${msg}\n\nМожно написать следующую правку или опубликовать.`,
   aiError: (err: string) => `⚠️ <b>ИИ не справился</b>\n\n<code>${err}</code>\n\nПопробуйте переформулировать запрос.`,
   published: (v: number, url: string, bot: string | null) => `🚀 <b>Опубликовано: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Бот: <b>@${bot}</b>` : ""}`,
@@ -67,7 +66,7 @@ const ru = {
   noRecords: (name: string) => `📦 <b>${name}</b>\n\nЗаписей пока нет.`,
   botHas: "🤖 К этому проекту бот уже подключён.",
   botCreate: "🤖 <b>Создание бота</b>\n\nОткроется экран Telegram — нажмите «Создать». Бот подключится сам.",
-  err: { notFound: "Проект не найден.", noRights: "Недостаточно прав для этого действия.", generic: "Не получилось выполнить. Попробуйте ещё раз." },
+  err: { limit: "Дневной лимит ИИ-запросов исчерпан. Попробуйте завтра.", notFound: "Проект не найден.", noRights: "Недостаточно прав для этого действия.", generic: "Не получилось выполнить. Попробуйте ещё раз." },
   failed: (why: string) => `⚠️ ${why}`,
   link: {
     confirm: (email: string) => `🔗 <b>Привязать этот Telegram?</b>\n\nК аккаунту MiniStudio: <b>${email}</b>\n\nЕсли это не вы — нажмите «Нет».`,
@@ -86,8 +85,7 @@ const ru = {
 export type BotDict = typeof ru;
 
 const uz: BotDict = {
-  notLinked: (site) =>
-    `🔗 <b>Telegram hali ulanmagan</b>\n\nLoyihalarni chatdan boshqarish uchun Telegram'ni saytdagi akkauntga ulang:\n\n1. ${site} ga kirib, Google bilan kiring\n2. Istalgan loyiha → <b>Sozlamalar</b> → <b>Telegramni ulash</b>\n3. Shu yerga qaytib, /start bosing`,
+  blocked: "⛔️ Akkauntingiz bloklangan.",
   menu: `<b>MiniStudio</b> — Telegram ilovalari konstruktori\n\nIlova yarating, oddiy so‘z bilan tahrirlang va chatning o‘zidan publish qiling.\n\n📁 /projects — loyihalaringiz\n➕ /new — yangi loyiha\n🌐 /language — til\n❌ /cancel — bekor qilish`,
   btn: {
     projects: "📁 Loyihalar",
@@ -116,8 +114,8 @@ const uz: BotDict = {
       `🤖 Bot: ${c.bot ? `<b>@${c.bot}</b>` : "<i>ulanmagan</i>"}`,
       ...(c.suspended ? ["", "⛔️ Administrator to‘xtatgan"] : []),
     ].join("\n"),
-  askName: "➕ <b>Yangi loyiha</b>\n\nNomini yozing, masalan: <i>Lazzat Kafe</i>\n\nBekor qilish: /cancel",
-  projectCreated: (name) => `✅ <b>Loyiha yaratildi:</b> ${name}`,
+  askIdea: "➕ <b>Yangi loyiha</b>\n\nNima yaratish kerakligini bitta xabarda yozing — men ilovani yarataman.\n\n<i>Masalan: Nukusdagi gul do‘koni — katalog, yetkazib berish va Click to‘lovi</i>\n\nBekor qilish: /cancel",
+  shortIdea: "💡 G‘oyani batafsilroq yozing — bitta xabarda, kamida bir-ikki jumla.\n\n<i>Masalan: Toshkentdagi qahvaxona — menyu, buyurtma va yetkazib berish</i>",
   askPromptNew: "✏️ <b>Ilovani tasvirlang</b>\n\nNima kerakligini oddiy so‘z bilan yozing.\n\n<i>Masalan: Nukusdagi gul do‘koni — katalog, yetkazib berish va Click to‘lovi</i>\n\nRejimdan chiqish: /cancel",
   askPromptEdit: (name) => `✏️ <b>${name}</b>\n\nNimani o‘zgartirish kerakligini oddiy so‘z bilan yozing.\n\n<i>Masalan: narxlarni kattaroq va qalinroq qil</i>\n\nRejimdan chiqish: /cancel`,
   working: "⏳ <b>AI ishlayapti…</b>\nOdatda 30–90 soniya. Tayyor bo‘lgach yozaman.",
@@ -130,7 +128,7 @@ const uz: BotDict = {
   ownerHint: "🔔 <b>Buyurtmalarni olish:</b> quyidagi tugmani bosing, so‘ng botda <b>Start</b> bosing — xabarlar shu yerga keladi.",
   ownerLinked: "✅ <b>Siz ega sifatida ulandingiz</b>\n\nYangi buyurtma va to‘lovlar shu yerga keladi.",
   btnBecomeOwner: "🔔 Buyurtmalarni olish (Start)",
-  aiGenerated: (n) => `Ilova yaratildi: ${n} ta ekran`,
+  aiGenerated: (n, name) => `«${name}» ilovasi yaratildi: ${n} ta ekran`,
   aiDone: (msg) => `✅ <b>Tayyor</b>\n\n${msg}\n\nKeyingi o‘zgarishni yozing yoki publish qiling.`,
   aiError: (err) => `⚠️ <b>AI uddalay olmadi</b>\n\n<code>${err}</code>\n\nSo‘rovni boshqacha yozib ko‘ring.`,
   published: (v, url, bot) => `🚀 <b>Nashr qilindi: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
@@ -144,7 +142,7 @@ const uz: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nHozircha yozuv yo‘q.`,
   botHas: "🤖 Bu loyihaga bot allaqachon ulangan.",
   botCreate: "🤖 <b>Bot yaratish</b>\n\nTelegram ekrani ochiladi — «Yaratish» ni bosing. Bot o‘zi ulanadi.",
-  err: { notFound: "Loyiha topilmadi.", noRights: "Bu amal uchun huquq yetarli emas.", generic: "Bajarib bo‘lmadi. Qayta urinib ko‘ring." },
+  err: { limit: "Kunlik AI so‘rovlari limiti tugadi. Ertaga urinib ko‘ring.", notFound: "Loyiha topilmadi.", noRights: "Bu amal uchun huquq yetarli emas.", generic: "Bajarib bo‘lmadi. Qayta urinib ko‘ring." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Shu Telegram ulansinmi?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBu siz bo‘lmasangiz — «Yo‘q» ni bosing.`,
@@ -162,8 +160,7 @@ const uz: BotDict = {
 };
 
 const en: BotDict = {
-  notLinked: (site) =>
-    `🔗 <b>Telegram is not linked yet</b>\n\nTo manage projects from this chat, link Telegram to your account on the website:\n\n1. Open ${site} and sign in with Google\n2. Open any project → <b>Settings</b> → <b>Link Telegram</b>\n3. Come back here and press /start`,
+  blocked: "⛔️ Your account is blocked.",
   menu: `<b>MiniStudio</b> — a builder for Telegram apps\n\nCreate an app, change it in plain words and publish it right from this chat.\n\n📁 /projects — your projects\n➕ /new — new project\n🌐 /language — language\n❌ /cancel — cancel`,
   btn: {
     projects: "📁 Projects",
@@ -192,8 +189,8 @@ const en: BotDict = {
       `🤖 Bot: ${c.bot ? `<b>@${c.bot}</b>` : "<i>not connected</i>"}`,
       ...(c.suspended ? ["", "⛔️ Suspended by an administrator"] : []),
     ].join("\n"),
-  askName: "➕ <b>New project</b>\n\nType a name, for example: <i>Lazzat Kafe</i>\n\nCancel: /cancel",
-  projectCreated: (name) => `✅ <b>Project created:</b> ${name}`,
+  askIdea: "➕ <b>New project</b>\n\nWrite what to create in one message — I will build the app.\n\n<i>For example: a flower shop in Nukus — catalog, delivery and Click payments</i>\n\nCancel: /cancel",
+  shortIdea: "💡 Describe the idea in a bit more detail — one message, a couple of sentences.\n\n<i>For example: a coffee shop in Tashkent with a menu, orders and delivery</i>",
   askPromptNew: "✏️ <b>Describe the app</b>\n\nWrite what you need in plain words.\n\n<i>For example: a flower shop in Nukus — catalog, delivery and Click payments</i>\n\nLeave this mode: /cancel",
   askPromptEdit: (name) => `✏️ <b>${name}</b>\n\nWrite what to change, in plain words.\n\n<i>For example: make the prices bigger and bolder</i>\n\nLeave this mode: /cancel`,
   working: "⏳ <b>AI is working…</b>\nUsually 30–90 seconds. I’ll write when it’s ready.",
@@ -206,7 +203,7 @@ const en: BotDict = {
   ownerHint: "🔔 <b>Get order alerts:</b> press the button below and then <b>Start</b> in the bot — notifications will arrive here.",
   ownerLinked: "✅ <b>You are connected as the owner</b>\n\nNew orders and payments will arrive here.",
   btnBecomeOwner: "🔔 Get order alerts (Start)",
-  aiGenerated: (n) => `App created: ${n} screens`,
+  aiGenerated: (n, name) => `App “${name}” created: ${n} screens`,
   aiDone: (msg) => `✅ <b>Done</b>\n\n${msg}\n\nSend the next change, or publish.`,
   aiError: (err) => `⚠️ <b>AI could not do it</b>\n\n<code>${err}</code>\n\nTry rephrasing the request.`,
   published: (v, url, bot) => `🚀 <b>Published: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
@@ -220,7 +217,7 @@ const en: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nNo records yet.`,
   botHas: "🤖 This project already has a bot connected.",
   botCreate: "🤖 <b>Create the bot</b>\n\nA Telegram screen opens — press “Create”. The bot connects by itself.",
-  err: { notFound: "Project not found.", noRights: "You don’t have the rights for this action.", generic: "That did not work. Please try again." },
+  err: { limit: "The daily limit of AI requests is used up. Try again tomorrow.", notFound: "Project not found.", noRights: "You don’t have the rights for this action.", generic: "That did not work. Please try again." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Link this Telegram?</b>\n\nTo the MiniStudio account: <b>${email}</b>\n\nIf this is not you, press “No”.`,
@@ -238,8 +235,7 @@ const en: BotDict = {
 };
 
 const kaa: BotDict = {
-  notLinked: (site) =>
-    `🔗 <b>Telegram ele ulanbaǵan</b>\n\nJoybarlardı chattan basqarıw ushın Telegram’dı saytdaǵı akkauntqa ulań:\n\n1. ${site} ǵa kirip, Google menen kiriń\n2. Qálegen joybar → <b>Sazlawlar</b> → <b>Telegramdı ulaw</b>\n3. Usı jerge qaytıp, /start basıń`,
+  blocked: "⛔️ Akkauntıńız bloklanǵan.",
   menu: `<b>MiniStudio</b> — Telegram ilovaların jaratıw konstruktorı\n\nIlova jaratıń, ápiwayı sóz benen tártipleń hám chattıń ózinen publish etiń.\n\n📁 /projects — joybarlarıńız\n➕ /new — taza joybar\n🌐 /language — til\n❌ /cancel — biykarlaw`,
   btn: {
     projects: "📁 Joybarlar",
@@ -268,8 +264,8 @@ const kaa: BotDict = {
       `🤖 Bot: ${c.bot ? `<b>@${c.bot}</b>` : "<i>ulanbaǵan</i>"}`,
       ...(c.suspended ? ["", "⛔️ Administrator toqtatqan"] : []),
     ].join("\n"),
-  askName: "➕ <b>Taza joybar</b>\n\nAtın jazıń, mısalı: <i>Lazzat Kafe</i>\n\nBiykarlaw: /cancel",
-  projectCreated: (name) => `✅ <b>Joybar jaratıldı:</b> ${name}`,
+  askIdea: "➕ <b>Taza joybar</b>\n\nNe jaratıw kerekligin bir xabarda jazıń — men ilovanı jarataman.\n\n<i>Mısalı: Nókistegi gúl dúkanı — katalog, jetkizip beriw hám Click tólemi</i>\n\nBiykarlaw: /cancel",
+  shortIdea: "💡 Ideyanı keńirek jazıń — bir xabarda, keminde eki-úsh gáp.\n\n<i>Mısalı: Tashkenttegi kofexana — menyu, buyırtpa hám jetkizip beriw</i>",
   askPromptNew: "✏️ <b>Ilovanı súwretleń</b>\n\nNe kerekligin ápiwayı sóz benen jazıń.\n\n<i>Mısalı: Nókistegi gúl dúkanı — katalog, jetkizip beriw hám Click tólemi</i>\n\nRejimnen shıǵıw: /cancel",
   askPromptEdit: (name) => `✏️ <b>${name}</b>\n\nNeni ózgertiw kerekligin ápiwayı sóz benen jazıń.\n\n<i>Mısalı: bahalardı úlkenirek hám qalıńıraq et</i>\n\nRejimnen shıǵıw: /cancel`,
   working: "⏳ <b>AI islep atır…</b>\nOdatda 30–90 sekund. Tayın bolǵanda jazaman.",
@@ -282,7 +278,7 @@ const kaa: BotDict = {
   ownerHint: "🔔 <b>Buyırtpalardı alıw:</b> tómendegi túymeni basıń, soń botta <b>Start</b> basıń — xabarlar usı jerge keledi.",
   ownerLinked: "✅ <b>Siz iyesi retinde ulandıńız</b>\n\nJańa buyırtpa hám tólemler usı jerge keledi.",
   btnBecomeOwner: "🔔 Buyırtpalardı alıw (Start)",
-  aiGenerated: (n) => `Ilova jaratıldı: ${n} ekran`,
+  aiGenerated: (n, name) => `«${name}» ilovası jaratıldı: ${n} ekran`,
   aiDone: (msg) => `✅ <b>Tayın</b>\n\n${msg}\n\nKeyingi ózgeristi jazıń yamasa publish etiń.`,
   aiError: (err) => `⚠️ <b>AI orınlay almadı</b>\n\n<code>${err}</code>\n\nSorawdı basqasha jazıp kóriń.`,
   published: (v, url, bot) => `🚀 <b>Járiyalandı: v${v}</b>\n\n🔗 ${url}${bot ? `\n🤖 Bot: <b>@${bot}</b>` : ""}`,
@@ -296,7 +292,7 @@ const kaa: BotDict = {
   noRecords: (name) => `📦 <b>${name}</b>\n\nHázirshe jazıw joq.`,
   botHas: "🤖 Bul joybarǵa bot aldınan ulanǵan.",
   botCreate: "🤖 <b>Bot jaratıw</b>\n\nTelegram ekranı ashıladı — «Jaratıw» túymesin basıń. Bot ózi ulanadı.",
-  err: { notFound: "Joybar tabılmadı.", noRights: "Bul háreket ushın huqıq jetkiliksiz.", generic: "Orınlap bolmadı. Qayta urınıp kóriń." },
+  err: { limit: "Kúnlik AI sorawları limiti tamamlandı. Erteń urınıp kóriń.", notFound: "Joybar tabılmadı.", noRights: "Bul háreket ushın huqıq jetkiliksiz.", generic: "Orınlap bolmadı. Qayta urınıp kóriń." },
   failed: (why) => `⚠️ ${why}`,
   link: {
     confirm: (email) => `🔗 <b>Usı Telegram ulansınba?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBul siz bolmasańız — «Yaq» túymesin basıń.`,

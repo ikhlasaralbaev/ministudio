@@ -8,6 +8,7 @@ import { db } from "./db";
 import { HttpError } from "./http";
 import { envOf, projects, type ProjectRow } from "./projects";
 import { emptyUsage, recordPrompt, type Usage } from "./usage";
+import { isTelegramOnly } from "./tglink";
 import type { SessionUser } from "./access";
 
 export type AiOutcome = { ok: true; result: Record<string, unknown> } | { ok: false; error: string };
@@ -40,6 +41,13 @@ export async function startAiJob(o: {
     editDoc = parsed.data;
   }
 
+  // Accounts created from Telegram alone get a daily cap on AI requests (until real plans exist).
+  if (isTelegramOnly(user.email)) {
+    const limit = Number(process.env.TG_AI_DAILY_LIMIT) || 20;
+    const used = await (await db()).collection("usage").countDocuments({ userId: user.id, mock: { $ne: true }, at: { $gt: new Date(Date.now() - 86_400_000) } });
+    if (used >= limit) throw new HttpError("Kunlik AI limiti tugadi. Ertaga urinib ko'ring.", 429);
+  }
+
   const jobs = (await db()).collection("ai_jobs");
   await jobs.createIndex({ createdAt: 1 }, { expireAfterSeconds: 86400 });
   const jobId = new ObjectId();
@@ -55,9 +63,13 @@ export async function startAiJob(o: {
       if (kind === "generate") {
         const env = envOf(p);
         const hints = [env.BOT_TOKEN && "Telegram bot", env.CLICK_SERVICE_ID && "Click payments", env.PAYME_MERCHANT_ID && "Payme payments"].filter(Boolean) as string[];
-        const { doc, usage } = await generateApp(prompt, hints, p.name, p.aiModel);
+        // a project named from the idea lets the AI pick the real name
+        const { doc, usage } = await generateApp(prompt, hints, p.autoName ? "" : p.name, p.aiModel);
         const message = `Ilova tayyor: ${doc.screens.length} ta ekran`;
-        await (await projects()).updateOne({ _id: p._id }, { $set: { doc, updatedAt: new Date() } });
+        await (await projects()).updateOne(
+          { _id: p._id },
+          { $set: { doc, updatedAt: new Date(), ...(p.autoName && doc.name ? { name: doc.name.slice(0, 80) } : {}) }, ...(p.autoName ? { $unset: { autoName: "" } } : {}) },
+        );
         await record("ok", usage, { message, opsCount: doc.screens.length });
         if (perms.viaAdmin) await audit({ ...actor(user, true), action: "ai.generate", projectId: id });
         return { doc, message };

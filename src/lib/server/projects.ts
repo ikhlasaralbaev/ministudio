@@ -20,6 +20,10 @@ export interface ProjectRow {
   botUsername?: string;
   /** Telegram id of a bot created through the manager bot (Managed Bots). */
   managedBotId?: number;
+  /** The name was made from the first idea; the AI replaces it with a real one when it generates the app. */
+  autoName?: boolean;
+  /** An idea typed on the dashboard that Studio turns into the first app as soon as it opens. */
+  pendingIdea?: string;
   ownerId?: string | null;
   members?: Member[];
   aiModel?: string | null;
@@ -62,6 +66,7 @@ export function toDTO(p: WithId<ProjectRow>, perms: Perms): ProjectDTO {
     permissions: perms,
     suspended: !!p.suspended,
     aiModel: p.aiModel ?? null,
+    pendingIdea: p.pendingIdea,
   };
 }
 
@@ -129,7 +134,7 @@ export async function deleteProjectCascade(p: WithId<ProjectRow>): Promise<void>
 const slugId = customAlphabet("abcdefghijkmnpqrstuvwxyz23456789", 8);
 
 /** A new empty project owned by `ownerId`. Returns its id. */
-export async function createProject(ownerId: string, name: string): Promise<string> {
+export async function createProject(ownerId: string, name: string, opts: { autoName?: boolean; pendingIdea?: string } = {}): Promise<string> {
   const now = new Date();
   const r = await (await projects()).insertOne({
     name: name.trim().slice(0, 80),
@@ -138,6 +143,8 @@ export async function createProject(ownerId: string, name: string): Promise<stri
     publishedVersion: 0,
     ownerId,
     members: [],
+    ...(opts.autoName ? { autoName: true } : {}),
+    ...(opts.pendingIdea ? { pendingIdea: opts.pendingIdea.slice(0, 2000) } : {}),
     createdAt: now,
     updatedAt: now,
   });

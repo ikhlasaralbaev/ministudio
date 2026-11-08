@@ -20,7 +20,7 @@ vi.mock("@/lib/server/ai", async (orig) => {
   const doc = { name: "Kafe", theme: { primary: "#e8590c", background: "#fff", text: "#111", radius: 12, font: "x" }, state: {}, collections: [], screens: [{ id: "s1", type: "Screen", name: "Bosh", children: [] }], bot: { welcomeText: "a", buttonText: "b" } };
   return {
     ...real,
-    generateApp: async () => ({ doc, usage: usage() }),
+    generateApp: async (_p: string, _h: string[], name?: string) => ({ doc: { ...doc, name: name || "Gul Bazar" }, usage: usage() }),
     editApp: async (d: unknown) => ({ doc: d, message: "Narxlar qalinlashtirildi", ops: [{ op: "rename", name: "x" }], usage: usage() }),
   };
 });
@@ -141,17 +141,51 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     const press = (data: string, from = 8001) => handleManagerUpdate({ callback_query: { id: "q", data, from: { id: from }, message: { chat: { id: 1 }, message_id: 1 } } });
     expect(await press("lk:no")).toMatch(/declined/);
     expect(await getTelegramLink(uid)).toBeNull();
-    // a malformed link is not a link request: it falls through to the chat console (this Telegram is not linked)
-    expect(await handleManagerUpdate({ message: { chat: { id: 1 }, from: { id: 1 }, text: "/start link_deadbeef" } })).toMatch(/not linked/);
+    // a malformed link is not a link request: it is just a /start in the chat console (menu)
+    expect(await handleManagerUpdate({ message: { chat: { id: 1 }, from: { id: 1 }, text: "/start link_deadbeef" } })).toBe("menu");
     expect(await press(`lk:${"0".repeat(36)}`)).toMatch(/expired/);
     expect(await press("lk:" + code, 42)).toMatch(/failed/); // 42 is already linked to another account (earlier test)
     expect(await getTelegramLink(uid)).toBeNull();
   });
 
+  it("ensureTelegramUser: one account per Telegram id, even when first messages race", async () => {
+    const { ensureTelegramUser } = await import("@/lib/server/tglink");
+    const { usersCol } = await import("@/lib/server/users");
+    const results = await Promise.all(Array.from({ length: 6 }, () => ensureTelegramUser({ id: 310310, first_name: "Vali", username: "vali" })));
+    expect(new Set(results.map((r) => r.id)).size).toBe(1);
+    expect(await usersCol().countDocuments({ telegramId: 310310 } as never)).toBe(1);
+  });
+
+  it("a Telegram-only account is merged into the Google account that proves the same Telegram; a real account is never taken over", async () => {
+    const { ensureTelegramUser, linkTelegram, getTelegramLink } = await import("@/lib/server/tglink");
+    const { usersCol } = await import("@/lib/server/users");
+    const { createProject, getProject, projects } = await import("@/lib/server/projects");
+    const { rawDb } = await import("@/lib/server/db");
+    const tgOnly = (await ensureTelegramUser({ id: 320320, first_name: "Sher", username: "sher" })).id;
+    const pid = await createProject(tgOnly, "Sherning kafesi");
+    await (await projects()).insertOne({ name: "Hamkor", slug: "hk1", doc: null, publishedVersion: 0, ownerId: "someone", members: [{ userId: tgOnly, email: "", access: "update" }], createdAt: new Date(), updatedAt: new Date() } as never);
+    await rawDb().collection("usage").insertOne({ userId: tgOnly, at: new Date(), mock: false });
+    await rawDb().collection("session").insertOne({ userId: tgOnly, token: "t" });
+
+    const google = (await usersCol().insertOne({ email: "sher@gmail.com", name: "Sher" } as never)).insertedId.toHexString();
+    await linkTelegram(google, { id: 320320, firstName: "Sher", username: "sher" }); // proved from Telegram itself
+
+    expect((await getProject(pid))?.ownerId).toBe(google); // projects moved
+    expect((await (await projects()).findOne({ slug: "hk1" }))?.members?.[0].userId).toBe(google); // memberships too
+    expect(await rawDb().collection("usage").countDocuments({ userId: google })).toBe(1); // usage history
+    expect(await rawDb().collection("session").countDocuments({ userId: tgOnly })).toBe(0); // old sessions gone
+    expect(await usersCol().countDocuments({ email: "tg320320@telegram.invalid" })).toBe(0); // placeholder deleted
+    expect(await getTelegramLink(google)).toMatchObject({ id: 320320 });
+
+    // a real (Google) account that already owns a Telegram is not absorbed by someone else
+    const other = (await usersCol().insertOne({ email: "other@gmail.com", name: "O" } as never)).insertedId.toHexString();
+    await expect(linkTelegram(other, { id: 320320, firstName: "X", username: "x" })).rejects.toThrow(/boshqa akkauntga/);
+  });
+
   it("link helpers: username and bot link are well-formed", async () => {
     const { newBotLink, suggestUsername } = await import("@/lib/server/manager");
     expect(suggestUsername("Lazzat Kafe!!")).toMatch(/^ms_lazzatkafe_[0-9a-f]{4}_bot$/);
-    expect(newBotLink("ms_manager_bot", "ms_x_bot", "Lazzat Kafe")).toBe("https://t.me/newbot/ms_manager_bot/ms_x_bot?name=Lazzat%20Kafe");
+    expect(newBotLink("ms_manager_bot", "ms_x_bot", "Gul Bazar")).toBe("https://t.me/newbot/ms_manager_bot/ms_x_bot?name=Gul%20Bazar");
   });
 });
 
@@ -192,9 +226,16 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     await rawDb().dropDatabase();
   });
 
-  it("an unlinked Telegram account is told how to link, nothing else happens", async () => {
-    expect(await say(424242, "/start")).toBe("not linked");
-    expect(last().text).toMatch(/Telegram ещё не привязан/);
+  it("a Telegram user we have never seen gets an account on the first message (no Google, nothing to link)", async () => {
+    const { usersCol } = await import("@/lib/server/users");
+    expect(await usersCol().countDocuments({ telegramId: 424242 } as never)).toBe(0);
+    expect(await say(424242, "/start")).toBe("menu");
+    expect(last().text).toContain("конструктор Telegram-приложений");
+    const u = (await usersCol().findOne({ telegramId: 424242 } as never)) as unknown as { email: string; emailVerified: boolean };
+    expect(u.email).toBe("tg424242@telegram.invalid");
+    expect(u.emailVerified).toBe(true);
+    await say(424242, "/start"); // again: still one account
+    expect(await usersCol().countDocuments({ telegramId: 424242 } as never)).toBe(1);
   });
 
   it("menu opens the panel inside Telegram through /tg", async () => {
@@ -203,26 +244,27 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(web.web_app.url).toBe("https://panel.test/tg?next=%2Fdashboard");
   });
 
-  it("creating a project by chat, then generating the app with a prompt", async () => {
-    const { getProject } = await import("@/lib/server/projects");
+  it("one message is enough: the idea creates the project (named by the AI) and generates the app", async () => {
+    const { getProject, projects } = await import("@/lib/server/projects");
     await press(TGA, "p:new");
-    expect(last().text).toMatch(/Новый проект/);
-    expect(await say(TGA, "Lazzat Kafe")).toBe("project created");
-    const { projects } = await import("@/lib/server/projects");
-    const row = (await (await projects()).findOne({ name: "Lazzat Kafe" }))!;
-    ids.P = row._id.toHexString();
-    expect(row.ownerId).toBe(ids.A);
-    expect(last().text).toMatch(/Опишите приложение/);
+    expect(last().text).toMatch(/Напишите одним сообщением/);
 
-    expect(await say(TGA, "gul do'koni katalogi")).toBe("ai generate started");
+    expect(await say(TGA, "gul do'koni uchun katalog va yetkazib berish")).toBe("ai generate started");
     expect(last().text).toMatch(/ИИ работает/);
+    const row = (await (await projects()).findOne({ ownerId: ids.A, autoName: true }))!;
+    ids.P = row._id.toHexString();
+    expect(row.name).toContain("gul do'koni"); // placeholder name from the idea until the AI names it
+
     await waitFor(() => last().text.includes("Готово"));
-    expect(last().text).toContain("Приложение создано: 1 экр.");
-    expect((await getProject(ids.P))?.doc?.screens).toHaveLength(1);
-    // no bot yet: the result points at the next step and offers "create bot" next to Publish
+    expect(last().text).toContain("Приложение «Gul Bazar» создано: 1 экр.");
+    const after = (await getProject(ids.P))!;
+    expect(after.name).toBe("Gul Bazar"); // the AI's name replaced the placeholder
+    expect(after.autoName).toBeUndefined();
+    expect(after.doc?.screens).toHaveLength(1);
+    // no bot yet: Publish comes first, creating the bot is a separate step
     expect(last().text).toContain("опубликуйте приложение");
     const kb = last().reply_markup!.inline_keyboard;
-    expect(kb[0][0].callback_data).toBe(`u:${ids.P}`); // Publish is the first button: it does not wait for a bot
+    expect(kb[0][0].callback_data).toBe(`u:${ids.P}`);
     expect(kb.flat().map((b) => b.callback_data)).toContain(`b:${ids.P}`);
 
     // the project now has an app: the next message is an edit
@@ -231,9 +273,32 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(last().text).toContain("Narxlar qalinlashtirildi");
   });
 
+  it("a short message ('salom') does not create a project; it explains what to write", async () => {
+    const { projects } = await import("@/lib/server/projects");
+    await say(TGA, "/cancel");
+    const before = await (await projects()).countDocuments({ ownerId: ids.A });
+    expect(await say(TGA, "salom")).toBe("short message");
+    expect(last().text).toMatch(/Опишите идею подробнее/);
+    expect(await (await projects()).countDocuments({ ownerId: ids.A })).toBe(before);
+  });
+
+  it("the daily AI cap applies to accounts made from Telegram alone", async () => {
+    const { usersCol } = await import("@/lib/server/users");
+    const { rawDb } = await import("@/lib/server/db");
+    process.env.TG_AI_DAILY_LIMIT = "2";
+    const TGC = 880003;
+    await say(TGC, "/start"); // creates the Telegram-only account
+    const uid = ((await usersCol().findOne({ telegramId: TGC } as never)) as unknown as { _id: { toHexString(): string } })._id.toHexString();
+    await rawDb().collection("usage").insertMany([1, 2].map(() => ({ userId: uid, mock: false, at: new Date() })));
+    await say(TGC, "kafe uchun menyu va yetkazib berish ilovasi");
+    await waitFor(() => last().text.includes("лимит"));
+    expect(last().text).toContain("Дневной лимит ИИ-запросов исчерпан");
+    delete process.env.TG_AI_DAILY_LIMIT;
+  });
+
   it("project card, publish, and latest records", async () => {
     await press(TGA, `p:${ids.P}`);
-    expect(last().text).toMatch(/<b>Lazzat Kafe<\/b>[\s\S]*<b>1<\/b> экр\.[\s\S]*Публикация: <i>нет<\/i>[\s\S]*Бот: <i>не подключён<\/i>/);
+    expect(last().text).toMatch(/<b>Gul Bazar<\/b>[\s\S]*<b>1<\/b> экр\.[\s\S]*Публикация: <i>нет<\/i>[\s\S]*Бот: <i>не подключён<\/i>/);
     const labels = last().reply_markup!.inline_keyboard.flat().map((b) => b.text);
     expect(labels).toEqual(expect.arrayContaining(["✏️ Изменить через ИИ", "🚀 Опубликовать", "📦 Заказы", "🤖 Создать бота"]));
 
@@ -256,10 +321,10 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
 
   it("the project list shows only your projects; /cancel leaves the AI mode", async () => {
     await press(TGB, "p:list");
-    expect(last().reply_markup!.inline_keyboard.flat().map((b) => b.text)).not.toContain("Lazzat Kafe");
+    expect(last().reply_markup!.inline_keyboard.flat().map((b) => b.text)).not.toContain("Gul Bazar");
     await press(TGA, `a:${ids.P}`);
     await say(TGA, "/cancel");
-    expect(await say(TGA, "salom")).toBe("menu (no state)"); // no longer treated as an AI prompt
+    expect(await say(TGA, "salom")).toBe("short message"); // no longer treated as an AI prompt
   });
 
   it("messages are HTML-formatted and project names cannot inject markup", async () => {
@@ -272,7 +337,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(body.text).not.toContain("<b>Evil</b>");
   });
 
-  it("Russian by default; /language switches (even before linking) and the choice is remembered", async () => {
+  it("Russian by default; /language switches (from the first message on) and the choice is remembered", async () => {
     const stranger = 515151; // not linked to any account
     await say(stranger, "/language");
     const row = last().reply_markup!.inline_keyboard[0] as { text: string; callback_data: string }[];
@@ -283,10 +348,10 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     expect(texts[0]).toContain("Til: <b>O‘zbekcha</b>");
     expect(texts[1]).toContain("Telegram ilovalari konstruktori");
     await say(stranger, "salom");
-    expect(last().text).toContain("Telegram hali ulanmagan"); // remembered
+    expect(last().text).toContain("G‘oyani batafsilroq yozing"); // remembered: Uzbek
     await press(stranger, "l:ru");
     await say(stranger, "привет");
-    expect(last().text).toContain("Telegram ещё не привязан");
+    expect(last().text).toContain("Опишите идею подробнее");
   });
 
   it("known server warnings are shown in the chat language", async () => {
@@ -300,7 +365,7 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
   it("creating a bot sends the Telegram link as a button", async () => {
     await press(TGA, `b:${ids.P}`);
     const btn = last().reply_markup!.inline_keyboard.flat()[0] as { url: string };
-    expect(btn.url).toMatch(/^https:\/\/t\.me\/newbot\/ms_manager_bot\/ms_[a-z0-9]+_[0-9a-f]{4}_bot\?name=Lazzat%20Kafe$/);
+    expect(btn.url).toMatch(/^https:\/\/t\.me\/newbot\/ms_manager_bot\/ms_[a-z0-9]+_[0-9a-f]{4}_bot\?name=Gul%20Bazar$/);
   });
 
   it("publishing works without a bot first, and every later publish goes to the bot once it exists", async () => {

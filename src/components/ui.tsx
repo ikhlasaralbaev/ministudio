@@ -75,6 +75,8 @@ export function useMe() {
 export function UserMenu({ me }: { me: Me }) {
   const router = useRouter();
   const t = useT();
+  // accounts made from Telegram alone have a placeholder email: show the name instead
+  const label = me.email.endsWith("@telegram.invalid") ? me.name : me.email;
   async function signOut() {
     meCache = null;
     await authClient.signOut();
@@ -86,10 +88,10 @@ export function UserMenu({ me }: { me: Me }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={me.image} alt="" className="h-6 w-6 rounded-full" referrerPolicy="no-referrer" />
       ) : (
-        <span className="grid h-6 w-6 place-items-center rounded-full bg-panel-2 text-xs">{me.email[0]?.toUpperCase()}</span>
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-panel-2 text-xs">{label[0]?.toUpperCase()}</span>
       )}
-      <span className="hidden max-w-44 truncate text-muted lg:block">{me.email}</span>
-      <button onClick={signOut} className="btn btn-sm" title={me.email}>
+      <span className="hidden max-w-44 truncate text-muted lg:block">{label}</span>
+      <button onClick={signOut} className="btn btn-sm" title={label}>
         <SignOut size={14} />
         <span className="hidden sm:inline">{t.nav.signOut}</span>
       </button>

@@ -11,6 +11,8 @@ interface CreateState {
   enabled: boolean;
   hasBot: boolean;
   botUsername: string | null;
+  ownerReady?: boolean;
+  ownerLink?: string | null;
   claim: { status: "pending" | "done"; createdAt: string; botUsername: string | null } | null;
 }
 
@@ -104,8 +106,18 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
   if (!tg || !st || !st.enabled) return null;
   if (st.hasBot) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-ok/40 bg-ok/10 p-3 text-sm text-ok">
-        <CheckCircle weight="fill" size={18} /> Bot ulangan{st.botUsername ? <a className="font-medium underline" target="_blank" href={`https://t.me/${st.botUsername}`}>@{st.botUsername}</a> : null}
+      <div className="space-y-2 rounded-lg border border-ok/40 bg-ok/10 p-3 text-sm">
+        <p className="flex items-center gap-2 text-ok">
+          <CheckCircle weight="fill" size={18} /> Bot ulangan{st.botUsername ? <a className="font-medium underline" target="_blank" href={`https://t.me/${st.botUsername}`}>@{st.botUsername}</a> : null}
+        </p>
+        {!st.ownerReady && st.ownerLink && (
+          <>
+            <p className="text-muted">Buyurtma xabarlari sizga kelishi uchun botda bir marta <b className="text-fg">Start</b> bosing:</p>
+            <a href={st.ownerLink} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
+              <TelegramLogo weight="fill" /> Buyurtmalarni olish (Start)
+            </a>
+          </>
+        )}
       </div>
     );
   }
@@ -145,7 +157,7 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
         </div>
       )}
       {err && <p className="text-danger">{err}</p>}
-      <p className="text-xs text-muted">Yoki pastdagi maydonga BotFather&apos;dan olingan tokenni qo&apos;lda kiriting.</p>
+      <p className="text-xs text-muted">Yoki BotFather&apos;dan olingan tokenni Sozlamalar sahifasida qo&apos;lda kiriting.</p>
     </div>
   );
 }

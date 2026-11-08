@@ -5,7 +5,9 @@ import { auth } from "./auth";
 import { HttpError } from "./http";
 import { managerConfig } from "./manager";
 import { validateInitData } from "./telegram";
-import { userByTelegramId } from "./tglink";
+import { ensureTelegramUser } from "./tglink";
+import { getBotLang } from "./managerprefs";
+import { LOCALE_COOKIE } from "../../i18n/config";
 import { sessionUserById } from "./users";
 
 /** initData older than this is refused (it is the user's proof of identity, so it must be fresh). */
@@ -20,8 +22,8 @@ export async function signInWithTelegram(initData: string): Promise<{ userId: st
   if (!m) throw new HttpError("Telegram orqali kirish sozlanmagan", 503);
   const tg = validateInitData(initData, m.token, MAX_AGE_SEC);
   if (!tg) throw new HttpError("Telegram ma'lumoti yaroqsiz yoki eskirgan. Mini App'ni qayta oching.", 401);
-  const linked = await userByTelegramId(tg.id);
-  if (!linked) throw new HttpError("Bu Telegram hech qanday akkauntga ulanmagan. Avval sayt orqali Google bilan kirib, Telegramni ulang.", 403, "telegram_not_linked");
+  // Telegram-first: a person we have not seen yet gets an account right here (the data above proves who they are).
+  const linked = await ensureTelegramUser(tg);
   if (!(await sessionUserById(linked.id))) throw new HttpError("Akkaunt bloklangan", 403, "banned");
 
   // A real Better Auth session, exactly as a Google sign-in would make it.
@@ -38,5 +40,7 @@ export async function signInWithTelegram(initData: string): Promise<{ userId: st
     expires: session.expiresAt,
     ...(maxAge ? { maxAge } : {}),
   });
+  // the panel opens in the language the person chose in the bot (Russian by default)
+  (await cookies()).set(LOCALE_COOKIE, await getBotLang(tg.id), { path: "/", maxAge: 31_536_000, sameSite: "lax" });
   return { userId: linked.id };
 }

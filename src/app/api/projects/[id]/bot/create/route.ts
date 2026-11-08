@@ -1,5 +1,6 @@
 import { requireProject } from "@/lib/server/access";
 import { envOf } from "@/lib/server/projects";
+import { ownerCode } from "@/lib/server/runtime";
 import { createClaim, latestClaim, managerConfig, newBotLink } from "@/lib/server/manager";
 import { getTelegramLink } from "@/lib/server/tglink";
 import { fail, handle, ok } from "@/lib/server/http";
@@ -8,12 +9,16 @@ import { fail, handle, ok } from "@/lib/server/http";
 export async function GET(_req: Request, ctx: RouteContext<"/api/projects/[id]/bot/create">) {
   return handle(async () => {
     const { id } = await ctx.params;
-    const { project: p } = await requireProject(id, "read");
+    const { project: p, perms } = await requireProject(id, "read");
     const c = await latestClaim(id);
+    const env = envOf(p);
     return ok({
       enabled: !!managerConfig(),
-      hasBot: !!envOf(p).BOT_TOKEN,
+      hasBot: !!env.BOT_TOKEN,
       botUsername: p.botUsername ?? null,
+      // one tap on this link (Start in the bot) makes the person the owner who receives order notifications
+      ownerReady: !!env.OWNER_CHAT_ID,
+      ownerLink: perms.update && p.botUsername ? `https://t.me/${p.botUsername}?start=owner_${ownerCode(id)}` : null,
       claim: c ? { status: c.status, createdAt: c.createdAt, botUsername: c.botUsername ?? null } : null,
     });
   });

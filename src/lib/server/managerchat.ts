@@ -10,7 +10,8 @@ import { recordsCol } from "./appdata";
 import { publishProject } from "./publish";
 import { ownerCode, rateLimited } from "./runtime";
 import { escapeHtml as esc, tgApi } from "./telegram";
-import { userByTelegramId } from "./tglink";
+import { ensureTelegramUser } from "./tglink";
+import { looksLikeIdea, nameFromIdea } from "../idea";
 import { sessionUserById } from "./users";
 import { createClaim, managerConfig, newBotLink } from "./manager";
 import { BOT_DICT, BOT_LANGS, BOT_LANG_NAME, isBotLang, type BotDict, type BotLang } from "../managerI18n";
@@ -23,7 +24,7 @@ import { getBotLang, setBotLang } from "./managerprefs";
  */
 
 type Markup = { inline_keyboard: Record<string, unknown>[][] };
-type ChatState = { mode: "new_name" } | { mode: "ai"; projectId: string };
+type ChatState = { mode: "idea" } | { mode: "ai"; projectId: string };
 
 const stateCol = async () => (await db()).collection<{ tgId: number; state: ChatState; updatedAt: Date }>("manager_chat");
 async function getState(tgId: number): Promise<ChatState | null> {
@@ -90,8 +91,8 @@ interface Ctx {
 }
 
 export async function handleManagerChat(update: {
-  message?: { chat?: { id?: number }; from?: { id?: number; first_name?: string }; text?: string };
-  callback_query?: { id: string; data?: string; from: { id: number }; message?: { chat?: { id?: number } } };
+  message?: { chat?: { id?: number }; from?: { id?: number; first_name?: string; username?: string }; text?: string };
+  callback_query?: { id: string; data?: string; from: { id: number; first_name?: string; username?: string }; message?: { chat?: { id?: number } } };
 }): Promise<string> {
   const m = managerConfig();
   if (!m) return "no manager";
@@ -130,11 +131,13 @@ export async function handleManagerChat(update: {
     return "language set";
   }
 
-  const linked = await userByTelegramId(tgId);
-  const user = linked ? await sessionUserById(linked.id) : null;
+  // Telegram-first: whoever writes to the bot has an account (created on the first message, no Google needed).
+  const who = cb?.from ?? msg?.from;
+  const account = await ensureTelegramUser({ id: tgId, first_name: who?.first_name, username: who?.username });
+  const user = await sessionUserById(account.id);
   if (!user) {
-    await send(t.notLinked(esc(BASE())));
-    return "not linked";
+    await send(t.blocked);
+    return "blocked";
   }
   const c: Ctx = { user, t, send, tgId };
 
@@ -152,9 +155,9 @@ export async function handleManagerChat(update: {
     }
     if (cmd === "projects" || data === "p:list") return await listProjects(c);
     if (cmd === "new" || data === "p:new") {
-      await setState(tgId, { mode: "new_name" });
-      await send(t.askName);
-      return "ask name";
+      await setState(tgId, { mode: "idea" });
+      await send(t.askIdea);
+      return "ask idea";
     }
 
     const open = /^([pauobx]):([a-f0-9]{24})$/.exec(data);
@@ -175,19 +178,19 @@ export async function handleManagerChat(update: {
     // ----- free text: depends on what we are waiting for -----
     if (text && !text.startsWith("/")) {
       const st = await getState(tgId);
-      if (st?.mode === "new_name") {
-        const id = await createProject(user.id, text);
-        await setState(tgId, { mode: "ai", projectId: id });
-        await send(`${t.projectCreated(esc(text.slice(0, 80)))}\n\n${t.askPromptNew}`);
-        return "project created";
-      }
       if (st?.mode === "ai") return await runAi(c, st.projectId, text);
-      await send(t.menu, menuMarkup(t));
-      return "menu (no state)";
+      // one message is enough: a described idea becomes a project and the app is generated at once
+      if (st?.mode === "idea" || looksLikeIdea(text)) {
+        const id = await createProject(user.id, nameFromIdea(text), { autoName: true });
+        await setState(tgId, { mode: "ai", projectId: id });
+        return await runAi(c, id, text);
+      }
+      await send(t.shortIdea, menuMarkup(t));
+      return "short message";
     }
   } catch (e) {
     const status = e instanceof HttpError ? e.status : 0;
-    await send(t.failed(status === 404 ? t.err.notFound : status === 403 ? t.err.noRights : t.err.generic));
+    await send(t.failed(status === 404 ? t.err.notFound : status === 403 ? t.err.noRights : status === 429 ? t.err.limit : t.err.generic));
     if (!(e instanceof HttpError)) console.error("manager chat", e);
     return "error";
   }
@@ -228,8 +231,8 @@ async function runAi({ user, t, send, tgId }: Ctx, id: string, prompt: string) {
   void done.then(async (r) => {
     if (!r.ok) return void (await send(t.aiError(esc(r.error.slice(0, 300)))));
     // "generate" reports in the chat language; an edit's summary comes from the AI in the language the user wrote in
-    const doc = r.result.doc as { screens?: unknown[] } | undefined;
-    const summary = kind === "generate" ? t.aiGenerated(doc?.screens?.length || 0) : String(r.result.message || "OK");
+    const doc = r.result.doc as { screens?: unknown[]; name?: string } | undefined;
+    const summary = kind === "generate" ? t.aiGenerated(doc?.screens?.length || 0, doc?.name || project.name) : String(r.result.message || "OK");
     await send(`${t.aiDone(esc(summary))}${hasBot ? "" : `\n\n${t.nextBot}`}`, {
       // Publish comes first and always works (with or without a bot); creating the bot is a separate, optional step
       inline_keyboard: [

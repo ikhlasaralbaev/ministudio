@@ -6,6 +6,7 @@ import { applyOps, cloneWithNewIds, findNode, findParent, newId, nodePath } from
 import { api, runAi } from "@/lib/client";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
+import { BotCreator } from "@/components/BotCreator";
 import { ModelPicker } from "./ModelPicker";
 import { FRAME_H, PhoneFrame, SCREEN_H, SCREEN_W } from "./PhoneFrame";
 import { ChatPanel } from "./ChatPanel";
@@ -189,6 +190,19 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       setHistoryTick((t) => t + 1);
     }
   }
+
+  // An idea typed on the dashboard becomes the first app as soon as Studio opens. The idea is cleared first, so a
+  // reload while the app is being built cannot start a second generation.
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    const idea = project.pendingIdea;
+    if (autoStarted.current || !idea || doc || readOnly) return;
+    autoStarted.current = true;
+    api(`/api/projects/${id}`, { method: "PATCH", json: { pendingIdea: null } })
+      .catch(() => {})
+      .then(() => generate(idea));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ---------- structure helpers ---------- */
   const selected = doc && selectedId ? findNode(doc, selectedId) : null;
@@ -486,7 +500,14 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         ))}
       </div>
 
-      {published && <PublishModal res={published} onClose={() => setPublished(null)} />}
+      {published && (
+        <PublishModal
+          res={published}
+          projectId={id}
+          onBot={(botUsername) => setPublished((r) => (r ? { ...r, botUsername } : r))}
+          onClose={() => setPublished(null)}
+        />
+      )}
     </div>
   );
 }
@@ -939,9 +960,13 @@ function GlobalBar({ busy, disabled, onSend }: { busy: boolean; disabled: boolea
 
 function PublishModal({
   res,
+  projectId,
+  onBot,
   onClose,
 }: {
   res: { url: string; version: number; botUsername: string | null; warnings: string[] };
+  projectId: string;
+  onBot: (botUsername: string | null) => void;
   onClose: () => void;
 }) {
   const [copied, setCopied] = useState(false);
@@ -960,6 +985,15 @@ function PublishModal({
             <span>Telegramda ochish</span>
             <span>@{res.botUsername} ↗</span>
           </a>
+        )}
+        {/* no bot yet: create it right here (one tap for Telegram accounts), no trip to Settings */}
+        {!res.botUsername && (
+          <div className="mb-3">
+            <BotCreator
+              projectId={projectId}
+              onConnected={() => api<{ botUsername?: string }>(`/api/projects/${projectId}`).then((p) => onBot(p.botUsername ?? null)).catch(() => {})}
+            />
+          </div>
         )}
         <div className="flex items-center gap-2 rounded-xl bg-panel-2 px-3 py-2">
           <code className="flex-1 truncate text-[12px]">{res.url}</code>

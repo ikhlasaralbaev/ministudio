@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, timeAgo } from "@/lib/client";
-import { Plus, Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
+import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
 import { fmt } from "@/i18n/app";
 import { useT } from "@/i18n/client";
 import type { Perms } from "@/lib/permissions";
@@ -25,7 +25,7 @@ export default function Dashboard() {
   const t = useT();
   const router = useRouter();
   const [rows, setRows] = useState<Row[] | null>(null);
-  const [name, setName] = useState("");
+  const [idea, setIdea] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -36,11 +36,12 @@ export default function Dashboard() {
 
   async function create(e: React.FormEvent) {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (idea.trim().length < 5) return;
     setBusy(true);
     try {
-      const r = await api<{ _id: string }>("/api/projects", { method: "POST", json: { name } });
-      router.push(`/projects/${r._id}/settings?new=1`);
+      // the project is named from the idea; Studio starts building the app as soon as it opens
+      const r = await api<{ _id: string }>("/api/projects", { method: "POST", json: { idea } });
+      router.push(`/projects/${r._id}/studio`);
     } catch (e) {
       setErr((e as Error).message);
       setBusy(false);
@@ -62,13 +63,28 @@ export default function Dashboard() {
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <form onSubmit={create} className="card rise mb-8 p-5 sm:p-6">
         <h1 className="mb-1 flex items-center gap-2 text-lg font-semibold">
-          <Sparkle weight="fill" className="text-pur" /> {t.dash.newTitle}
+          <Sparkle weight="fill" className="text-pur" /> {t.dash.ideaTitle}
         </h1>
-        <p className="mb-4 text-sm text-muted">{t.dash.newHint}</p>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.dash.placeholder} className="inp h-10 flex-1 text-[15px]" />
-          <button disabled={busy || !name.trim()} className="btn btn-primary h-10">
-            <Plus weight="bold" /> {busy ? t.dash.creating : t.dash.create}
+        <p className="mb-3 text-sm text-muted">{t.dash.ideaHint}</p>
+        <textarea
+          value={idea}
+          onChange={(e) => setIdea(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) create(e);
+          }}
+          rows={3}
+          maxLength={2000}
+          placeholder={t.dash.ideaPlaceholder}
+          className="inp w-full resize-none text-[15px] leading-relaxed"
+        />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          {t.dash.examples.map((x) => (
+            <button type="button" key={x} onClick={() => setIdea(x)} className="lb lb-muted transition hover:border-accent hover:text-fg">
+              {x}
+            </button>
+          ))}
+          <button disabled={busy || idea.trim().length < 5} className="btn btn-primary ml-auto h-10">
+            <Sparkle weight="fill" /> {busy ? t.dash.ideaCreating : t.dash.ideaCreate}
           </button>
         </div>
         {err && <p className="mt-3 text-sm text-danger">{err}</p>}

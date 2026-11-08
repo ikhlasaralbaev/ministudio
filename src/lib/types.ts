@@ -300,4 +300,6 @@ export interface ProjectDTO {
   ownerEmail?: string | null;
   /** Claude model chosen for this project's AI (null = server default). */
   aiModel: string | null;
+  /** Idea typed when the project was created; Studio starts generating from it. */
+  pendingIdea?: string;
 }
