@@ -7,6 +7,7 @@ import { api, runAi } from "@/lib/client";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
+import { AiPrompt } from "@/components/AiPrompt";
 import { ModelPicker } from "./ModelPicker";
 import { FRAME_H, PhoneFrame, SCREEN_H, SCREEN_W } from "./PhoneFrame";
 import { ChatPanel } from "./ChatPanel";
@@ -550,35 +551,19 @@ function EmptyState({
       <div className="w-full max-w-2xl">
         <h1 className="mb-2 text-center text-3xl font-semibold tracking-tight">Qanday ilova yaratamiz?</h1>
         <p className="mb-8 text-center text-muted">Biznesingizni tasvirlab bering — AI ekranlar, dizayn va logikani yaratadi.</p>
-        <div className={`rounded-2xl border border-line bg-panel p-3 shadow-2xl ${busy ? "ai-working" : ""}`}>
-          <textarea
-            autoFocus
-            rows={4}
-            value={prompt}
-            disabled={busy}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && prompt.trim()) onGenerate(prompt);
-            }}
-            placeholder="Masalan: Nukusdagi gul do'koni uchun ilova. Guldastalar katalogi, narxlar, yetkazib berish manzili va vaqti, Click orqali to'lov..."
-            className="w-full resize-none bg-transparent p-2 text-[15px] outline-none placeholder:text-muted/60"
-          />
-          <div className="flex items-center justify-between px-2 pt-1">
-            <span className="text-xs text-muted">
-              {envKeys.length ? `Ulangan: ${envKeys.filter((k) => !k.includes("SECRET") && !k.endsWith("KEY")).join(", ")}` : "Integratsiyalar hali ulanmagan"} · ⌘↵
-            </span>
-            <div className="flex items-center gap-2">
-            {picker}
-            <button
-              disabled={busy || !prompt.trim()}
-              onClick={() => onGenerate(prompt)}
-              className="rounded-xl bg-primary px-5 py-2 text-sm font-medium text-white hover:bg-primary-2 disabled:opacity-40"
-            >
-              {busy ? "AI chizmoqda… (30–90 s)" : <>Yaratish <Sparkle weight="fill" className="inline" /></>}
-            </button>
-            </div>
-          </div>
-        </div>
+        <AiPrompt
+          value={prompt}
+          onChange={setPrompt}
+          onSubmit={() => onGenerate(prompt)}
+          busy={busy}
+          busyLabel="AI chizmoqda… 30–90 s"
+          submitLabel="Yaratish"
+          placeholders={EXAMPLES}
+          rows={4}
+          autoFocus
+          footerLeft={`${envKeys.length ? `Ulangan: ${envKeys.filter((k) => !k.includes("SECRET") && !k.endsWith("KEY")).join(", ")}` : "Integratsiyalar hali ulanmagan"} · ⌘↵`}
+          extra={picker}
+        />
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
           {EXAMPLES.map((ex) => (
             <button
