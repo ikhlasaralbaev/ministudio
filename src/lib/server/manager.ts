@@ -7,6 +7,8 @@ import { envOf, getProject, projects, publicUrl } from "./projects";
 import { tgApi } from "./telegram";
 import { botSecret } from "./runtime";
 import { connectBot } from "./botconnect";
+import { consumeLinkCode, linkTelegram, peekLinkCode } from "./tglink";
+import { HttpError } from "./http";
 
 /**
  * The platform's "manager bot": a Telegram bot with Bot Management Mode enabled (done once in BotFather). With it a
@@ -114,4 +116,87 @@ export async function setupManager(base: string) {
   const url = `${base}/api/manager/webhook`;
   await tgApi(m.token, "setWebhook", { url, secret_token: managerSecret(), drop_pending_updates: false });
   return { username: me.username, canManageBots: !!me.can_manage_bots, webhook: url };
+}
+
+const maskEmail = (e: string) => e.replace(/^(.).*(@.*)$/, "$1***$2");
+
+interface TgMessage {
+  chat?: { id?: number };
+  from?: { id?: number; first_name?: string; username?: string };
+  text?: string;
+}
+interface TgCallback {
+  id: string;
+  data?: string;
+  from: { id: number; first_name?: string; username?: string };
+  message?: { chat?: { id?: number }; message_id?: number };
+}
+
+/**
+ * Everything the manager bot receives:
+ *  - managed_bot: a bot was created through us -> store its token (handleManagedBot)
+ *  - "/start link_<code>": a user wants to link this Telegram account to their platform account -> ask to confirm
+ *  - the confirm button ("lk:<code>") -> link it
+ */
+export async function handleManagerUpdate(update: {
+  managed_bot?: ManagedBotUpdate;
+  managed_bot_updated?: ManagedBotUpdate;
+  message?: TgMessage;
+  callback_query?: TgCallback;
+}): Promise<string> {
+  const m = managerConfig();
+  if (!m) return "no manager";
+  const mb = update.managed_bot ?? update.managed_bot_updated;
+  if (mb) return handleManagedBot(mb);
+
+  const msg = update.message;
+  const chatId = msg?.chat?.id;
+  if (msg && chatId) {
+    const code = /^\/start\s+link_([a-f0-9]{36})\s*$/.exec(msg.text || "")?.[1];
+    if (code) {
+      const owner = await peekLinkCode(code);
+      await tgApi(m.token, "sendMessage", owner
+        ? {
+            chat_id: chatId,
+            text: `MiniStudio akkaunti ${maskEmail(owner.email)} ga ushbu Telegram'ni ulaysizmi?\n\nBu siz emas bo'lsa, «Yo'q» ni bosing.`,
+            reply_markup: { inline_keyboard: [[{ text: "Ha, ulash", callback_data: `lk:${code}` }, { text: "Yo'q", callback_data: "lk:no" }]] },
+          }
+        : { chat_id: chatId, text: "Havola eskirgan yoki yaroqsiz. Platformada «Telegramni ulash» ni qayta bosing." }).catch(() => {});
+      return owner ? "link: asked to confirm" : "link: bad code";
+    }
+    await tgApi(m.token, "sendMessage", {
+      chat_id: chatId,
+      text: "Bu MiniStudio platformasining yordamchi boti. Bot yaratish uchun platformadagi «Bot yaratish» tugmasidan foydalaning.",
+    }).catch(() => {});
+    return "greeted";
+  }
+
+  const cb = update.callback_query;
+  if (cb?.data?.startsWith("lk:")) {
+    const chat = cb.message?.chat?.id;
+    const done = (text: string) =>
+      Promise.all([
+        tgApi(m.token, "answerCallbackQuery", { callback_query_id: cb.id }).catch(() => {}),
+        chat && cb.message?.message_id ? tgApi(m.token, "editMessageText", { chat_id: chat, message_id: cb.message.message_id, text }).catch(() => {}) : null,
+      ]);
+    const code = cb.data.slice(3);
+    if (code === "no") {
+      await done("Bekor qilindi.");
+      return "link: declined";
+    }
+    const userId = await consumeLinkCode(code);
+    if (!userId) {
+      await done("Havola eskirgan yoki allaqachon ishlatilgan.");
+      return "link: expired";
+    }
+    try {
+      await linkTelegram(userId, { id: cb.from.id, firstName: cb.from.first_name || "", username: cb.from.username || "" });
+      await done("✅ Telegram ulandi. Platformaga qaytib, davom eting.");
+      return "link: linked";
+    } catch (e) {
+      await done(e instanceof HttpError ? `Ulanmadi: ${e.message}` : "Ulanmadi. Qayta urinib ko'ring.");
+      return "link: failed";
+    }
+  }
+  return "ignored";
 }

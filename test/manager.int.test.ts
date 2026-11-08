@@ -90,6 +90,41 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     await linkTelegram(u2, { id: 42, firstName: "B", username: "b" }); // free again
   });
 
+  it("linking through the bot: Start asks for confirmation (account shown masked), the button links once", async () => {
+    const { usersCol } = await import("@/lib/server/users");
+    const { createLinkCode, getTelegramLink } = await import("@/lib/server/tglink");
+    const { handleManagerUpdate } = await import("@/lib/server/manager");
+    const uid = (await usersCol().insertOne({ email: "ali.valiyev@gmail.com", name: "Ali" } as never)).insertedId.toHexString();
+    const code = await createLinkCode(uid);
+    const sent = () => calls.filter((c) => c.method === "sendMessage").at(-1)!.body as { text: string; reply_markup?: { inline_keyboard: { callback_data: string }[][] } };
+
+    expect(await handleManagerUpdate({ message: { chat: { id: 7 }, from: { id: 7001 }, text: `/start link_${code}` } })).toMatch(/asked to confirm/);
+    expect(sent().text).toContain("a***@gmail.com"); // the account is visible, but not in full
+    expect(sent().text).not.toContain("ali.valiyev");
+    expect(sent().reply_markup?.inline_keyboard[0][0].callback_data).toBe(`lk:${code}`);
+    expect(await getTelegramLink(uid)).toBeNull(); // nothing linked before the user confirms
+
+    const press = (data: string) => handleManagerUpdate({ callback_query: { id: "q", data, from: { id: 7001, first_name: "Ali", username: "ali" }, message: { chat: { id: 7 }, message_id: 5 } } });
+    expect(await press(`lk:${code}`)).toMatch(/linked/);
+    expect(await getTelegramLink(uid)).toMatchObject({ id: 7001, username: "ali" });
+    expect(await press(`lk:${code}`)).toMatch(/expired/); // a code works once
+  });
+
+  it("linking: declining, a bad code, and a Telegram already linked elsewhere", async () => {
+    const { usersCol } = await import("@/lib/server/users");
+    const { createLinkCode, getTelegramLink } = await import("@/lib/server/tglink");
+    const { handleManagerUpdate } = await import("@/lib/server/manager");
+    const uid = (await usersCol().insertOne({ email: "x@x.uz", name: "X" } as never)).insertedId.toHexString();
+    const code = await createLinkCode(uid);
+    const press = (data: string, from = 8001) => handleManagerUpdate({ callback_query: { id: "q", data, from: { id: from }, message: { chat: { id: 1 }, message_id: 1 } } });
+    expect(await press("lk:no")).toMatch(/declined/);
+    expect(await getTelegramLink(uid)).toBeNull();
+    expect(await handleManagerUpdate({ message: { chat: { id: 1 }, text: "/start link_deadbeef" } })).toMatch(/greeted/);
+    expect(await press(`lk:${"0".repeat(36)}`)).toMatch(/expired/);
+    expect(await press("lk:" + code, 42)).toMatch(/failed/); // 42 is already linked to another account (earlier test)
+    expect(await getTelegramLink(uid)).toBeNull();
+  });
+
   it("link helpers: username and bot link are well-formed", async () => {
     const { newBotLink, suggestUsername } = await import("@/lib/server/manager");
     expect(suggestUsername("Lazzat Kafe!!")).toMatch(/^ms_lazzatkafe_[0-9a-f]{4}_bot$/);

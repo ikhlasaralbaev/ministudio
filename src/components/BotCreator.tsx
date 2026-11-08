@@ -5,7 +5,6 @@ import { api } from "@/lib/client";
 
 interface TgState {
   linked: { id: number; username: string; name: string } | null;
-  loginBot: string | null;
   enabled: boolean;
 }
 interface CreateState {
@@ -13,36 +12,6 @@ interface CreateState {
   hasBot: boolean;
   botUsername: string | null;
   claim: { status: "pending" | "done"; createdAt: string; botUsername: string | null } | null;
-}
-type TgAuth = Record<string, string | number>;
-declare global {
-  interface Window {
-    onMiniStudioTelegramAuth?: (u: TgAuth) => void;
-  }
-}
-
-/** Telegram's own "Log in with Telegram" button (it only works on the domain registered for the bot in BotFather). */
-function TelegramLoginButton({ bot, onAuth }: { bot: string; onAuth: (u: TgAuth) => void }) {
-  const box = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    window.onMiniStudioTelegramAuth = onAuth;
-    const el = box.current;
-    if (!el) return;
-    el.innerHTML = "";
-    const s = document.createElement("script");
-    s.src = "https://telegram.org/js/telegram-widget.js?22";
-    s.async = true;
-    s.setAttribute("data-telegram-login", bot);
-    s.setAttribute("data-size", "large");
-    s.setAttribute("data-radius", "6");
-    s.setAttribute("data-userpic", "false");
-    s.setAttribute("data-onauth", "onMiniStudioTelegramAuth(user)");
-    el.appendChild(s);
-    return () => {
-      delete window.onMiniStudioTelegramAuth;
-    };
-  }, [bot, onAuth]);
-  return <div ref={box} className="min-h-10" />;
 }
 
 /**
@@ -85,18 +54,36 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
     return () => clearInterval(t);
   }, [waiting, load, onConnected]);
 
-  const link = useCallback(
-    async (u: TgAuth) => {
-      setErr("");
+  // Linking: open the manager bot (Start + "Ha, ulash" there), then wait for the platform to see the link.
+  const [linking, setLinking] = useState(false);
+  const linkStarted = useRef(0);
+  useEffect(() => {
+    if (!linking) return;
+    const t = setInterval(async () => {
       try {
-        await api("/api/me/telegram", { method: "POST", json: u });
-        await load();
-      } catch (e) {
-        setErr((e as Error).message);
+        const a = await api<TgState>("/api/me/telegram");
+        if (a.linked) {
+          setTg(a);
+          setLinking(false);
+        } else if (Date.now() - linkStarted.current > 10 * 60_000) setLinking(false);
+      } catch {
+        /* keep waiting */
       }
-    },
-    [load],
-  );
+    }, 2000);
+    return () => clearInterval(t);
+  }, [linking]);
+
+  async function startLink() {
+    setErr("");
+    try {
+      const r = await api<{ link: string }>("/api/me/telegram", { method: "POST" });
+      linkStarted.current = Date.now();
+      setLinking(true);
+      window.open(r.link, "_blank", "noopener");
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+  }
 
   async function create() {
     setBusy(true);
@@ -113,6 +100,7 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
     }
   }
 
+  if (err && (!tg || !st)) return <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">Bot yaratish bo&apos;limi yuklanmadi: {err}</p>;
   if (!tg || !st || !st.enabled) return null;
   if (st.hasBot) {
     return (
@@ -130,7 +118,10 @@ export function BotCreator({ projectId, onConnected, onOwnerId }: { projectId: s
       {!tg.linked ? (
         <div className="space-y-2">
           <p>1. Telegram akkauntingizni ulang (platforma sizni Telegramda tanishi uchun):</p>
-          {tg.loginBot && <TelegramLoginButton bot={tg.loginBot} onAuth={link} />}
+          <button type="button" className="btn btn-primary" disabled={linking} onClick={startLink}>
+            <TelegramLogo weight="fill" /> {linking ? "Telegramda tasdiqlashni kutyapman…" : "Telegramni ulash"}
+          </button>
+          {linking && <p className="text-xs text-muted">Ochilgan Telegram oynasida <b>Start</b> bosing, so&apos;ng «Ha, ulash» tugmasini bosing. Bu yerda o&apos;zi yangilanadi.</p>}
         </div>
       ) : (
         <div className="space-y-2.5">

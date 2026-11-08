@@ -103,11 +103,11 @@ Repository secrets (Settings → Secrets and variables → Actions):
 
 ## Manager bot (create a project's bot from the platform)
 Optional. Lets a user create the Telegram bot for a project with one confirmation in Telegram instead of using
-BotFather (Telegram "Managed Bots", Bot API 9.6). The flow also asks the user to link their Telegram account
-(Telegram Login Widget), so the platform can match the created bot to the right account.
+BotFather (Telegram "Managed Bots", Bot API 9.6). The flow also asks the user to link their Telegram account first
+(they open the manager bot through a one-time link, press Start and confirm), so the platform can match the created
+bot to the right account. No login widget and no `/setdomain` are needed.
 
-1. In BotFather create one bot for the platform, enable **Bot Management Mode** for it, and run `/setdomain` with the
-   platform domain (needed by the login widget).
+1. In BotFather create one bot for the platform and enable **Bot Management Mode** for it.
 2. Add `TELEGRAM_MANAGER_BOT_TOKEN` and `TELEGRAM_MANAGER_BOT_USERNAME` to `.env.production` (and to the
    `ENV_PRODUCTION` GitHub secret, otherwise the next automatic deploy removes them), then deploy.
 3. Admin page → "Manager bot" → *Webhook o'rnatish va tekshirish*. It must report that bot management is enabled.

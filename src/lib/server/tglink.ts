@@ -1,8 +1,14 @@
 import "server-only";
+import { randomBytes } from "crypto";
 import { ObjectId } from "mongodb";
+import { db } from "./db";
 import { usersCol } from "./users";
 import { HttpError } from "./http";
-import type { TgLoginUser } from "../tglogin";
+export interface TgLoginUser {
+  id: number;
+  firstName: string;
+  username: string;
+}
 
 type TgFields = { telegramId?: number; telegramUsername?: string; telegramName?: string; telegramLinkedAt?: Date };
 
@@ -44,4 +50,39 @@ export async function unlinkTelegram(userId: string) {
 export async function userByTelegramId(tgId: number): Promise<{ id: string; email: string } | null> {
   const u = (await usersCol().findOne({ telegramId: tgId } as never)) as { _id: ObjectId; email: string } | null;
   return u ? { id: u._id.toHexString(), email: u.email } : null;
+}
+
+/* ---------- linking through a deep link to the manager bot (no login widget, no domain setup) ---------- */
+
+interface LinkCode {
+  _id: string;
+  userId: string;
+  createdAt: Date;
+}
+const codes = async () => (await db()).collection<LinkCode>("tg_link_codes");
+const CODE_TTL_MS = 15 * 60_000;
+
+/** One-time code for "open the manager bot and press Start". Expires in 15 minutes. */
+export async function createLinkCode(userId: string): Promise<string> {
+  const c = await codes();
+  await c.createIndex({ createdAt: 1 }, { expireAfterSeconds: 900 });
+  const code = randomBytes(18).toString("hex");
+  await c.insertOne({ _id: code, userId, createdAt: new Date() });
+  return code;
+}
+
+/** Whose code it is (without using it), so the bot can show the account before asking for confirmation. */
+export async function peekLinkCode(code: string): Promise<{ userId: string; email: string } | null> {
+  if (!/^[a-f0-9]{36}$/.test(code)) return null;
+  const row = await (await codes()).findOne({ _id: code, createdAt: { $gt: new Date(Date.now() - CODE_TTL_MS) } });
+  if (!row || !ObjectId.isValid(row.userId)) return null;
+  const u = (await usersCol().findOne({ _id: new ObjectId(row.userId) })) as { email?: string } | null;
+  return u ? { userId: row.userId, email: u.email || "" } : null;
+}
+
+/** Uses the code (atomically, once). */
+export async function consumeLinkCode(code: string): Promise<string | null> {
+  if (!/^[a-f0-9]{36}$/.test(code)) return null;
+  const row = await (await codes()).findOneAndDelete({ _id: code, createdAt: { $gt: new Date(Date.now() - CODE_TTL_MS) } });
+  return row?.userId ?? null;
 }
