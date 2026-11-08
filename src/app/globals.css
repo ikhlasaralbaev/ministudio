@@ -263,3 +263,10 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .ikat-loader i, .ms-skeleton, .ai-working, .rise { animation: none; }
 }
+
+.lb-muted { color: var(--muted); border-color: var(--line); }
+.cell-img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; border: 1px solid var(--line); background: var(--panel-2); }
+
+/* schema diagram: lines are drawn only when the three columns are side by side (>= lg) */
+.schema-wrap { --diagram: 0; }
+@media (min-width: 1024px) { .schema-wrap { --diagram: 1; } }

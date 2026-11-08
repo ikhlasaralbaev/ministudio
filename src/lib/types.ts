@@ -96,6 +96,8 @@ export interface UINode {
  * MongoDB stores `undefined` as null, so documents read back from the database carry nulls on optional fields.
  */
 const opt = <T extends z.ZodType>(s: T) => s.nullish().transform((v) => v ?? undefined);
+/** Like opt(), but the key itself may be missing in the type. */
+const optk = <T extends z.ZodType>(s: T) => opt(s).optional();
 
 export const NodeSchema: z.ZodType<UINode> = z.lazy(() =>
   z.object({
@@ -112,11 +114,29 @@ export const NodeSchema: z.ZodType<UINode> = z.lazy(() =>
 
 /* ---------- App document ---------- */
 
+/**
+ * A field of a collection. `type` is free text from the AI (string, number, array...) or one of the panel's types:
+ * text, number, money, boolean, date, phone, url, image, select, relation, list, object.
+ */
+export const CollectionFieldSchema = z.object({
+  name: z.string(),
+  type: z.string(),
+  label: optk(z.string()),
+  /** type "relation": the collection (static or records) this field points at (by its id / number). */
+  ref: optk(z.string()),
+  /** type "select": allowed values (shown as badges, filterable). */
+  options: optk(z.array(z.string())),
+});
+export type CollectionField = z.infer<typeof CollectionFieldSchema>;
+
 export const CollectionSchema = z.object({
   name: z.string(),
   // static: data lives in the doc (menu, products). records: written at runtime (orders) and stored in DB.
   mode: z.enum(["static", "records"]),
-  fields: z.array(z.object({ name: z.string(), type: z.string() })).default([]),
+  fields: z.array(CollectionFieldSchema).default([]),
+  /** Human title shown in the owner's panel (defaults to the name). */
+  label: optk(z.string()),
+  description: optk(z.string()),
   data: z.array(z.record(z.string(), z.unknown())).optional(),
 });
 export type Collection = z.infer<typeof CollectionSchema>;
@@ -131,8 +151,6 @@ export const ThemeSchema = z.object({
 
 /* ---------- Telegram bot (chat features besides the mini app) ---------- */
 // ids are short slugs so they fit Telegram's 64-byte callback_data ("m:<id>", "f:<id>").
-/** Like opt(), but the key itself may be missing in the type. */
-const optk = <T extends z.ZodType>(s: T) => opt(s).optional();
 const botId = z.string().regex(/^[a-z0-9_-]{1,24}$/, "id: a-z, 0-9, _ yoki -");
 
 export const BotButtonSchema = z.object({

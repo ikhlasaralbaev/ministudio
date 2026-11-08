@@ -5,7 +5,7 @@ export const SPEC = `
   "name": string,
   "theme": { "primary": "#hex", "background": "#hex", "text": "#hex", "radius": number, "font": css-font-family },
   "state": { key: initial value },            // runtime state, e.g. { "cart": [], "name": "", "phone": "" }
-  "collections": [ { "name": string, "mode": "static" | "records", "fields": [{ "name", "type" }], "data"?: [ {...} ] } ],
+  "collections": [ { "name": string, "mode": "static" | "records", "label"?: string, "fields": [{ "name", "type", "label"?, "ref"?, "options"? }], "data"?: [ {...} ] } ],
       // static  = data stored inside the app (menu, products, services). Read as collections.<name>
       // records = rows written at runtime with dbInsert (orders, transactions, bookings). Stored in the DB per Telegram user,
       //           visible and exportable for the owner in admin. Read as collections.<name> = THE CURRENT USER'S OWN rows,
@@ -61,6 +61,10 @@ IMPORTANT: string literals inside expressions need quotes: "value": "'pending'".
 - state is temporary: it resets every time the app is opened. Anything the user creates and expects to see again
   (orders, expenses/income entries, bookings, notes, favorites, history) MUST be a "records" collection written with dbInsert
   and displayed straight from collections.<name> (List source "collections.<name>", totals like sum(collections.<name>, 'amount')).
+- ALWAYS declare "fields" for every collection (the owner sees them as a typed table and a relations diagram). "type" is one of:
+  text, number, money (prices, totals), boolean, date (ISO), phone, url, image (url), select (+ "options": ["new","accepted","done"], use it for statuses),
+  relation (+ "ref": <other collection name>: the value is that row's id), list (array of items, e.g. order items), object.
+  Give collections and fields a short human "label" in the app's language. Order items must carry the catalog row "id" (so the order links to the product).
 - Never mirror records into state (no "append to state.items" next to dbInsert): it disappears on reopen and gets out of sync.
 - Edit/delete such data with dbUpdate/dbDelete using item._id. Show "My orders"/"History" screens from collections.<name>.
 - Use state only for UI and drafts: current tab, form inputs, the cart before checkout, selected item.

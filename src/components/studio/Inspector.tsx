@@ -5,6 +5,7 @@ import { z } from "zod";
 import { ActionSchema, CollectionSchema, type AppDoc, type Op, type UINode } from "@/lib/types";
 import { describeAction } from "./describe";
 import { BotEditor } from "./BotEditor";
+import { CollectionEditor, StateEditor } from "./DataEditors";
 
 const inp =
   "w-full rounded-md border border-line bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
@@ -383,30 +384,9 @@ export function AppInspector({ doc, apply }: { doc: AppDoc; apply: (ops: Op[], c
         </Row>
       </Section>
       <BotEditor doc={doc} apply={apply} />
-      <Section title="State (boshlang'ich)">
-        <JsonEdit
-          value={doc.state}
-          rows={5}
-          onApply={(v) => {
-            const ops: Op[] = Object.entries(v as Record<string, unknown>).map(([key, value]) => ({ op: "setState", key, value }));
-            apply(ops);
-          }}
-        />
-        <p className="text-[11px] text-muted">Ifodalarda <code className="text-fg/70">state.kalit</code> deb ishlatiladi.</p>
-      </Section>
+      <StateEditor doc={doc} apply={apply} />
       {doc.collections.map((c) => (
-        <Section key={c.name} title={`Kolleksiya · ${c.name}`} right={<span className="text-[11px] text-muted">{c.mode === "static" ? `${c.data?.length || 0} ta` : "bazada"}</span>}>
-          {c.mode === "static" ? (
-            <JsonEdit
-              value={c.data || []}
-              rows={8}
-              onApply={(v) => apply([{ op: "setCollection", collection: { ...c, data: v } }])}
-              validate={(v) => (Array.isArray(v) ? null : "Massiv bo'lishi kerak")}
-            />
-          ) : (
-            <p className="text-[12px] text-muted">Ilova ishlaganda yoziladi. &quot;Ma&apos;lumotlar&quot; bo&apos;limida ko&apos;rinadi.</p>
-          )}
-        </Section>
+        <CollectionEditor key={c.name} doc={doc} c={c} apply={apply} />
       ))}
       <Section title="Yangi kolleksiya">
         <NewCollection onAdd={(c) => apply([{ op: "setCollection", collection: c }])} />

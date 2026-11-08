@@ -4,7 +4,7 @@ import type { Locale } from "./config";
 
 const uz = {
   tagline: "Promptdan Telegram Mini App’gacha",
-  nav: { projects: "Loyihalar", studio: "Studio", settings: "Sozlamalar", data: "Ma’lumotlar", admin: "Admin", signOut: "Chiqish", language: "Til", project: "Loyiha" },
+  nav: { projects: "Loyihalar", studio: "Studio", settings: "Sozlamalar", data: "Ma’lumotlar", schema: "Tuzilma", admin: "Admin", signOut: "Chiqish", language: "Til", project: "Loyiha" },
   banner: { admin: "Admin rejimi: siz {email} loyihasidasiz. Harakatlaringiz jurnalga yoziladi.", suspended: "Loyiha administrator tomonidan to‘xtatilgan: ilova va bot foydalanuvchilar uchun ishlamaydi.", owner: "egasi" },
   dash: {
     newTitle: "Yangi loyiha", newHint: "Nom bering → bot token va kalitlarni kiriting → prompt yozing → tahrirlang → publish.",
@@ -22,7 +22,7 @@ export type AppDict = typeof uz;
 
 const en: AppDict = {
   tagline: "From a prompt to a Telegram Mini App",
-  nav: { projects: "Projects", studio: "Studio", settings: "Settings", data: "Data", admin: "Admin", signOut: "Sign out", language: "Language", project: "Project" },
+  nav: { projects: "Projects", studio: "Studio", settings: "Settings", data: "Data", schema: "Schema", admin: "Admin", signOut: "Sign out", language: "Language", project: "Project" },
   banner: { admin: "Admin mode: you are inside {email}’s project. Your actions are logged.", suspended: "This project was suspended by an administrator: the app and bot are offline for users.", owner: "the owner" },
   dash: {
     newTitle: "New project", newHint: "Name it → add the bot token and keys → write a prompt → edit → publish.",
@@ -38,7 +38,7 @@ const en: AppDict = {
 
 const ru: AppDict = {
   tagline: "От промпта до Telegram Mini App",
-  nav: { projects: "Проекты", studio: "Студия", settings: "Настройки", data: "Данные", admin: "Админ", signOut: "Выйти", language: "Язык", project: "Проект" },
+  nav: { projects: "Проекты", studio: "Студия", settings: "Настройки", data: "Данные", schema: "Структура", admin: "Админ", signOut: "Выйти", language: "Язык", project: "Проект" },
   banner: { admin: "Режим админа: вы в проекте {email}. Ваши действия записываются в журнал.", suspended: "Проект приостановлен администратором: приложение и бот для пользователей не работают.", owner: "владельца" },
   dash: {
     newTitle: "Новый проект", newHint: "Назовите → укажите токен бота и ключи → напишите промпт → отредактируйте → опубликуйте.",
@@ -54,7 +54,7 @@ const ru: AppDict = {
 
 const kaa: AppDict = {
   tagline: "Promptdan Telegram Mini App’qa shekem",
-  nav: { projects: "Joybarlar", studio: "Studio", settings: "Sazlawlar", data: "Mag‘lıwmatlar", admin: "Admin", signOut: "Shıǵıw", language: "Til", project: "Joybar" },
+  nav: { projects: "Joybarlar", studio: "Studio", settings: "Sazlawlar", data: "Mag‘lıwmatlar", schema: "Dúzilis", admin: "Admin", signOut: "Shıǵıw", language: "Til", project: "Joybar" },
   banner: { admin: "Admin rejimi: siz {email} joybarındasız. Háreketlerińiz jurnalǵa jazıladı.", suspended: "Joybar administrator tárepinen toqtatılǵan: ilova hám bot paydalanıwshılar ushın islemeydi.", owner: "iyesi" },
   dash: {
     newTitle: "Taza joybar", newHint: "Atın beriń → bot token hám kilitlerdi kiritiń → prompt jazıń → tártipleń → publish.",

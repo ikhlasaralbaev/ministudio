@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { Database, Gear, ShieldCheck, SquaresFour, Sparkle } from "@phosphor-icons/react";
+import { Database, Gear, ShieldCheck, SquaresFour, Sparkle, TreeStructure } from "@phosphor-icons/react";
 import { LangSwitch, Logo, useMe, UserMenu } from "@/components/ui";
 import { useT } from "@/i18n/client";
 
@@ -30,6 +30,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         { href: `/projects/${pid}/studio`, label: t.nav.studio, icon: <Sparkle size={18} />, match: (p) => p.endsWith("/studio") },
         { href: `/projects/${pid}/settings`, label: t.nav.settings, icon: <Gear size={18} />, match: (p) => p.endsWith("/settings") },
         { href: `/projects/${pid}/data`, label: t.nav.data, icon: <Database size={18} />, match: (p) => p.endsWith("/data") },
+        { href: `/projects/${pid}/schema`, label: t.nav.schema, icon: <TreeStructure size={18} />, match: (p) => p.endsWith("/schema") },
       ]
     : [];
 
