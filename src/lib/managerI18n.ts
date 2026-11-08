@@ -116,7 +116,7 @@ const uz: BotDict = {
     no: "Yo‘q",
   },
   listTitle: "📁 <b>Loyihalaringiz</b>\n\nLoyihani tanlang:",
-  noProjects: "📁 <b>Hali loyiha yo‘q</b>\n\nBoshlash uchun «Yangi loyiha» ni bosing.",
+  noProjects: "📁 <b>Hali loyiha yo‘q</b>\n\nBoshlash uchun «Yangi loyiha» tugmasini bosing.",
   card: (c) =>
     [
       `<b>${c.name}</b>`,
@@ -153,12 +153,12 @@ const uz: BotDict = {
   ordersTitle: (name) => `📦 <b>${name}</b> — oxirgi yozuvlar`,
   noRecords: (name) => `📦 <b>${name}</b>\n\nHozircha yozuv yo‘q.`,
   botHas: "🤖 Bu loyihaga bot allaqachon ulangan.",
-  botCreate: "🤖 <b>Bot yaratish</b>\n\nTelegram ekrani ochiladi — «Yaratish» ni bosing. Bot o‘zi ulanadi.",
+  botCreate: "🤖 <b>Bot yaratish</b>\n\nTelegram ekrani ochiladi — «Yaratish» tugmasini bosing. Bot o‘zi ulanadi.",
   err: { limit: "Kunlik AI so‘rovlari limiti tugadi. Ertaga urinib ko‘ring.", notFound: "Loyiha topilmadi.", noRights: "Bu amal uchun huquq yetarli emas.", generic: "Bajarib bo‘lmadi. Qayta urinib ko‘ring." },
   failed: (why) => `⚠️ ${why}`,
   link: {
-    confirm: (email) => `🔗 <b>Shu Telegram ulansinmi?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBu siz bo‘lmasangiz — «Yo‘q» ni bosing.`,
-    expired: "⌛️ Havola eskirgan yoki yaroqsiz. Saytda «Telegramni ulash» ni qayta bosing.",
+    confirm: (email) => `🔗 <b>Shu Telegram ulansinmi?</b>\n\nMiniStudio akkaunti: <b>${email}</b>\n\nBu siz bo‘lmasangiz — «Yo‘q» tugmasini bosing.`,
+    expired: "⌛️ Havola eskirgan yoki yaroqsiz. Saytda «Telegramni ulash» tugmasini qayta bosing.",
     declined: "Bekor qilindi.",
     linked: "✅ <b>Telegram ulandi</b>\n\nSaytga qayting yoki /start bosing.",
     failed: (why) => `⚠️ Ulanmadi: ${why}`,
@@ -272,12 +272,12 @@ const en: BotDict = {
 
 const kaa: BotDict = {
   blocked: "⛔️ Akkauntıńız bloklanǵan.",
-  menu: `<b>MiniStudio</b> — Telegram ilovaların jaratıw konstruktorı\n\nIlova jaratıń, ápiwayı sóz benen tártipleń hám chattıń ózinen publish etiń.\n\n📁 /projects — joybarlarıńız\n➕ /new — taza joybar\n🌐 /language — til\n❌ /cancel — biykarlaw`,
+  menu: `<b>MiniStudio</b> — Telegram ilovaların jaratıw konstruktorı\n\nIlova jaratıń, ápiwayı sóz benen dúzetiń hám chattıń ózinen publish etiń.\n\n📁 /projects — joybarlarıńız\n➕ /new — taza joybar\n🌐 /language — til\n❌ /cancel — biykarlaw`,
   btn: {
     projects: "📁 Joybarlar",
     newProject: "➕ Taza joybar",
     panel: "🖥 Paneldi ashıw",
-    edit: "✏️ AI menen tártiplew",
+    edit: "✏️ AI menen dúzetiw",
     publish: "🚀 Publish",
     orders: "📦 Buyırtpalar",
     createBot: "🤖 Bot jaratıw",
@@ -285,7 +285,7 @@ const kaa: BotDict = {
     back: "‹ Joybarlar",
     allInPanel: "📊 Hámmesi panelde",
     viewInPanel: "🖥 Panelde kóriw",
-    createBotNow: "🤖 Botti jaratıw",
+    createBotNow: "🤖 Bottı jaratıw",
     yes: "✅ Awa, ulaw",
     no: "Yaq",
   },
@@ -310,7 +310,7 @@ const kaa: BotDict = {
   nextBot: "🚀 <b>Keyingi qádem:</b> ilovanı publish etiń — ol derhal siltew arqalı ashıladı. Telegram ishinde ashılıwı ushın bot jaratıń: buni publishten aldın da, keyin de islewge boladı.",
   botConnected: (bot, name, live) =>
     `🤖 <b>@${bot} botı jaratıldı hám ulandı</b>\n\nJoybar: <b>${name}</b>\n${live ? "Ilova botta aldınan islep tur." : "Endi ilovanı publish etiw qaldı — tómendegi túymeni basıń."}`,
-  btnOpenBot: "🤖 Botti ashıw",
+  btnOpenBot: "🤖 Bottı ashıw",
   ownerHint: "🔔 <b>Buyırtpalardı alıw:</b> tómendegi túymeni basıń, soń botta <b>Start</b> basıń — xabarlar usı jerge keledi.",
   ownerLinked: "✅ <b>Siz iyesi retinde ulandıńız</b>\n\nJańa buyırtpa hám tólemler usı jerge keledi.",
   btnBecomeOwner: "🔔 Buyırtpalardı alıw (Start)",

@@ -7,7 +7,7 @@ const uz = {
   nav: { projects: "Loyihalar", studio: "Studio", settings: "Sozlamalar", data: "Ma’lumotlar", schema: "Tuzilma", admin: "Admin", signOut: "Chiqish", language: "Til", project: "Loyiha" },
   banner: { admin: "Admin rejimi: siz {email} loyihasidasiz. Harakatlaringiz jurnalga yoziladi.", suspended: "Loyiha administrator tomonidan to‘xtatilgan: ilova va bot foydalanuvchilar uchun ishlamaydi.", owner: "egasi" },
   dash: {
-    ideaTitle: "Nima yaratamiz?", ideaHint: "Biznesingizni bir-ikki jumlada tasvirlang. AI ilovani o‘zi yaratadi, keyin bir bosishda e‘lon qilasiz.",
+    ideaTitle: "Nima yaratamiz?", ideaHint: "Biznesingizni bir-ikki jumlada tasvirlang. AI ilovani o‘zi yaratadi, keyin bir bosishda e’lon qilasiz.",
     ideaPlaceholder: "Masalan: Nukusdagi gul do‘koni uchun katalog, yetkazib berish va Click to‘lovi", ideaCreate: "Ilovani yaratish", ideaCreating: "Yaratilmoqda…", loading: "Yuklanmoqda…",
     examples: ["Kafe uchun menyu, savat va yetkazib berish", "Sartaroshxonaga yozilish: xizmat, usta va vaqt", "O‘quv markazi: kurslar katalogi va ariza", "Kompyuter klubi: kabinalar va bron qilish"],
     mine: "Mening loyihalarim", member: "Men a’zo bo‘lgan loyihalar", empty: "Hali loyiha yo‘q. Birinchisini yarating.",
@@ -19,7 +19,7 @@ const uz = {
   build: {
     title: "Ilovangizni yaratyapman",
     hint: "Odatda 30–90 soniya. Sahifani yopmasangiz ham bo‘ladi — hammasi saqlanadi.",
-    phrases: ["G‘oyangizni o‘ylab ko‘ryapman…", "Ekranlarni loyihalayapman…", "Ranglar va shriftlarni tanlayapman…", "Hammasini joy-joyiga qo‘yyapman…", "Ilova mantiqini pishiryapman…", "Ma’lumotlar va katalogni tayyorlayapman…", "Bezayapman…", "Hammasi joyidami, tekshiryapman…", "Deyarli tayyor…"],
+    phrases: ["G‘oyangizni o‘ylab ko‘ryapman…", "Ekranlarni loyihalayapman…", "Ranglar va shriftlarni tanlayapman…", "Hammasini joy-joyiga qo‘yayapman…", "Ilova mantiqini pishiryapman…", "Ma’lumotlar va katalogni tayyorlayapman…", "Bezayapman…", "Hammasi joyidami, tekshiryapman…", "Deyarli tayyor…"],
   },
   login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
 };
@@ -72,14 +72,14 @@ const ru: AppDict = {
 
 const kaa: AppDict = {
   tagline: "Promptdan Telegram Mini App’qa shekem",
-  nav: { projects: "Joybarlar", studio: "Studio", settings: "Sazlawlar", data: "Mag‘lıwmatlar", schema: "Dúzilis", admin: "Admin", signOut: "Shıǵıw", language: "Til", project: "Joybar" },
+  nav: { projects: "Joybarlar", studio: "Studio", settings: "Sazlawlar", data: "Maǵlıwmatlar", schema: "Dúzilis", admin: "Admin", signOut: "Shıǵıw", language: "Til", project: "Joybar" },
   banner: { admin: "Admin rejimi: siz {email} joybarındasız. Háreketlerińiz jurnalǵa jazıladı.", suspended: "Joybar administrator tárepinen toqtatılǵan: ilova hám bot paydalanıwshılar ushın islemeydi.", owner: "iyesi" },
   dash: {
     ideaTitle: "Ne jaratamız?", ideaHint: "Biznesińizdi bir-eki gápte súwretleń. AI ilovanı ózi jaratadı, soń bir basıwda járiyalaysız.",
     ideaPlaceholder: "Mısalı: Nókistegi gúl dúkanı ushın katalog, jetkizip beriw hám Click tólemi", ideaCreate: "Ilovanı jaratıw", ideaCreating: "Jaratılmaqta…", loading: "Júklenbekte…",
     examples: ["Kafe ushın menyu, sebet hám jetkizip beriw", "Shashtarazxanaǵa jazılıw: xızmet, sheber hám waqıt", "Oqıw orayı: kurslar katalogı hám arza", "Kompyuter klubı: kabinalar hám bron"],
     mine: "Meniń joybarlarım", member: "Men aǵza bolǵan joybarlar", empty: "Házirshe joybar joq. Birinshisin jaratıń.",
-    screens: "{n} ekran", blank: "bos", edit: "Tártiplew", view: "Kóriw", suspended: "Toqtatılǵan",
+    screens: "{n} ekran", blank: "bos", edit: "Dúzetiw", view: "Kóriw", suspended: "Toqtatılǵan",
     published: "v{n} járiyalanǵan", unpublished: "járiyalanbaǵan", del: "Óshiriw",
     confirm: "“{name}” joybarı, onıń buyırtpaları hám tólemleri pútkilley óshiriledi. Qaytarıp bolmaydı.\n\nRastlaw ushın joybar atın jazıń:",
     mismatch: "Atı sáykes kelmedi, joybar óshirilmedi.",
@@ -87,7 +87,7 @@ const kaa: AppDict = {
   build: {
     title: "Ilovańızdı jaratıp atırman",
     hint: "Odatda 30–90 sekund. Betti jabıwdıń keregi joq — hámmesi saqlanadı.",
-    phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Ilova logikasın pisirip atırman…", "Mag‘lıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
+    phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Ilova logikasın pisirip atırman…", "Maǵlıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
   },
   login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
 };
