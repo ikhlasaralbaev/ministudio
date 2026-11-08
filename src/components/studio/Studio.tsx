@@ -1017,7 +1017,6 @@ function PublishModal({
   onBot: (botUsername: string | null) => void;
   onClose: () => void;
 }) {
-  const [copied, setCopied] = useState(false);
   const warnings = res.botUsername ? res.warnings : res.warnings.filter((w) => !/Bot token|OWNER_CHAT_ID/.test(w));
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
@@ -1043,21 +1042,6 @@ function PublishModal({
             />
           </div>
         )}
-        <div className="flex items-center gap-2 rounded-xl bg-panel-2 px-3 py-2">
-          <code className="flex-1 truncate text-[12px]">{res.url}</code>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(res.url);
-              setCopied(true);
-            }}
-            className="text-[12px] text-accent-2"
-          >
-            {copied ? "Nusxalandi" : "Nusxalash"}
-          </button>
-          <a href={res.url} target="_blank" className="text-[12px] text-muted hover:text-fg">
-            ↗
-          </a>
-        </div>
         {/* without a bot, the bot card above already says what is missing: do not repeat it as warnings */}
         {warnings.length > 0 && (
           <ul className="mt-4 space-y-1.5 text-[13px] text-warn">
