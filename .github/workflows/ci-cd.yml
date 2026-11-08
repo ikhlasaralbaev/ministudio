@@ -17,17 +17,18 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    services:
-      mongo:
-        image: mongo:8
-        ports: ["27017:27017"]
-        options: >-
-          --health-cmd 'mongosh --quiet --eval "db.runCommand({ping:1})"' 
-          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       MONGODB_TEST_URI: mongodb://127.0.0.1:27017
     steps:
       - uses: actions/checkout@v4
+      - name: Start MongoDB
+        run: |
+          docker run -d --name mongo -p 27017:27017 mongo:8
+          for i in $(seq 1 30); do
+            docker exec mongo mongosh --quiet --eval "db.runCommand({ping:1}).ok" >/dev/null 2>&1 && exit 0
+            sleep 2
+          done
+          docker logs mongo; exit 1
       - uses: actions/setup-node@v4
         with:
           node-version: 22
