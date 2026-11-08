@@ -161,10 +161,10 @@ function Section({ title, rows, empty, onRemove, onCopy }: { title: string; rows
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((p, i) => (
-            <div key={p._id} style={{ ["--i" as string]: i }} className="rise card group p-4 transition hover:border-muted">
+            <div key={p._id} style={{ ["--i" as string]: i }} className="rise card press group p-4">
               <Link href={`/projects/${p._id}/studio`} className="block">
                 <div
-                  className="relative mb-4 flex h-28 items-end overflow-hidden rounded-lg border border-line p-3"
+                  className="relative mb-4 flex h-28 items-end overflow-hidden rounded-xl p-3"
                   style={{
                     background: p.theme
                       ? `linear-gradient(135deg, ${p.theme.primary}, ${p.theme.primary}55)`

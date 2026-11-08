@@ -10,7 +10,7 @@ import { useParams } from "next/navigation";
 import { CollectionEditor, StateEditor } from "./DataEditors";
 
 const inp =
-  "w-full rounded-md border border-line bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
+  "w-full rounded-lg bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
 
 export function Section({ title, children, right }: { title: string; children: React.ReactNode; right?: React.ReactNode }) {
   return (
@@ -441,7 +441,7 @@ function NewCollection({ onAdd }: { onAdd: (c: z.infer<typeof CollectionSchema>)
           onAdd({ name, mode, fields: [], ...(mode === "static" ? { data: [] } : {}) });
           setName("");
         }}
-        className="rounded-md bg-panel-2 px-2 text-[13px] hover:bg-line disabled:opacity-40"
+        className="btn btn-sm px-2"
       >
         +
       </button>

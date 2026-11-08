@@ -8,6 +8,8 @@ import { AppView, useRuntime, type Host } from "@/components/runtime";
 import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
 import { SharePoster } from "@/components/SharePoster";
+import { motion } from "motion/react";
+import { SPRING } from "@/lib/springs";
 import { AiPrompt } from "@/components/AiPrompt";
 import { BuildingScreen } from "@/components/BuildingScreen";
 import { useAttachments } from "@/components/Attachments";
@@ -383,12 +385,13 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         project={project}
         right={
           <>
-            <div className="mr-1 flex rounded-lg bg-panel-2 p-0.5 text-[13px]" title="Studio ko'rinishi">
+            <div className="seg mr-1" title="Studio ko'rinishi">
               {(["vibe", "advanced"] as Layout[]).map((l) => (
                 <button
                   key={l}
                   onClick={() => setLayout(l)}
-                  className={`rounded-md px-2.5 py-1 ${layout === l ? "bg-line text-fg" : "text-muted hover:text-fg"}`}
+                  aria-pressed={layout === l}
+                  className="seg-item"
                 >
                   {l === "vibe" ? <><Sparkle weight="fill" className="mr-1 inline" />Vibe</> : "Advanced"}
                 </button>
@@ -415,12 +418,13 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
               {!readOnly && (
                 <ModelPicker projectId={id} value={aiModel} onChange={setAiModel} onError={(m) => toast(m, "err")} />
               )}
-              {!vibe && <div className="mx-2 flex rounded-lg bg-panel-2 p-0.5 text-sm">
+              {!vibe && <div className="seg mx-2">
                 {(["edit", "preview"] as Mode[]).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
-                    className={`rounded-md px-3 py-1 ${mode === m ? "bg-line text-fg" : "text-muted hover:text-fg"}`}
+                    aria-pressed={mode === m}
+                    className="seg-item"
                   >
                     {m === "edit" ? "Tahrirlash" : "▶ Sinash"}
                   </button>
@@ -560,14 +564,17 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       {/* toasts */}
       <div className="pointer-events-none fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 flex-col items-center gap-2">
         {toasts.map((t) => (
-          <div
+          <motion.div
             key={t.id}
-            className={`pointer-events-auto max-w-lg rounded-xl px-4 py-2.5 text-sm shadow-2xl ${
-              t.kind === "err" ? "bg-danger/90 text-white" : t.kind === "ok" ? "bg-ok/95 text-white" : "bg-panel-2 text-white"
+            initial={{ opacity: 0, y: 14, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={SPRING.smooth}
+            className={`pointer-events-auto max-w-lg rounded-full px-4 py-2.5 text-sm font-medium shadow-[var(--shadow)] ${
+              t.kind === "err" ? "bg-danger text-white" : t.kind === "ok" ? "bg-ok text-white" : "glass text-fg"
             }`}
           >
             {t.text}
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -941,7 +948,7 @@ function CommentBox({
   };
   return (
     <div
-      className="absolute z-20 w-[280px] rounded-2xl border border-line bg-panel p-3 shadow-2xl"
+      className="absolute z-20 w-[280px] card p-3 shadow-2xl"
       style={{ top, left }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -998,7 +1005,7 @@ function GlobalBar({ busy, disabled, onSend }: { busy: boolean; disabled: boolea
   const [text, setText] = useState("");
   return (
     <div className="shrink-0 border-t border-line bg-panel px-4 py-3">
-      <div className={`mx-auto flex max-w-2xl items-center gap-2 rounded-xl border border-line bg-panel-2 px-3 py-1.5 ${busy ? "ai-working" : ""}`}>
+      <div className={`mx-auto flex max-w-2xl items-center gap-2 rounded-2xl bg-panel-2 px-3 py-1.5 ${busy ? "ai-working" : ""}`}>
         <Sparkle weight="fill" className="text-accent-2" />
         <input
           value={text}
@@ -1063,8 +1070,14 @@ function PublishModal({
 }) {
   const warnings = res.botUsername ? res.warnings : res.warnings.filter((w) => !/Bot token|OWNER_CHAT_ID/.test(w));
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-2xl border border-line bg-panel p-6" onClick={(e) => e.stopPropagation()}>
+    <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4 backdrop-blur-sm" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+      <motion.div
+        className="w-full max-w-md rounded-[28px] bg-panel p-6 shadow-[var(--sh)]"
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.94, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={SPRING.smooth}
+      >
         <div className="mb-1 text-3xl text-accent-2"><RocketLaunch weight="duotone" className="mx-auto" /></div>
         <h2 className="mb-4 text-lg font-semibold">Ilova e&apos;lon qilindi <span className="text-sm font-normal text-muted">v{res.version}</span></h2>
         {res.botUsername && (
@@ -1104,10 +1117,10 @@ function PublishModal({
             ))}
           </ul>
         )}
-        <button onClick={onClose} className="mt-5 w-full rounded-xl bg-panel-2 py-2 text-sm hover:bg-line">
+        <button onClick={onClose} className="btn mt-5 w-full">
           Yopish
         </button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

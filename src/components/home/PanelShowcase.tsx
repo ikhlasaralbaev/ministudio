@@ -124,7 +124,7 @@ export function PanelShowcase({ tabs, frame }: { tabs: PanelTab[]; frame: string
                 <iframe
                   ref={frameRef}
                   title={frame}
-                  src="/demo/panel.html?embed=1&v=3#studio"
+                  src="/demo/panel.html?embed=1&v=4#studio"
                   onLoad={() => {
                     ready.current = true;
                     post(pending.current);

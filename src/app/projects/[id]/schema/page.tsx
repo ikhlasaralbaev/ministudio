@@ -38,7 +38,7 @@ function NodeCard({ n, id, hot, dim, setRef, onHover }: { n: SchemaNode; id: str
       ref={setRef}
       onMouseEnter={() => onHover(n.name)}
       onMouseLeave={() => onHover(null)}
-      className={`card w-full overflow-hidden transition ${hot ? "border-accent shadow-[0_0_0_3px_#2f81f733]" : ""} ${dim ? "opacity-45" : ""}`}
+      className={`card w-full overflow-hidden transition ${hot ? "border-accent shadow-[0_0_0_4px_color-mix(in_srgb,var(--accent)_30%,transparent)]" : ""} ${dim ? "opacity-45" : ""}`}
     >
       <div className="flex items-center gap-2 border-b border-line bg-panel-2/50 px-3 py-2">
         <span className={`lb lb-${tone} !px-1.5`}>{icon(n)}</span>

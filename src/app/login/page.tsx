@@ -76,12 +76,12 @@ function LoginInner() {
 
   return (
     <main className="relative grid min-h-dvh place-items-center overflow-hidden px-6">
-      <div className="pointer-events-none absolute left-1/2 top-[-260px] h-[620px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,#a371f744,#2f81f722_45%,transparent_72%)] blur-xl" />
+      <div className="pointer-events-none absolute left-1/2 top-[-260px] h-[620px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--pur)_22%,transparent),color-mix(in_srgb,var(--accent)_13%,transparent)_45%,transparent_72%)] blur-xl" />
       <div className="absolute left-4 top-4 flex items-center gap-3">
         <Link href="/" className="btn btn-sm"><ArrowLeft /> {t.login.back}</Link>
       </div>
       <div className="absolute right-4 top-4"><LangSwitch /></div>
-      <div className="rise relative w-full max-w-sm rounded-xl border border-line bg-panel p-8 text-center shadow-[var(--shadow)]">
+      <div className="rise relative w-full max-w-sm rounded-[28px] bg-panel p-9 text-center shadow-[var(--sh)]">
         <div className="mb-4 flex justify-center">
           <Logo size={48} />
         </div>
@@ -91,7 +91,7 @@ function LoginInner() {
         <button
           onClick={signIn}
           disabled={busy}
-          className="btn btn-lg w-full gap-3 !bg-white !text-black hover:!bg-white/90"
+          className="btn btn-lg w-full gap-3 !bg-fg !text-bg"
         >
           <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden>
             <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />

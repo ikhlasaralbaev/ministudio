@@ -5,7 +5,7 @@ import { formatButtons, formatKeyboard, formatSteps, parseButtons, parseKeyboard
 import { Row, Section, Txt } from "./Inspector";
 
 type Apply = (ops: Op[], coalesceKey?: string) => void;
-const sel = "w-full rounded-md border border-line bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
+const sel = "w-full rounded-lg bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
 
 function Target({ value, onChange, targets }: { value: string; onChange: (v: string) => void; targets: string[] }) {
   return (

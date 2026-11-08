@@ -8,7 +8,7 @@ import type { AppDoc, Collection, CollectionField, Op } from "@/lib/types";
 import { Row, Section, Txt } from "./Inspector";
 
 type Apply = (ops: Op[], coalesceKey?: string) => void;
-const sel = "w-full rounded-md border border-line bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
+const sel = "w-full rounded-lg bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
 
 const primitive = (v: unknown) => v === null || ["string", "number", "boolean"].includes(typeof v);
 /** "12" -> 12, "true" -> true, anything else stays text. */

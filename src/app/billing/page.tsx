@@ -36,7 +36,7 @@ export default function BillingPage() {
       {!d && !err && <div className="ms-skeleton h-32 rounded-xl border border-line" />}
       {d && (
         <div className="space-y-6">
-          <section className="rounded-xl border border-line bg-panel p-5">
+          <section className="card p-5">
             <p className="text-sm text-muted">{t.billing.balance}</p>
             {d.unmetered ? (
               <p className="mt-1 text-sm">{t.billing.unmetered}</p>
@@ -48,7 +48,7 @@ export default function BillingPage() {
             <p className="mt-3 text-sm text-muted">{t.billing.how}</p>
           </section>
 
-          <section className="rounded-xl border border-line bg-panel p-5">
+          <section className="card p-5">
             <h2 className="mb-1 font-semibold">{t.billing.topupTitle}</h2>
             <p className="text-sm text-muted">{t.billing.topupSoon}</p>
           </section>
@@ -59,7 +59,7 @@ export default function BillingPage() {
               {d.history.length === 0 ? (
                 <p className="text-sm text-muted">{t.billing.noHistory}</p>
               ) : (
-                <ul className="divide-y divide-line rounded-xl border border-line bg-panel">
+                <ul className="divide-y divide-line card">
                   {d.history.map((r, i) => (
                     <li key={i} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                       <span className="min-w-0 flex-1">

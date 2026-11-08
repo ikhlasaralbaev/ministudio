@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { motion } from "motion/react";
 import { api } from "@/lib/client";
+import { SPRING } from "@/lib/springs";
 import { AI_MODELS, resolveModel } from "@/lib/models";
 
 /** Claude model used for this project's generation and edits. Saved on the project. */
@@ -50,14 +52,19 @@ export function ModelPicker({
         type="button"
         onClick={() => setOpen((o) => !o)}
         title="AI modeli"
-        className="flex items-center gap-1.5 rounded-lg border border-line bg-panel-2 px-2.5 py-1 text-[13px] text-fg/90 hover:border-accent/60"
+        className="btn btn-sm gap-1.5"
       >
         <span className="text-accent-2">✦</span>
         {current.label}
         <span className="text-[10px] text-muted">▾</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 w-72 overflow-hidden rounded-xl border border-line bg-panel p-1 shadow-2xl">
+        <motion.div
+          className="glass absolute right-0 top-full z-50 mt-1.5 w-72 origin-top-right overflow-hidden rounded-2xl p-1.5 shadow-[var(--shadow)]"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={SPRING.snappy}
+        >
           <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Claude modeli</p>
           {AI_MODELS.map((m) => (
             <button
@@ -65,7 +72,7 @@ export function ModelPicker({
               type="button"
               onClick={() => !m.disabled && pick(m.id)}
               disabled={m.disabled}
-              className={`flex w-full items-start gap-2 rounded-lg px-3 py-2 text-left ${m.disabled ? "cursor-not-allowed opacity-45" : "hover:bg-panel-2"} ${m.id === current.id ? "bg-panel-2" : ""}`}
+              className={`flex w-full items-start gap-2 rounded-xl px-3 py-2 text-left ${m.disabled ? "cursor-not-allowed opacity-45" : "hover:bg-panel-2"} ${m.id === current.id ? "bg-panel-2" : ""}`}
             >
               <span className="mt-0.5 w-3 text-accent-2">{m.id === current.id ? "✓" : ""}</span>
               <span>
@@ -75,7 +82,7 @@ export function ModelPicker({
             </button>
           ))}
           <p className="px-3 pb-2 pt-1 text-[11px] text-muted/80">Narx: 1M kirish / chiqish token uchun</p>
-        </div>
+        </motion.div>
       )}
     </div>
   );

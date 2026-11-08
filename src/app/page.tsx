@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { ArrowRight, CaretRight, GoogleLogo, MagnifyingGlass, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, CaretRight, GoogleLogo, PaperPlaneTilt } from "@phosphor-icons/react/dist/ssr";
 import { getLocale } from "@/i18n/server";
 import { LOCALES, LOCALE_LABEL } from "@/i18n/config";
 import { HOME } from "@/i18n/home";
@@ -40,11 +40,6 @@ export default async function Landing() {
             <a href="#ship">{d.nav.ship}</a>
           </nav>
           <span className="sp" />
-          <div className="search">
-            <MagnifyingGlass weight="bold" />
-            <span>{d.nav.features}</span>
-            <kbd className="mono">/</kbd>
-          </div>
           <LangSwitch />
           {signedIn ? (
             <Link className="btn g" href="/dashboard">

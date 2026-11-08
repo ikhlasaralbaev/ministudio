@@ -42,7 +42,7 @@ export function TemplateGallery() {
               type="button"
               disabled={!!busy}
               onClick={() => void pick(tpl.id)}
-              className="card flex flex-col items-start gap-1.5 p-3 text-left transition hover:border-muted disabled:opacity-60"
+              className="card press flex flex-col items-start gap-1.5 p-4 text-left disabled:opacity-60"
             >
               <Ico size={22} weight="duotone" className="text-accent" />
               <span className="text-sm font-medium">{tpl.label[locale]}</span>

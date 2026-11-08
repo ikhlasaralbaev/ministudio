@@ -54,7 +54,7 @@ export function TelegramLink() {
 
   if (!st || !st.enabled || st.linked) return null;
   return (
-    <div className="mx-auto mb-8 flex max-w-2xl flex-wrap items-center gap-3 rounded-xl border border-line bg-panel p-4 text-sm">
+    <div className="mx-auto mb-8 flex max-w-2xl flex-wrap items-center gap-3 card p-4 text-sm">
       <TelegramLogo size={22} className="shrink-0 text-accent" />
       <div className="min-w-0 flex-1">
         <p className="font-medium">{t.tg.title}</p>

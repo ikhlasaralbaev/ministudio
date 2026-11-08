@@ -212,7 +212,7 @@ export function ChatPanel({
               ))}
             </div>
           )}
-          <div className={`rounded-2xl border border-line bg-panel-2 p-2 focus-within:border-accent/60 ${busy ? "ai-working" : ""}`} {...imageDropProps(attach, busy)}>
+          <div className={`rounded-2xl bg-panel-2 p-2 focus-within:border-accent/60 ${busy ? "ai-working" : ""}`} {...imageDropProps(attach, busy)}>
             <textarea
               ref={inputRef}
               rows={1}

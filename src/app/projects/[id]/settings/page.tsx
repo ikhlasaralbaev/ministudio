@@ -109,7 +109,7 @@ function SettingsInner() {
       <div className="scroll-thin flex-1 overflow-auto">
         <form onSubmit={save} className="mx-auto max-w-3xl space-y-6 px-6 pt-8">
           {project && !canEdit && (
-            <div className="rounded-xl border border-line bg-panel-2 p-4 text-sm text-muted">
+            <div className="rounded-2xl bg-panel-2 p-4 text-sm text-muted">
               Sizda faqat ko&apos;rish huquqi bor: sozlamalarni o&apos;zgartira olmaysiz.
             </div>
           )}
@@ -124,7 +124,7 @@ function SettingsInner() {
             </div>
           )}
 
-          <section className="rounded-2xl border border-line bg-panel p-6">
+          <section className="card p-6">
             <h2 className="mb-4 font-semibold">Loyiha</h2>
             <Field label="Nomi">
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
@@ -136,7 +136,7 @@ function SettingsInner() {
           </section>
 
           {groups.map((g) => (
-            <section key={g} className="rounded-2xl border border-line bg-panel p-6">
+            <section key={g} className="card p-6">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-semibold">{g}</h2>
                 {g === "Telegram" && data?.botUsername && (
@@ -186,7 +186,7 @@ function SettingsInner() {
             </section>
           ))}
 
-          <section className="rounded-2xl border border-line bg-panel p-6">
+          <section className="card p-6">
             <h2 className="mb-1 font-semibold">Boshqa o&apos;zgaruvchilar</h2>
             <p className="mb-4 text-sm text-muted">Har qanday qo&apos;shimcha kalit. Barchasi shifrlangan holda saqlanadi.</p>
             <div className="space-y-2">
@@ -233,7 +233,7 @@ function SettingsInner() {
           {project && me && <Members projectId={id} perms={project.permissions} userId={me.id} />}
 
           {project && (
-            <section className="rounded-2xl border border-line bg-panel p-6">
+            <section className="card p-6">
               <h2 className="mb-1 font-semibold">Nusxa va eksport</h2>
               <p className="mb-4 text-sm text-muted">Ilovaning dizayni va mantig&apos;i (kalitlar, buyurtmalar va mijozlar ma&apos;lumoti kirmaydi).</p>
               <div className="flex flex-wrap gap-2">

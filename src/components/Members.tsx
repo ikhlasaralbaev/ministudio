@@ -118,7 +118,7 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
   const loginUrl = typeof window !== "undefined" ? `${window.location.origin}/login` : "/login";
 
   return (
-    <section className="rounded-2xl border border-line bg-panel p-6">
+    <section className="card p-6">
       <h2 className="mb-1 font-semibold">A&apos;zolar</h2>
       <p className="mb-4 text-sm text-muted">
         Qo&apos;shilgan odam Google akkaunti bilan kirganda loyiha uning ro&apos;yxatida paydo bo&apos;ladi.

@@ -2,7 +2,8 @@
 import { shownEmail } from "@/lib/display";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { motion } from "motion/react";
 import { Coins, PaperPlaneTilt, SignOut, Translate } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
 import { fmt } from "@/i18n/app";
@@ -16,8 +17,8 @@ type NavProject = Pick<ProjectDTO, "permissions" | "suspended"> & { ownerEmail?:
 export function Logo({ size = 28 }: { size?: number }) {
   return (
     <div
-      className="grid shrink-0 place-items-center rounded-lg bg-gradient-to-br from-accent to-pur text-white"
-      style={{ width: size, height: size }}
+      className="grid shrink-0 place-items-center bg-gradient-to-br from-accent to-pur text-white shadow-[0_2px_8px_color-mix(in_srgb,var(--accent)_35%,transparent)]"
+      style={{ width: size, height: size, borderRadius: size * 0.26 }}
     >
       <PaperPlaneTilt weight="fill" size={size * 0.58} />
     </div>
@@ -99,7 +100,7 @@ export function UserMenu({ me }: { me: Me }) {
   return (
     <div className="flex items-center gap-2 text-sm">
       {credits !== null && (
-        <Link href="/billing" title={t.billing.chipTitle} className={`btn btn-sm ${credits <= 0 ? "border-danger/60 text-danger" : ""}`}>
+        <Link href="/billing" title={t.billing.chipTitle} className={`btn btn-sm ${credits <= 0 ? "text-danger" : ""}`}>
           <Coins size={14} weight="fill" /> {credits <= 0 ? t.billing.empty : formatCredits(credits)}
         </Link>
       )}
@@ -118,21 +119,24 @@ export function UserMenu({ me }: { me: Me }) {
   );
 }
 
-/** Four-language switcher (cookie based). */
+/** Four-language switcher: an iOS-style segmented control whose thumb glides to the chosen language on a spring. */
 export function LangSwitch({ className = "" }: { className?: string }) {
   const locale = useLocale();
   const setLocale = useSetLocale();
+  const thumb = useId();
   return (
-    <div className={`flex items-center rounded-md border border-line bg-bg p-0.5 text-xs ${className}`} role="group" aria-label="Language">
+    <div className={`flex items-center rounded-[9px] bg-panel-2 p-0.5 text-xs ${className}`} role="group" aria-label="Language">
       <Translate size={13} className="mx-1.5 text-muted" />
       {LOCALES.map((l) => (
         <button
           key={l}
           onClick={() => setLocale(l)}
           title={LOCALE_LABEL[l].name}
-          className={`rounded px-1.5 py-0.5 font-medium transition ${l === locale ? "bg-panel-2 text-fg" : "text-muted hover:text-fg"}`}
+          aria-pressed={l === locale}
+          className={`relative rounded-[7px] px-2 py-1 font-semibold transition-colors active:scale-95 ${l === locale ? "text-fg" : "text-muted hover:text-fg"}`}
         >
-          {LOCALE_LABEL[l].short}
+          {l === locale && <motion.span layoutId={thumb} className="absolute inset-0 rounded-[7px] bg-panel shadow-[0_1px_3px_rgba(0,0,0,0.18)]" transition={{ type: "spring", bounce: 0, duration: 0.3 }} />}
+          <span className="relative">{LOCALE_LABEL[l].short}</span>
         </button>
       ))}
     </div>

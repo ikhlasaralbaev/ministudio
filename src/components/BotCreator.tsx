@@ -138,7 +138,7 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
   if (!tg || !st || !st.enabled) return null;
   if (st.hasBot) {
     return (
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-panel-2 p-3 text-sm">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl bg-panel-2 p-3 text-sm">
         <CheckCircle weight="fill" size={20} className="shrink-0 text-ok" />
         <div className="min-w-0 flex-1">
           <p className="font-medium">
@@ -163,7 +163,7 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
   const waitingNow = linking || waiting;
   const step = !tg.linked ? 1 : 2;
   return (
-    <div className="space-y-4 rounded-xl border border-line bg-panel-2 p-4 text-sm">
+    <div className="space-y-4 rounded-2xl bg-panel-2 p-4 text-sm">
       <div className="flex items-center gap-2 font-medium">
         <Robot weight="fill" size={18} className="text-accent-2" /> Telegram bot yaratish
       </div>

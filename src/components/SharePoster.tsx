@@ -58,7 +58,7 @@ export function SharePoster({ botUsername, name, color = "#2a8bd1" }: { botUsern
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-panel-2 p-3">
+    <div className="flex flex-wrap items-center gap-4 rounded-2xl bg-panel-2 p-3">
       <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-lg bg-white">
         {qr ? (
           // eslint-disable-next-line @next/next/no-img-element

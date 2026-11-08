@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLocale } from "@/i18n/server";
 import { LOCALE_LABEL } from "@/i18n/config";
 import { LocaleProvider } from "@/i18n/client";
+import { MotionProvider } from "@/components/MotionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body>
-        <LocaleProvider locale={locale}>{children}</LocaleProvider>
+        <LocaleProvider locale={locale}>
+          <MotionProvider>{children}</MotionProvider>
+        </LocaleProvider>
       </body>
     </html>
   );
