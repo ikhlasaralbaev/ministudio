@@ -17,6 +17,8 @@ export interface ProjectRow {
   history?: { version: number; doc: AppDoc; at: Date }[];
   envEnc?: string;
   botUsername?: string;
+  /** Telegram id of a bot created through the manager bot (Managed Bots). */
+  managedBotId?: number;
   ownerId?: string | null;
   members?: Member[];
   aiModel?: string | null;

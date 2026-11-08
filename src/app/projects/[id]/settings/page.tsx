@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import { Field, inputCls, ProjectNav } from "@/components/ui";
 import { Members } from "@/components/Members";
+import { BotCreator } from "@/components/BotCreator";
 import type { ProjectDTO } from "@/lib/types";
 
 interface EnvResp {
@@ -138,6 +139,7 @@ function SettingsInner() {
                 )}
               </div>
               <div className="space-y-4">
+                {g === "Telegram" && <BotCreator projectId={id} onConnected={() => void load()} onOwnerId={(tgId) => setForm((f) => ({ ...f, OWNER_CHAT_ID: String(tgId) }))} />}
                 {KNOWN.filter((k) => k.group === g).map((k) => (
                   <Field key={k.key} label={`${k.label} · ${k.key}`} hint={k.hint}>
                     <input

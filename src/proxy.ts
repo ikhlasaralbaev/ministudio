@@ -9,6 +9,7 @@ const PUBLIC = [
   /^\/demo\//, // landing page live panel demo (static)
   /^\/api\/rt\//,
   /^\/api\/bot\//,
+  /^\/api\/manager\/webhook$/,
   /^\/api\/pay\//,
   /^\/api\/auth\//,
   /^\/login(\/|$)/,

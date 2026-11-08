@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { api, timeAgo } from "@/lib/client";
 import { inputCls } from "@/components/ui";
+import { ManagerCard } from "@/components/ManagerCard";
 
 type Tab = "users" | "projects" | "audit";
 interface Usage {
@@ -339,6 +340,7 @@ export default function AdminPage() {
         <h1 className="text-xl font-semibold tracking-tight">Platforma admini</h1>
         <p className="text-sm text-muted">Foydalanuvchilar, loyihalar va jurnal</p>
       </header>
+      <ManagerCard />
       <nav className="mb-6 flex gap-1 border-b border-line">
         {tabs.map((t) => (
           <button
