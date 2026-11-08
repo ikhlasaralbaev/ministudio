@@ -296,6 +296,8 @@ function baseStyle(n: UINode, doc: AppDoc): React.CSSProperties {
     case "Screen":
       return {
         minHeight: "100%",
+        // fills the page when its parent is a flex column (the published app), so a bottom bar sits at the bottom of short screens too
+        flex: "1 0 auto",
         display: "flex",
         flexDirection: "column",
         gap: 12,
