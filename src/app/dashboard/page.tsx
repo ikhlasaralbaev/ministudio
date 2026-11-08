@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api, timeAgo } from "@/lib/client";
 import { Sparkle, Gear, Database, Trash, Robot } from "@phosphor-icons/react";
 import { AiPrompt } from "@/components/AiPrompt";
+import { takeIdeaDraft } from "@/lib/draft";
 import { fmt } from "@/i18n/app";
 import { useT } from "@/i18n/client";
 import type { Perms } from "@/lib/permissions";
@@ -29,6 +30,12 @@ export default function Dashboard() {
   const [idea, setIdea] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
+
+  // an idea typed on the landing page before signing in lands in the prompt box
+  useEffect(() => {
+    const d = takeIdeaDraft();
+    if (d) setIdea((cur) => cur || d);
+  }, []);
 
   const load = () => api<Row[]>("/api/projects").then(setRows).catch((e) => setErr(e.message));
   useEffect(() => {

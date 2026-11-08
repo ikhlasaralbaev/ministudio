@@ -2,6 +2,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkle, Translate } from "@phosphor-icons/react";
+import { ideaDraftScript, saveIdeaDraft } from "@/lib/draft";
 
 export interface Chip {
   label: string;
@@ -28,27 +29,42 @@ export function PromptBox({
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const area = useRef<HTMLTextAreaElement>(null);
 
+  // keep the idea while the visitor signs in (any of the sign-in buttons), the dashboard picks it up
+  const update = (v: string) => {
+    setValue(v);
+    saveIdeaDraft(v);
+  };
+
   function type(text: string) {
     if (timer.current) clearInterval(timer.current);
     let i = 0;
     setValue("");
     timer.current = setInterval(() => {
-      setValue(text.slice(0, ++i));
-      if (i >= text.length && timer.current) clearInterval(timer.current);
+      const part = text.slice(0, ++i);
+      setValue(part);
+      if (i >= text.length) {
+        saveIdeaDraft(text);
+        if (timer.current) clearInterval(timer.current);
+      }
     }, 18);
     area.current?.focus();
   }
 
   return (
     <>
+      {/* typed before the page finished hydrating? this keeps it (the field has no name: nothing goes into the URL) */}
+      <script dangerouslySetInnerHTML={{ __html: ideaDraftScript(".prompt textarea") }} />
       <form
         className="prompt"
+        action={href}
+        method="get"
         onSubmit={(e) => {
           e.preventDefault();
+          saveIdeaDraft(value);
           router.push(href);
         }}
       >
-        <textarea ref={area} value={value} onChange={(e) => setValue(e.target.value)} placeholder={placeholder} />
+        <textarea ref={area} value={value} onChange={(e) => update(e.target.value)} placeholder={placeholder} />
         <div className="pb">
           <span className="tg">
             <Sparkle weight="fill" /> Sonnet 5.5
