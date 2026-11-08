@@ -50,6 +50,9 @@ const ru = {
   botConnected: (bot: string, name: string, live: boolean) =>
     `🤖 <b>Бот @${bot} создан и подключён</b>\n\nПроект: <b>${name}</b>\n${live ? "Приложение уже работает в боте." : "Осталось опубликовать приложение — нажмите кнопку ниже."}`,
   btnOpenBot: "🤖 Открыть бота",
+  ownerHint: "🔔 <b>Получать заказы:</b> нажмите кнопку ниже и затем <b>Start</b> в боте — уведомления будут приходить вам сюда.",
+  ownerLinked: "✅ <b>Вы подключены как владелец</b>\n\nНовые заказы и платежи будут приходить сюда.",
+  btnBecomeOwner: "🔔 Получать заказы (Start)",
   aiGenerated: (n: number) => `Приложение создано: ${n} экр.`,
   aiDone: (msg: string) => `✅ <b>Готово</b>\n\n${msg}\n\nМожно написать следующую правку или опубликовать.`,
   aiError: (err: string) => `⚠️ <b>ИИ не справился</b>\n\n<code>${err}</code>\n\nПопробуйте переформулировать запрос.`,
@@ -124,6 +127,9 @@ const uz: BotDict = {
   botConnected: (bot, name, live) =>
     `🤖 <b>@${bot} boti yaratildi va ulandi</b>\n\nLoyiha: <b>${name}</b>\n${live ? "Ilova botda allaqachon ishlayapti." : "Endi ilovani publish qilish qoldi — quyidagi tugmani bosing."}`,
   btnOpenBot: "🤖 Botni ochish",
+  ownerHint: "🔔 <b>Buyurtmalarni olish:</b> quyidagi tugmani bosing, so‘ng botda <b>Start</b> bosing — xabarlar shu yerga keladi.",
+  ownerLinked: "✅ <b>Siz ega sifatida ulandingiz</b>\n\nYangi buyurtma va to‘lovlar shu yerga keladi.",
+  btnBecomeOwner: "🔔 Buyurtmalarni olish (Start)",
   aiGenerated: (n) => `Ilova yaratildi: ${n} ta ekran`,
   aiDone: (msg) => `✅ <b>Tayyor</b>\n\n${msg}\n\nKeyingi o‘zgarishni yozing yoki publish qiling.`,
   aiError: (err) => `⚠️ <b>AI uddalay olmadi</b>\n\n<code>${err}</code>\n\nSo‘rovni boshqacha yozib ko‘ring.`,
@@ -197,6 +203,9 @@ const en: BotDict = {
   botConnected: (bot, name, live) =>
     `🤖 <b>Bot @${bot} created and connected</b>\n\nProject: <b>${name}</b>\n${live ? "The app is already live in the bot." : "Now publish the app — press the button below."}`,
   btnOpenBot: "🤖 Open the bot",
+  ownerHint: "🔔 <b>Get order alerts:</b> press the button below and then <b>Start</b> in the bot — notifications will arrive here.",
+  ownerLinked: "✅ <b>You are connected as the owner</b>\n\nNew orders and payments will arrive here.",
+  btnBecomeOwner: "🔔 Get order alerts (Start)",
   aiGenerated: (n) => `App created: ${n} screens`,
   aiDone: (msg) => `✅ <b>Done</b>\n\n${msg}\n\nSend the next change, or publish.`,
   aiError: (err) => `⚠️ <b>AI could not do it</b>\n\n<code>${err}</code>\n\nTry rephrasing the request.`,
@@ -270,6 +279,9 @@ const kaa: BotDict = {
   botConnected: (bot, name, live) =>
     `🤖 <b>@${bot} botı jaratıldı hám ulandı</b>\n\nJoybar: <b>${name}</b>\n${live ? "Ilova botta aldınan islep tur." : "Endi ilovanı publish etiw qaldı — tómendegi túymeni basıń."}`,
   btnOpenBot: "🤖 Botti ashıw",
+  ownerHint: "🔔 <b>Buyırtpalardı alıw:</b> tómendegi túymeni basıń, soń botta <b>Start</b> basıń — xabarlar usı jerge keledi.",
+  ownerLinked: "✅ <b>Siz iyesi retinde ulandıńız</b>\n\nJańa buyırtpa hám tólemler usı jerge keledi.",
+  btnBecomeOwner: "🔔 Buyırtpalardı alıw (Start)",
   aiGenerated: (n) => `Ilova jaratıldı: ${n} ekran`,
   aiDone: (msg) => `✅ <b>Tayın</b>\n\n${msg}\n\nKeyingi ózgeristi jazıń yamasa publish etiń.`,
   aiError: (err) => `⚠️ <b>AI orınlay almadı</b>\n\n<code>${err}</code>\n\nSorawdı basqasha jazıp kóriń.`,

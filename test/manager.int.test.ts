@@ -66,7 +66,10 @@ describe.skipIf(!uri)("manager bot and telegram link (MongoDB)", () => {
     const dm = calls.filter((c) => c.method === "sendMessage" && (c.body as { chat_id: number }).chat_id === 555).at(-1)!.body as { text: string; reply_markup: { inline_keyboard: { text: string; callback_data?: string }[][] } };
     expect(dm.text).toContain("@my_kafe_bot");
     expect(dm.text).toContain("Осталось опубликовать");
-    expect(dm.reply_markup.inline_keyboard[0][0].callback_data).toBe(`u:${id}`);
+    const { ownerCode } = await import("@/lib/server/runtime");
+    expect(dm.reply_markup.inline_keyboard[0][0]).toMatchObject({ url: `https://t.me/my_kafe_bot?start=owner_${ownerCode(id)}` }); // one tap: Start with the owner code
+    expect(dm.text).toContain("Start");
+    expect(dm.reply_markup.inline_keyboard[1][0].callback_data).toBe(`u:${id}`);
   });
 
   it("a bot from someone without a pending claim is ignored (no token is fetched)", async () => {
@@ -315,5 +318,31 @@ describe.skipIf(!uri)("manager bot chat console (MongoDB, Telegram and AI mocked
     const kb = last().reply_markup!.inline_keyboard.flat() as { text: string; url?: string; callback_data?: string }[];
     expect(kb.find((b) => b.url)?.url).toBe("https://t.me/mock_bot"); // "open the bot" instead of "create bot"
     expect(kb.map((b) => b.callback_data)).not.toContain(`b:${ids.P}`);
+  });
+
+  it("the bot's own /start connects the owner automatically when a linked project editor presses it", async () => {
+    const { encryptEnv } = await import("@/lib/server/crypto");
+    const { projects, envOf, getProject } = await import("@/lib/server/projects");
+    const { botSecret } = await import("@/lib/server/runtime");
+    const { POST } = await import("@/app/api/bot/[id]/route");
+    const doc = { name: "K", theme: {}, state: {}, collections: [], screens: [{ id: "s", type: "Screen", children: [] }], bot: { welcomeText: "Salom", buttonText: "Ochish" } };
+    const pid = (await (await projects()).insertOne({ name: "Own", slug: "own1", doc, publishedDoc: doc, publishedVersion: 1, ownerId: ids.A, envEnc: encryptEnv({ BOT_TOKEN: "9:X" }), createdAt: new Date(), updatedAt: new Date() } as never)).insertedId.toHexString();
+    const start = (from: number) =>
+      POST(new Request(`https://panel.test/api/bot/${pid}`, { method: "POST", headers: { "x-telegram-bot-api-secret-token": botSecret(pid), "content-type": "application/json" }, body: JSON.stringify({ message: { chat: { id: from }, from: { id: from, first_name: "U" }, text: "/start" } }) }), { params: Promise.resolve({ id: pid }) } as never);
+
+    await start(TGB); // linked, but not a member of this project: not the owner
+    expect(envOf((await getProject(pid))!).OWNER_CHAT_ID).toBeUndefined();
+    await start(990099); // not linked to any account
+    expect(envOf((await getProject(pid))!).OWNER_CHAT_ID).toBeUndefined();
+
+    const before = calls.length;
+    await start(TGA); // the project's owner (linked): connected without any code
+    expect(envOf((await getProject(pid))!).OWNER_CHAT_ID).toBe(String(TGA));
+    const msgs = calls.slice(before).filter((c) => c.method === "sendMessage").map((c) => (c.body as { text: string }).text);
+    expect(msgs[0]).toContain("Вы подключены как владелец");
+    expect(msgs[1]).toBe("Salom"); // and still gets the welcome with the app button
+
+    await start(TGB); // once an owner exists nobody else can take over by pressing Start
+    expect(envOf((await getProject(pid))!).OWNER_CHAT_ID).toBe(String(TGA));
   });
 });

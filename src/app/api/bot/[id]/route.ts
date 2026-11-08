@@ -5,6 +5,11 @@ import { botSecret, ownerCode } from "@/lib/server/runtime";
 import { handleUpdate, type BotUpdate } from "@/lib/bot";
 import { decideRecord, finishFlow, getFlowState, setFlowState } from "@/lib/server/botops";
 import { trackTgUser } from "@/lib/server/appdata";
+import { effectivePermissions } from "@/lib/permissions";
+import { userByTelegramId } from "@/lib/server/tglink";
+import { sessionUserById } from "@/lib/server/users";
+import { getBotLang } from "@/lib/server/managerprefs";
+import { BOT_DICT } from "@/lib/managerI18n";
 
 // Telegram webhook. Always answer 200 quickly so Telegram doesn't retry.
 export async function POST(req: Request, ctx: RouteContext<"/api/bot/[id]">) {
@@ -52,14 +57,23 @@ export async function POST(req: Request, ctx: RouteContext<"/api/bot/[id]">) {
 
     if (text.startsWith("/start")) {
       const arg = text.split(" ")[1] || "";
-      if (arg === `owner_${ownerCode(id)}`) {
+      // The owner connects either with the owner link (start=owner_<code>), or simply by pressing Start when this Telegram
+      // account is linked to a platform account that may edit the project (and nobody is connected yet).
+      let becomeOwner = arg === `owner_${ownerCode(id)}`;
+      if (!becomeOwner && !env.OWNER_CHAT_ID && msg.from?.id) {
+        const linked = await userByTelegramId(msg.from.id).catch(() => null);
+        const user = linked ? await sessionUserById(linked.id).catch(() => null) : null;
+        becomeOwner = !!user && !!effectivePermissions(p, user, false)?.update;
+      }
+      if (becomeOwner) {
         env.OWNER_CHAT_ID = String(chatId);
         await (await projects()).updateOne({ _id: p._id }, { $set: { envEnc: encryptEnv(env) } });
         await tgApi(token, "sendMessage", {
           chat_id: chatId,
-          text: "✅ Siz ilova egasi sifatida ulandingiz. Yangi buyurtmalar shu yerga keladi.",
+          parse_mode: "HTML",
+          text: BOT_DICT[await getBotLang(msg.from?.id)].ownerLinked,
         });
-        return new Response("ok");
+        // no early return: the new owner also gets the normal welcome with the app button, to try the app right away
       }
       if (p.suspended) {
         await tgApi(token, "sendMessage", { chat_id: chatId, text: SUSPENDED_TEXT });

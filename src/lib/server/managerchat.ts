@@ -8,7 +8,7 @@ import { HttpError } from "./http";
 import { createProject, envOf, projects, publicUrl, type ProjectRow } from "./projects";
 import { recordsCol } from "./appdata";
 import { publishProject } from "./publish";
-import { rateLimited } from "./runtime";
+import { ownerCode, rateLimited } from "./runtime";
 import { escapeHtml as esc, tgApi } from "./telegram";
 import { userByTelegramId } from "./tglink";
 import { sessionUserById } from "./users";
@@ -248,7 +248,13 @@ async function publish({ user, t, send }: Ctx, id: string) {
   const hasBot = !!r.botUsername;
   await send(`${t.published(r.version, esc(r.url), r.botUsername)}${warn ? `\n\n${t.warnings}\n${warn}` : ""}`, {
     inline_keyboard: [
-      ...(hasBot ? [[{ text: t.btnOpenBot, url: `https://t.me/${r.botUsername}` }]] : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
+      ...(hasBot
+        ? [
+            [{ text: t.btnOpenBot, url: `https://t.me/${r.botUsername}` }],
+            // no owner yet: one tap (Start with the owner code) connects whoever presses it as the owner
+            ...(envOf(project).OWNER_CHAT_ID ? [] : [[{ text: t.btnBecomeOwner, url: `https://t.me/${r.botUsername}?start=owner_${ownerCode(id)}` }]]),
+          ]
+        : [[{ text: t.btn.createBot, callback_data: `b:${id}` }]]),
       [{ text: t.btn.viewInPanel, ...panel(`/projects/${id}/studio`) }],
     ],
   });

@@ -5,7 +5,7 @@ import { db } from "./db";
 import { encryptEnv } from "./crypto";
 import { envOf, getProject, projects, publicUrl } from "./projects";
 import { escapeHtml, tgApi } from "./telegram";
-import { botSecret } from "./runtime";
+import { botSecret, ownerCode } from "./runtime";
 import { connectBot } from "./botconnect";
 import { consumeLinkCode, linkTelegram, peekLinkCode } from "./tglink";
 import { HttpError } from "./http";
@@ -112,11 +112,13 @@ export async function handleManagedBot(mb: ManagedBotUpdate): Promise<string> {
   if (claim && mb.bot?.username) {
     const t = BOT_DICT[await getBotLang(creator)];
     const live = !!p.publishedDoc;
+    // One tap on "Start" makes the creator the owner: Telegram does not let a bot message someone who never started it.
+    const ownerLink = `https://t.me/${mb.bot.username}?start=owner_${ownerCode(projectId)}`;
     await tgApi(m.token, "sendMessage", {
       chat_id: creator,
       parse_mode: "HTML",
-      text: t.botConnected(escapeHtml(mb.bot.username), escapeHtml(p.name), live),
-      reply_markup: { inline_keyboard: [live ? [{ text: t.btnOpenBot, url: `https://t.me/${mb.bot.username}` }] : [{ text: t.btn.publish, callback_data: `u:${projectId}` }]] },
+      text: `${t.botConnected(escapeHtml(mb.bot.username), escapeHtml(p.name), live)}\n\n${t.ownerHint}`,
+      reply_markup: { inline_keyboard: [[{ text: t.btnBecomeOwner, url: ownerLink }], ...(live ? [] : [[{ text: t.btn.publish, callback_data: `u:${projectId}` }]])] },
     }).catch(() => {});
   }
   return `connected bot ${mb.bot?.username ?? botId} to project ${projectId}`;
