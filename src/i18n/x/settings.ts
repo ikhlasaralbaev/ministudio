@@ -169,5 +169,21 @@ const c: Record<string, XEntry> = {
   ),
   "Ha": e("Awa", "Yes", "Да"),
   "Yo'q": e("Yaq", "No", "Нет"),
+  "Barcha shablonlar": e("Barlıq úlgiler", "All templates", "Все шаблоны"),
+  "Tayyor shablonlar": e("Tayın úlgiler", "Ready-made templates", "Готовые шаблоны"),
+  "Shablonni oching, ilovani sinab ko'ring va bir bosishda o'zingizniki qiling. Keyin hammasini AI bilan o'zgartirasiz.": e(
+    "Úlgini ashıń, ilovanı sınap kóriń hám bir basıwda ózińizdiki etiń. Keyin hámmesin AI menen ózgertesiz.",
+    "Open a template, try the app and make it yours in one tap. Then change everything with AI.",
+    "Откройте шаблон, попробуйте приложение и сделайте его своим одним нажатием. Затем всё изменяется с помощью ИИ.",
+  ),
+  "Chapdagi ilova ishlaydi: menyuni varaqlang, savatga qo'shing, formani to'ldiring. Hech narsa saqlanmaydi.": e(
+    "Jaydaǵı ilova isleydi: menyudı aylandırıń, sebetke qosıń, formanı toltırıń. Hesh nárse saqlanbaydı.",
+    "The app works: browse the menu, add to the cart, fill in the form. Nothing is saved.",
+    "Приложение работает: листайте меню, добавляйте в корзину, заполняйте форму. Ничего не сохраняется.",
+  ),
+  "Yaratilmoqda…": e("Jaratılmaqta…", "Creating…", "Создаётся…"),
+  "Shu shablondan boshlash": e("Usı úlgiden baslaw", "Start from this template", "Начать с этого шаблона"),
+  "Namuna: egasiga xabar yuboriladi": e("Mısal: iyesine xabar jiberiledi", "Demo: the owner would be notified", "Пример: владельцу отправится уведомление"),
+  "Namuna: to'lov sahifasi ochiladi": e("Mısal: tólew betı ashıladı", "Demo: the payment page would open", "Пример: откроется страница оплаты"),
 };
 export default c;

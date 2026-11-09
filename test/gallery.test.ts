@@ -7,8 +7,8 @@ import { LOCALES } from "@/i18n/config";
 const ids = (nodes: UINode[]): string[] => nodes.flatMap((n) => [n.id, ...ids(n.children ?? [])]);
 
 describe("template gallery", () => {
-  it("offers eight templates, each with a label and hint in every language", () => {
-    expect(TEMPLATES).toHaveLength(8);
+  it("offers twenty templates, each with a label and hint in every language", () => {
+    expect(TEMPLATES).toHaveLength(20);
     for (const t of TEMPLATES) for (const l of LOCALES) {
       expect(t.label[l], `${t.id} label ${l}`).toBeTruthy();
       expect(t.hint[l], `${t.id} hint ${l}`).toBeTruthy();
