@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { api } from "@/lib/client";
 import { SPRING } from "@/lib/springs";
@@ -21,15 +22,28 @@ export function ModelPicker({
   const x = useX();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; right: number } | null>(null);
   const current = AI_MODELS.find((m) => m.id === resolveModel(value))!;
 
   useEffect(() => {
     if (!open) return;
-    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false);
+    // The header scrolls sideways, which would clip a normal dropdown: the menu lives on <body> and is placed from the button.
+    const place = () => {
+      const r = ref.current?.getBoundingClientRect();
+      if (r) setPos({ top: r.bottom + 6, right: Math.max(8, window.innerWidth - r.right) });
+    };
+    place();
+    const close = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (!ref.current?.contains(t) && !menu.current?.contains(t)) setOpen(false);
+    };
     const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     window.addEventListener("mousedown", close);
     window.addEventListener("keydown", esc);
+    window.addEventListener("resize", place);
     return () => {
+      window.removeEventListener("resize", place);
       window.removeEventListener("mousedown", close);
       window.removeEventListener("keydown", esc);
     };
@@ -60,9 +74,11 @@ export function ModelPicker({
         {current.label}
         <span className="text-[10px] text-muted">▾</span>
       </button>
-      {open && (
+      {open && pos && createPortal(
         <motion.div
-          className="glass absolute right-0 top-full z-50 mt-1.5 w-72 origin-top-right overflow-hidden rounded-2xl p-1.5 shadow-[var(--shadow)]"
+          ref={menu}
+          style={{ top: pos.top, right: pos.right }}
+          className="glass fixed z-[100] w-72 max-w-[calc(100vw-16px)] origin-top-right overflow-hidden rounded-2xl p-1.5 shadow-[var(--shadow)]"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={SPRING.snappy}
@@ -84,7 +100,8 @@ export function ModelPicker({
             </button>
           ))}
           <p className="px-3 pb-2 pt-1 text-[11px] text-muted/80">{x("Narx: 1M kirish / chiqish token uchun")}</p>
-        </motion.div>
+        </motion.div>,
+        document.body,
       )}
     </div>
   );

@@ -16,6 +16,7 @@ export async function POST(req: Request, ctx: RouteContext<"/api/projects/[id]/a
     const body = await req.json();
     const prompt = String(body.prompt || "").trim();
     if (!prompt) return fail("Prompt bo'sh");
+    if (prompt.length > 8000) return fail("Prompt juda uzun (8000 belgigacha)");
     const { jobId } = await startAiJob({
       project,
       user,

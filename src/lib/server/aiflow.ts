@@ -11,7 +11,11 @@ import { envOf, projects, type ProjectRow } from "./projects";
 import { emptyUsage, recordPrompt, type Usage } from "./usage";
 import { notifyJobDone, shouldNotify } from "./notify";
 import { chargeUsage, requireCredits } from "./credits";
+import { rateLimited } from "./runtime";
 import { isPlatformAdmin, type SessionUser } from "./access";
+
+const MAX_AI_PER_WINDOW = 12;
+const MAX_RUNNING_JOBS = 2;
 
 export type AiOutcome = { ok: true; result: Record<string, unknown> } | { ok: false; error: string };
 
@@ -51,10 +55,18 @@ export async function startAiJob(o: {
   const metered = !isPlatformAdmin(user.email);
   if (metered) await requireCredits(user.id);
 
+  // Abuse guards (platform admins excluded): a burst limit, and at most 2 jobs running at once, which also stops
+  // parallel requests from all passing the balance check before any of them is charged.
+  const jobs = (await db()).collection("ai_jobs");
+  if (metered) {
+    if (rateLimited(`ai:${user.id}`, MAX_AI_PER_WINDOW, 10 * 60_000)) throw new HttpError("Juda ko'p so'rov yubordingiz. Birozdan keyin qayta urinib ko'ring.", 429);
+    const running = await jobs.countDocuments({ userId: user.id, status: "running", createdAt: { $gt: new Date(Date.now() - 10 * 60_000) } });
+    if (running >= MAX_RUNNING_JOBS) throw new HttpError("Avvalgi so'rovlaringiz tugashini kuting.", 429);
+  }
+
   // attachments: references (images) and the logo (a text note), both only from THIS project
   const extras = { images: await aiImages(id, o.refs), logo: await logoInfo(id, p.logoAssetId) };
 
-  const jobs = (await db()).collection("ai_jobs");
   await jobs.createIndex({ createdAt: 1 }, { expireAfterSeconds: 86400 });
   const jobId = new ObjectId();
   await jobs.insertOne({ _id: jobId, projectId: id, userId: user.id, status: "running", kind, createdAt: new Date() });
