@@ -22,9 +22,18 @@ const PUBLIC = [
   /^\/favicon/,
 ];
 
+/** A shared link `/?ref=CODE` is remembered for a month, so it still counts after the visitor browses and signs up later. */
+function remember(req: NextRequest, res: NextResponse): NextResponse {
+  const ref = req.nextUrl.searchParams.get("ref");
+  if (ref && /^[a-z0-9]{6,12}$/.test(ref)) {
+    res.cookies.set("ms_ref", ref, { path: "/", maxAge: 30 * 24 * 3600, sameSite: "lax" });
+  }
+  return res;
+}
+
 export function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  if (PUBLIC.some((r) => r.test(pathname))) return NextResponse.next();
+  if (PUBLIC.some((r) => r.test(pathname))) return remember(req, NextResponse.next());
   if (getSessionCookie(req)) return NextResponse.next();
 
   if (pathname.startsWith("/api/")) {

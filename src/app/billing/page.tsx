@@ -1,14 +1,14 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Coins } from "@phosphor-icons/react";
+import { ArrowLeft, Check, Coins, Copy, UsersThree } from "@phosphor-icons/react";
 import { api, timeAgo } from "@/lib/client";
 import { formatCredits } from "@/components/ui";
-import { useT } from "@/i18n/client";
+import { useT, useX } from "@/i18n/client";
 
 interface Row {
   credits: number;
-  reason: "grant" | "ai" | "topup" | "admin";
+  reason: "grant" | "ai" | "topup" | "admin" | "referral";
   note: string | null;
   balance: number;
   at: string;
@@ -17,6 +17,60 @@ interface Resp {
   unmetered: boolean;
   credits: number | null;
   history: Row[];
+}
+
+interface Ref {
+  code: string;
+  invited: number;
+  credits: number;
+  reward: number;
+}
+
+/** Share a link: every friend who signs up through it brings credits. */
+function Referral() {
+  const x = useX();
+  const [r, setR] = useState<Ref | null>(null);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    api<Ref>("/api/me/referral").then(setR).catch(() => {});
+  }, []);
+  if (!r || !r.reward) return null;
+  const link = `${window.location.origin}/?ref=${r.code}`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+    } catch {
+      const el = document.getElementById("ref-link") as HTMLInputElement | null;
+      el?.select();
+      document.execCommand("copy");
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return (
+    <section className="card p-5">
+      <h2 className="mb-1 flex items-center gap-2 font-semibold">
+        <UsersThree weight="duotone" className="text-accent" size={20} /> {x("Do'stlaringizni taklif qiling")}
+      </h2>
+      <p className="text-sm text-muted">{x("Havolangiz orqali ro'yxatdan o'tgan har bir do'st uchun {n} kredit olasiz.", { n: r.reward })}</p>
+      <div className="mt-3 flex gap-2">
+        <input id="ref-link" readOnly value={link} onFocus={(e) => e.currentTarget.select()} className="input min-w-0 flex-1 font-mono text-xs" />
+        <button type="button" onClick={() => void copy()} className="btn btn-sm shrink-0">
+          {copied ? <Check size={14} /> : <Copy size={14} />} {copied ? x("Nusxalandi") : x("Nusxalash")}
+        </button>
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+        <div className="rounded-xl border border-line p-3">
+          <p className="text-muted">{x("Taklif qilinganlar")}</p>
+          <p className="mt-0.5 text-xl font-semibold">{r.invited}</p>
+        </div>
+        <div className="rounded-xl border border-line p-3">
+          <p className="text-muted">{x("Olingan kredit")}</p>
+          <p className="mt-0.5 text-xl font-semibold">{formatCredits(r.credits)}</p>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default function BillingPage() {
@@ -47,6 +101,8 @@ export default function BillingPage() {
             )}
             <p className="mt-3 text-sm text-muted">{t.billing.how}</p>
           </section>
+
+          {!d.unmetered && <Referral />}
 
           <section className="card p-5">
             <h2 className="mb-1 font-semibold">{t.billing.topupTitle}</h2>

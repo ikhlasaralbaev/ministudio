@@ -3,6 +3,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
 import { Database, Gear, ShieldCheck, SquaresFour, Sparkle, TreeStructure } from "@phosphor-icons/react";
+import { useEffect } from "react";
+import { api } from "@/lib/client";
 import { LangSwitch, Logo, useMe, UserMenu } from "@/components/ui";
 import { useT } from "@/i18n/client";
 
@@ -18,6 +20,13 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const me = useMe();
   const t = useT();
+  // an account that arrived through a friend's link settles it once: the friend gets their reward
+  useEffect(() => {
+    if (!me || typeof document === "undefined" || !document.cookie.includes("ms_ref=")) return;
+    api("/api/referral/claim", { method: "POST" })
+      .then(() => window.dispatchEvent(new Event("ms:credits")))
+      .catch(() => {});
+  }, [me]);
   const pid = path.match(/^\/projects\/([^/]+)/)?.[1];
   const rail = !!pid && path.endsWith("/studio");
 

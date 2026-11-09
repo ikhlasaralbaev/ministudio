@@ -151,6 +151,8 @@ the bot). The balance and history are on `/billing`; an admin adds credits per u
 top-up (Click/Payme for the platform itself) is not built yet: it needs a merchant account for MiniStudio. Everything lives in
 the `credit_balances` and `credit_ledger` collections, so a payment only has to call `addCredits(userId, credits, "topup", ...)`.
 
+**Referrals.** Every account has a link `/?ref=CODE` (shown on the credits page). A visitor who arrives through it keeps a `ms_ref` cookie for 30 days; the first time that new account is seen signed in (`POST /api/referral/claim`, called by the app shell), the code's owner gets `REFERRAL_CREDITS` (default 25). One reward per invited account, nothing for yourself, only for accounts created in the last 3 days, and at most `MAX_REFERRALS` (default 100) rewards per person. `REFERRAL_CREDITS=0` switches it off.
+
 ## Other new settings
 `NOTIFY_AFTER_MS` (default 20000): AI jobs longer than this are announced in Telegram when no page is watching.
 Browser login through Telegram needs the manager bot (`TELEGRAM_MANAGER_BOT_TOKEN` / `_USERNAME`).

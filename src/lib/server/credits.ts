@@ -17,7 +17,7 @@ export interface LedgerRow {
   userId: string;
   /** mk, positive = added, negative = spent */
   delta: number;
-  reason: "grant" | "ai" | "topup" | "admin";
+  reason: "grant" | "ai" | "topup" | "admin" | "referral";
   note?: string;
   ref?: string;
   balanceAfter: number;
@@ -79,7 +79,7 @@ export async function chargeUsage(userId: string, usage: Usage, ref?: string): P
 }
 
 /** Adds credits (admin grant now; a payment later). */
-export async function addCredits(userId: string, credits: number, reason: "admin" | "topup", note?: string, ref?: string): Promise<number> {
+export async function addCredits(userId: string, credits: number, reason: "admin" | "topup" | "referral", note?: string, ref?: string): Promise<number> {
   if (!Number.isFinite(credits) || credits === 0) throw new HttpError("Miqdor noto'g'ri", 400);
   return toCredits(await apply(userId, Math.round(credits * MK_PER_CREDIT), reason, { note, ref }));
 }

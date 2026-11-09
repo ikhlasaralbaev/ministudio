@@ -64,6 +64,8 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   const [screenId, setScreenId] = useState<string>(project.doc?.screens[0]?.id || "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<Mode>("edit");
+  // Vibe: the phone works like the real app until "Tanlash" is on; then a tap selects an element and a comment edits just that one.
+  const [pick, setPick] = useState(false);
   // Narrow screens show one panel at a time (chat / layers / app / properties) with a tab bar; wide screens show them side by side.
   const [pane, setPane] = useState<"left" | "center" | "right">("center");
   const [busy, setBusy] = useState<null | "generate" | "global" | string>(null);
@@ -89,7 +91,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
   }, []);
   const setLayout = (l: Layout) => {
     setLayoutRaw(l);
-    if (l === "vibe") setSelectedId(null); // no element selection in vibe: keyboard shortcuts stay inert
+    if (l === "vibe") setSelectedId(null); // vibe starts in "try" mode: nothing selected
     try {
       localStorage.setItem(LAYOUT_KEY, l);
     } catch {}
@@ -345,10 +347,10 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       } else if (mod && e.key.toLowerCase() === "y" && !typing) {
         e.preventDefault();
         redo();
-      } else if (mod && e.key.toLowerCase() === "d" && !typing) {
+      } else if (mod && e.key.toLowerCase() === "d" && !typing && !vibe) {
         e.preventDefault();
         duplicate();
-      } else if ((e.key === "Delete" || e.key === "Backspace") && !typing && selectedId && doc) {
+      } else if ((e.key === "Delete" || e.key === "Backspace") && !typing && selectedId && doc && !vibe) {
         e.preventDefault();
         apply([{ op: "delete", id: selectedId }]);
         setSelectedId(null);
@@ -361,7 +363,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [undo, redo, duplicate, apply, selectedId, doc, readOnly]);
+  }, [undo, redo, duplicate, apply, selectedId, doc, readOnly, vibe]);
 
   /* ---------- publish ---------- */
   async function publish() {
@@ -474,12 +476,17 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
           {doc ? (
             <Canvas
               doc={doc}
-              mode="preview"
+              mode={pick ? "edit" : "preview"}
               screenId={screenId}
               setScreenId={setScreenId}
-              selectedId={null}
+              selectedId={pick ? selectedId : null}
               onSelect={setSelectedId}
-              selected={null}
+              selected={pick ? selected : null}
+              pick={pick}
+              onPick={(v) => {
+                setPick(v);
+                setSelectedId(null);
+              }}
               busy={busy}
               onEdit={edit}
               toast={toast}
@@ -734,6 +741,9 @@ function Canvas(props: {
   readOnly: boolean;
   /** Vibe mode: just the phone, no screen tabs or command bar. */
   clean?: boolean;
+  /** Vibe mode: tapping selects an element (true) or works the app (false). */
+  pick?: boolean;
+  onPick?: (v: boolean) => void;
 }) {
   const x = useX();
   const { doc, mode, screenId, setScreenId, selectedId, onSelect, selected, busy, onEdit, toast, readOnly, clean = false } = props;
@@ -802,7 +812,17 @@ function Canvas(props: {
 
   return (
     <section className="relative flex min-w-0 flex-1 flex-col">
-      {clean && (
+      {clean && !readOnly && props.onPick && (
+        <div className="seg absolute left-4 top-4 z-10" role="group" title={x("Elementni tanlab, comment bilan o'zgartiring")}>
+          <button type="button" aria-pressed={!props.pick} onClick={() => props.onPick?.(false)} className="seg-item">
+            {x("Sinash")}
+          </button>
+          <button type="button" aria-pressed={!!props.pick} onClick={() => props.onPick?.(true)} className="seg-item">
+            {x("Tanlash")}
+          </button>
+        </div>
+      )}
+      {clean && !props.pick && (
         <button
           onClick={() => setPreviewKey((k) => k + 1)}
           className="absolute right-4 top-4 z-10 rounded-lg border border-line bg-panel/80 px-3 py-1.5 text-[12px] text-muted backdrop-blur hover:text-fg"
@@ -844,7 +864,7 @@ function Canvas(props: {
         {/* phone stays centered; it is scaled down (never up) to fit the canvas height */}
         <div className="flex min-h-full min-w-max items-center justify-center p-6">
           <div className="relative" onClick={(e) => e.stopPropagation()} style={{ zoom: fit }}>
-            <div className={`mb-3 flex items-center justify-between px-2 text-[12px] text-muted ${clean ? "invisible" : ""}`}>
+            <div className={`mb-3 flex items-center justify-between px-2 text-[12px] text-muted ${clean && !props.pick ? "invisible" : ""} ${clean ? "pt-9" : ""}`}>
               <span>{mode === "edit" ? x("Element ustiga bosing → comment yozing") : x("Sinov rejimi — xuddi Telegram'dagidek ishlaydi")}</span>
               <span>
                 {SCREEN_W} × {SCREEN_H}

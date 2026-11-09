@@ -30,7 +30,7 @@ const uz = {
     how: "AI so‘rovlari kreditga sarflanadi: oddiy ilova yaratish taxminan 5–10 kredit, kichik tahrir 1–2 kredit.",
     topupTitle: "Balansni to‘ldirish", topupSoon: "Onlayn to‘lov (Click, Payme) tez orada qo‘shiladi. Hozircha kreditni administrator qo‘shadi.",
     history: "Tarix", noHistory: "Hali harakat yo‘q.", back: "Loyihalar", unmetered: "Siz platforma administratorisiz: kreditlar hisoblanmaydi.",
-    reasons: { grant: "Boshlang‘ich kredit", ai: "AI so‘rovi", topup: "To‘ldirish", admin: "Administrator" },
+    reasons: { grant: "Boshlang‘ich kredit", ai: "AI so‘rovi", topup: "To‘ldirish", admin: "Administrator", referral: "Do‘st taklifi" },
   },
   login: { failed: "Kirish rad etildi. Akkauntingiz bloklangan bo‘lishi mumkin.", telegramOpen: "Telegramni ochish", telegram: "Telegram orqali kirish", telegramWait: "Telegramda «Start» va «Ha, bu men» tugmalarini bosing…", telegramFail: "Kirish bajarilmadi. Qayta urinib ko‘ring.", google: "Google bilan kirish", redirecting: "Yo‘naltirilmoqda…", back: "Bosh sahifa" },
 };
@@ -65,7 +65,7 @@ const en: AppDict = {
     how: "AI requests spend credits: building a typical app takes about 5–10 credits, a small edit 1–2.",
     topupTitle: "Top up", topupSoon: "Online payment (Click, Payme) is coming soon. For now an administrator adds credits.",
     history: "History", noHistory: "Nothing yet.", back: "Projects", unmetered: "You are a platform administrator: credits are not counted.",
-    reasons: { grant: "Starting credits", ai: "AI request", topup: "Top-up", admin: "Administrator" },
+    reasons: { grant: "Starting credits", ai: "AI request", topup: "Top-up", admin: "Administrator", referral: "Friend referral" },
   },
   login: { failed: "Sign-in was rejected. Your account may be blocked.", telegramOpen: "Open Telegram", telegram: "Sign in with Telegram", telegramWait: "Press “Start” and “Yes, it is me” in Telegram…", telegramFail: "Sign-in failed. Try again.", google: "Sign in with Google", redirecting: "Redirecting…", back: "Home" },
 };
@@ -98,7 +98,7 @@ const ru: AppDict = {
     how: "ИИ-запросы тратят кредиты: создание обычного приложения — около 5–10 кредитов, небольшая правка — 1–2.",
     topupTitle: "Пополнение", topupSoon: "Онлайн-оплата (Click, Payme) скоро появится. Пока кредиты добавляет администратор.",
     history: "История", noHistory: "Пока ничего нет.", back: "Проекты", unmetered: "Вы администратор платформы: кредиты не списываются.",
-    reasons: { grant: "Стартовые кредиты", ai: "ИИ-запрос", topup: "Пополнение", admin: "Администратор" },
+    reasons: { grant: "Стартовые кредиты", ai: "ИИ-запрос", topup: "Пополнение", admin: "Администратор", referral: "Приглашение друга" },
   },
   login: { failed: "Вход отклонён. Возможно, ваш аккаунт заблокирован.", telegramOpen: "Открыть Telegram", telegram: "Войти через Telegram", telegramWait: "Нажмите «Start» и «Да, это я» в Telegram…", telegramFail: "Не удалось войти. Попробуйте ещё раз.", google: "Войти через Google", redirecting: "Перенаправляем…", back: "На главную" },
 };
@@ -131,7 +131,7 @@ const kaa: AppDict = {
     how: "AI sorawları kreditke jumsaladı: ápiwayı bot jaratıw shama menen 5–10 kredit, kishi dúzetiw 1–2 kredit.",
     topupTitle: "Balansti toltırıw", topupSoon: "Onlayn tólem (Click, Payme) tezde qosıladı. Házirshe kreditti administrator qosadı.",
     history: "Tariyx", noHistory: "Házirshe háreket joq.", back: "Joybarlar", unmetered: "Siz platforma administratorısız: kreditler esaplanbaydı.",
-    reasons: { grant: "Baslanǵısh kredit", ai: "AI sorawı", topup: "Toltırıw", admin: "Administrator" },
+    reasons: { grant: "Baslanǵısh kredit", ai: "AI sorawı", topup: "Toltırıw", admin: "Administrator", referral: "Dos shaqırıwı" },
   },
   login: { failed: "Kiriw ret etildi. Akkauntıńız bloklanǵan bolıwı múmkin.", telegramOpen: "Telegramdı ashıw", telegram: "Telegram arqalı kiriw", telegramWait: "Telegramda «Start» hám «Awa, bul men» túymelerin basıń…", telegramFail: "Kiriw orınlanbadı. Qayta urınıp kóriń.", google: "Google menen kiriw", redirecting: "Jónetilmekte…", back: "Bas bet" },
 };

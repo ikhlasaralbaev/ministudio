@@ -102,6 +102,9 @@ const c: Record<string, XEntry> = {
   ),
   "Ilova e'lon qilindi": e("Web ui járiyalandı", "App published", "Приложение опубликовано"),
   "Telegramda ochish": e("Telegramda ashıw", "Open in Telegram", "Открыть в Telegram"),
+  "Sinash": e("Sınaw", "Try", "Проба"),
+  "Tanlash": e("Tańlaw", "Select", "Выбор"),
+  "Elementni tanlab, comment bilan o'zgartiring": e("Elementti tańlap, comment menen ózgertiń", "Select an element and change it with a comment", "Выберите элемент и измените его комментарием"),
   "Yopish": e("Jabıw", "Close", "Закрыть"),
 
   "Kafe uchun menyu, savat va buyurtma berish ilovasi": e("Kafe ushın menyu, sebet hám buyırtpa beriw web ui ı", "A cafe menu, a cart and ordering", "Меню кафе, корзина и оформление заказа"),
