@@ -157,7 +157,7 @@ export function shopApp(cfg: ShopCfg): AppDoc {
     k.spacer(),
     k.when(
       k.row({ position: "sticky", bottom: 70, margin: "0 16px 10px", padding: "13px 16px", borderRadius: 999, background: c.primary, color: c.onPrimary, justifyContent: "space-between", boxShadow: `0 10px 28px ${c.primary}66`, cursor: "pointer", zIndex: 4 }, [
-        k.row({ gap: 8 }, [k.icon("shopping-bag", 20, c.onPrimary, "fill"), k.text(`{{ ${CART_N} }} ta ${cfg.words.items}`, undefined, { color: c.onPrimary, fontWeight: 700 })]),
+        k.row({ gap: 8 }, [k.icon("shopping-bag", 20, c.onPrimary, "fill"), k.text(`{{ ${CART_N} }} ${cfg.words.items}`, undefined, { color: c.onPrimary, fontWeight: 700 })]),
         k.text(`{{ fmt(${SUB}) }} so'm`, undefined, { color: c.onPrimary, fontWeight: 800 }),
       ], [{ type: "navigate", screen: "scr_cart" }]),
       `${CART_N} > 0`,

@@ -1,17 +1,17 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { X } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
-import { GROUPS, TEMPLATES, buildTemplate, type TemplateGroup, type TemplateMeta } from "@/lib/gallery";
+import { GROUPS, TEMPLATES, buildTemplate, isTemplateId, type TemplateGroup, type TemplateMeta } from "@/lib/gallery";
 import { SPRING } from "@/lib/springs";
 import { useLocale, useX } from "@/i18n/client";
 import { FRAME_H, PhoneFrame } from "@/components/studio/PhoneFrame";
 import { TemplateLive, TemplateThumb } from "./TemplatePreview";
 
 /** The template page: every template as a live preview, a filter by kind, and a larger working preview with a start button. */
-export function TemplatesBrowser() {
+export function TemplatesBrowser({ signedIn }: { signedIn: boolean }) {
   const x = useX();
   const locale = useLocale();
   const router = useRouter();
@@ -20,11 +20,32 @@ export function TemplatesBrowser() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
+  // ?open=<id> (from the home page) shows that template; ?start=<id> (back from the login page) creates the project at once
+  const params = useSearchParams();
+  const did = useRef(false);
+  useEffect(() => {
+    if (did.current) return;
+    did.current = true;
+    const o = params.get("open");
+    const st = params.get("start");
+    if (isTemplateId(o)) setOpen(TEMPLATES.find((t) => t.id === o) ?? null);
+    if (isTemplateId(st)) {
+      window.history.replaceState(null, "", "/templates"); // going back must not create a second project
+      if (signedIn) {
+        setOpen(TEMPLATES.find((t) => t.id === st) ?? null);
+        void start(st);
+      } else setOpen(TEMPLATES.find((t) => t.id === st) ?? null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const shown = TEMPLATES.filter((t) => group === "all" || t.group === group);
-  const docs = useMemo(() => new Map(TEMPLATES.map((t) => [t.id, buildTemplate(t.id)!])), []);
+  const docs = useMemo(() => new Map(TEMPLATES.map((t) => [t.id, buildTemplate(t.id, locale)!])), [locale]);
 
   async function start(id: string) {
     if (busy) return;
+    // Not signed in yet: sign in first, and come back here with ?start= so the project is created right after.
+    if (!signedIn) return router.push(`/login?next=${encodeURIComponent(`/templates?start=${id}`)}`);
     setBusy(true);
     setErr("");
     try {

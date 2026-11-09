@@ -6,6 +6,7 @@ import { getSessionCookie } from "better-auth/cookies";
 const PUBLIC = [
   /^\/$/, // landing page
   /^\/app\//,
+  /^\/templates(\/|$)/, // template gallery: anyone can look, starting one asks to sign in
   /^\/demo\//, // landing page live panel demo (static)
   /^\/api\/rt\//,
   /^\/api\/bot\//,

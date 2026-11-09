@@ -169,6 +169,7 @@ const c: Record<string, XEntry> = {
   ),
   "Ha": e("Awa", "Yes", "Да"),
   "Yo'q": e("Yaq", "No", "Нет"),
+  "Kirish": e("Kiriw", "Sign in", "Войти"),
   "Barcha shablonlar": e("Barlıq úlgiler", "All templates", "Все шаблоны"),
   "Tayyor shablonlar": e("Tayın úlgiler", "Ready-made templates", "Готовые шаблоны"),
   "Shablonni oching, ilovani sinab ko'ring va bir bosishda o'zingizniki qiling. Keyin hammasini AI bilan o'zgartirasiz.": e(

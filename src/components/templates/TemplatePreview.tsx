@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppDoc } from "@/lib/types";
 import type { RecordRow, RecordsByCollection } from "@/lib/records";
 import { AppView, useRuntime, type Host } from "@/components/runtime";
-import { useX } from "@/i18n/client";
+import { useLocale, useX } from "@/i18n/client";
 import type { XFn } from "@/i18n/x";
 
 const W = 390;
@@ -117,5 +117,6 @@ export function TemplateThumb({ doc }: { doc: AppDoc }) {
 
 /** The whole template as a working app: browse, add to the cart, fill the form. Nothing is saved anywhere. */
 export function TemplateLive({ doc }: { doc: AppDoc }) {
-  return <Running key={doc.name} doc={doc} interactive />;
+  const locale = useLocale();
+  return <Running key={`${doc.name}-${locale}`} doc={doc} interactive />;
 }

@@ -11,6 +11,9 @@ import { HomeEffects } from "@/components/home/HomeEffects";
 import { PromptBox } from "@/components/home/PromptBox";
 import { PanelShowcase } from "@/components/home/PanelShowcase";
 import { Terminal } from "@/components/home/Terminal";
+import { HomeTemplates } from "@/components/templates/HomeTemplates";
+
+const TEMPLATES_NAV = { uz: "Shablonlar", ru: "Шаблоны", en: "Templates", kaa: "Úlgiler" } as const;
 import "./landing.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -34,6 +37,7 @@ export default async function Landing() {
             MiniStudio
           </a>
           <nav>
+            <a href="#templates">{TEMPLATES_NAV[locale]}</a>
             <a href="#studio">{d.nav.studio}</a>
             <a href="#features">{d.nav.features}</a>
             <a href="#bots">{d.nav.bots}</a>
@@ -83,6 +87,8 @@ export default async function Landing() {
           />
         </div>
       </div>
+
+      <HomeTemplates />
 
       <section id="studio">
         <div className="w">

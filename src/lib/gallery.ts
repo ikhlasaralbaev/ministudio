@@ -4,6 +4,7 @@ import { barberService, beautyService, carService, courseService } from "./galle
 import { electronicsShop, bookShop, groceryShop, pharmacyShop, pizzaShop, sushiShop } from "./gallery/shops2";
 import { cleaningService, dentalService, gymService, photoService, spaService, vetService } from "./gallery/services2";
 import type { Locale } from "../i18n/config";
+import { translateDoc } from "./gallery/translate";
 
 /**
  * Ready-made starting points shown on the dashboard: one tap creates a project from them (no AI cost), then the person
@@ -83,7 +84,7 @@ export function isTemplateId(id: unknown): id is string {
   return typeof id === "string" && Object.hasOwn(BUILDERS, id);
 }
 
-/** A fresh document (ids are unique per call site, so every project gets its own copy). */
-export function buildTemplate(id: string): AppDoc | null {
-  return isTemplateId(id) ? BUILDERS[id]() : null;
+/** A fresh document (ids are unique per call site, so every project gets its own copy), with its text in the given language. */
+export function buildTemplate(id: string, locale: Locale = "uz"): AppDoc | null {
+  return isTemplateId(id) ? translateDoc(BUILDERS[id](), locale) : null;
 }

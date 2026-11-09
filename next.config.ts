@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages: ["mongodb", "sharp"],
   // Dev only: let the Telegram mini app load through an https tunnel (cloudflared / ngrok).
-  allowedDevOrigins: ["*.trycloudflare.com", "*.ngrok-free.app", "*.ngrok.app"],
+  allowedDevOrigins: ["127.0.0.1", "*.trycloudflare.com", "*.ngrok-free.app", "*.ngrok.app"],
   // Telegram opens Mini Apps (/app/*, /tg) in its own frame, so only the rest of the site refuses framing.
   async headers() {
     const base = [
