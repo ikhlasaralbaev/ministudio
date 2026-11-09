@@ -45,5 +45,7 @@ export const auth = betterAuth({
       },
     },
   },
+  // Sign-in is Google only, but the endpoints are still public: keep bursts of attempts down (per IP, in memory).
+  rateLimit: { enabled: true, window: 60, max: 60, customRules: { "/sign-in/social": { window: 60, max: 10 }, "/callback/*": { window: 60, max: 20 } } },
   plugins: [nextCookies()],
 });

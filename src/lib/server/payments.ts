@@ -1,5 +1,6 @@
 import "server-only";
 import { createHash } from "crypto";
+import { safeEqual } from "./safeEqual";
 
 /** Click payment page link (https://docs.click.uz) */
 export function clickLink(p: {
@@ -40,5 +41,5 @@ export function clickSignValid(
     f.amount +
     f.action +
     f.sign_time;
-  return createHash("md5").update(base).digest("hex") === f.sign_string;
+  return safeEqual(createHash("md5").update(base).digest("hex"), f.sign_string);
 }

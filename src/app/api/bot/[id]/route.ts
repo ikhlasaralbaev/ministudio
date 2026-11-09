@@ -1,3 +1,4 @@
+import { safeEqual } from "@/lib/server/safeEqual";
 import { encryptEnv } from "@/lib/server/crypto";
 import { envOf, getProject, projects, publicUrl, SUSPENDED_TEXT } from "@/lib/server/projects";
 import { escapeHtml, tgApi } from "@/lib/server/telegram";
@@ -14,7 +15,7 @@ import { BOT_DICT } from "@/lib/managerI18n";
 // Telegram webhook. Always answer 200 quickly so Telegram doesn't retry.
 export async function POST(req: Request, ctx: RouteContext<"/api/bot/[id]">) {
   const { id } = await ctx.params;
-  if (req.headers.get("x-telegram-bot-api-secret-token") !== botSecret(id)) return new Response("forbidden", { status: 403 });
+  if (!safeEqual(req.headers.get("x-telegram-bot-api-secret-token"), botSecret(id))) return new Response("forbidden", { status: 403 });
   try {
     const p = await getProject(id);
     if (!p?.publishedDoc) return new Response("ok");
