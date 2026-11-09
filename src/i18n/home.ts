@@ -227,13 +227,13 @@ const ru: HomeDict = {
 };
 
 const kaa: HomeDict = {
-  meta: { title: "MiniStudio: Telegram ilovaların jaratıw platforması", description: "Biznesińizdi súwretleń: AI menyu, sebet, tólem hám bot menen islewshi Telegram Mini App jaratadı." },
+  meta: { title: "MiniStudio: Telegram bot jaratıw platforması", description: "Ideańızdı jazıń: AI menyu, sebet hám tólemi bar, web ui ǵa iye Telegram bot jaratadı." },
   nav: { studio: "Studio", features: "Imkaniyatlar", bots: "Botlar", ship: "Publish", login: "Kiriw", start: "Biypul baslaw", cabinet: "Kabinet" },
   pill: { tag: "Taza", text: "Sonnet 5.5 hám Haiku 5.5 qollap-quwatlanadı" },
-  h1a: "Telegram ilovaları ushın",
+  h1a: "Telegram bot",
   h1b: "jaratıw platforması",
-  lede: "Biznesińizdi súwretleń: AI menyu, sebet, tólem hám bot menen islewshi Mini App jaratadı. Dúzetiń hám bir basıwda iske túsiriń.",
-  placeholder: "Qanday ilova jaratamız? Mısalı: Nókistegi gúl dúkanı ushın katalog, jetkizip beriw hám Click tólemi",
+  lede: "Ideańızdı jazıń, bir neshe sekundlarda web ui ǵa iye Telegram botıńız tayın boladı. Dúzetiń hám bir basıwda iske túsiriń.",
+  placeholder: "Qanday bot jaratamız? Mısalı: Nókistegi gúl dúkanı ushın katalog, jetkizip beriw hám Click tólemi",
   create: "Jaratıw",
   chips: [
     { icon: "Coffee", label: "Kafe", text: "Kafe ushın menyu, sebet hám jetkizip beriw" },
@@ -255,7 +255,7 @@ const kaa: HomeDict = {
     ],
   },
   features: {
-    h2: "Ilova qurıw ushın kerek hámme nárse bir jerde",
+    h2: "Bot qurıw ushın kerek hámme nárse bir jerde",
     lead: "Ideyadan janlı botqa shekem: jaratıw, dúzetiw, tólem, maǵlıwmat hám komanda.",
     pay: { t: "Click hám Payme tólemleri", p: "Summa hárdayım serverde katalog bahasınan qayta esaplanadı. Klient onı ózgerte almaydı.", sent: "klient jiberdi", rejected: "ret etildi", server: "server esapladı", cur: "swm" },
     chat: { t: "Sóylesip dúzetiń", p: "Elementti basıń hám jazıń. Qalǵanın AI isleydi." },
@@ -281,7 +281,7 @@ const kaa: HomeDict = {
     cta: "Biypul baslaw",
     term: [
       { k: "cmd", text: "ministudio publish lazzat-kafe" },
-      { k: "dm", text: "Ilova tekserilmekte..." },
+      { k: "dm", text: "Bot tekserilmekte..." },
       { k: "ok", text: "Hújjet tekserildi: 3 ekran" },
       { k: "ok", text: "Bot ulandı @lazzat_kafe_bot" },
       { k: "ok", text: "Tólem: Click, Payme" },
@@ -289,8 +289,8 @@ const kaa: HomeDict = {
       { k: "live", text: "Janlı https://t.me/lazzat_kafe_bot" },
     ],
   },
-  cta: { h2: "Birinshi ilovańızdı búgin jaratıń", p: "Google menen kiriń hám biznesińizdi súwretleń.", btn: "Google menen dawam etiw" },
-  footer: { blurb: "Telegram Mini App’lar jaratıw platforması.", product: "Ónim", language: "Til", privacy: "Házirshe biypul" },
+  cta: { h2: "Birinshi botıńızdı búgin jaratıń", p: "Google menen kiriń hám biznesińizdi súwretleń.", btn: "Google menen dawam etiw" },
+  footer: { blurb: "Telegram bot jaratıw platforması.", product: "Ónim", language: "Til", privacy: "Házirshe biypul" },
 };
 
 export const HOME: Record<Locale, HomeDict> = { uz, en, ru, kaa };

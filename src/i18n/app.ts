@@ -104,12 +104,12 @@ const ru: AppDict = {
 };
 
 const kaa: AppDict = {
-  tagline: "Promptdan Telegram Mini App’qa shekem",
+  tagline: "Promptdan Telegram botqa shekem",
   nav: { projects: "Joybarlar", studio: "Studio", settings: "Sazlawlar", data: "Maǵlıwmatlar", schema: "Dúzilis", admin: "Admin", signOut: "Shıǵıw", language: "Til", project: "Joybar" },
-  banner: { admin: "Admin rejimi: siz {email} joybarındasız. Háreketlerińiz jurnalǵa jazıladı.", suspended: "Joybar administrator tárepinen toqtatılǵan: ilova hám bot paydalanıwshılar ushın islemeydi.", owner: "iyesi" },
+  banner: { admin: "Admin rejimi: siz {email} joybarındasız. Háreketlerińiz jurnalǵa jazıladı.", suspended: "Joybar administrator tárepinen toqtatılǵan: bot hám web ui paydalanıwshılar ushın islemeydi.", owner: "iyesi" },
   dash: {
-    ideaTitle: "Ne jaratamız?", ideaHint: "Biznesińizdi bir-eki gápte súwretleń. AI ilovanı ózi jaratadı, soń bir basıwda járiyalaysız.",
-    ideaPlaceholder: "Mısalı: Nókistegi gúl dúkanı ushın katalog, jetkizip beriw hám Click tólemi", ideaCreate: "Ilovanı jaratıw", ideaCreating: "Jaratılmaqta…", loading: "Júklenbekte…",
+    ideaTitle: "Ne jaratamız?", ideaHint: "Biznesińizdi bir-eki gápte súwretleń. AI botıńızdı ózi jaratadı, soń bir basıwda járiyalaysız.",
+    ideaPlaceholder: "Mısalı: Nókistegi gúl dúkanı ushın katalog, jetkizip beriw hám Click tólemi", ideaCreate: "Bottı jaratıw", ideaCreating: "Jaratılmaqta…", loading: "Júklenbekte…",
     examples: ["Kafe ushın menyu, sebet hám jetkizip beriw", "Shashtarazxanaǵa jazılıw: xızmet, sheber hám waqıt", "Oqıw orayı: kurslar katalogı hám arza", "Kompyuter klubı: kabinalar hám bron"],
     mine: "Meniń joybarlarım", member: "Men aǵza bolǵan joybarlar", empty: "Házirshe joybar joq. Birinshisin jaratıń.",
     screens: "{n} ekran", blank: "bos", edit: "Dúzetiw", view: "Kóriw", suspended: "Toqtatılǵan",
@@ -120,15 +120,15 @@ const kaa: AppDict = {
     copy: "Nusqalaw", importFile: "Fayldan import", importBad: "Importtı orınlaw múmkin bolmadı",
   },
   build: {
-    title: "Ilovańızdı jaratıp atırman",
+    title: "Botıńızdı jaratıp atırman",
     hint: "Odatda 30–90 sekund. Betti jabıwdıń keregi joq — hámmesi saqlanadı.",
-    phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Ilova logikasın pisirip atırman…", "Maǵlıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
+    phrases: ["Ideyańızdı oylap atırman…", "Ekranlardı joybarlap atırman…", "Reńler hám shriftlerdi tańlap atırman…", "Hámmesin ornı-ornına qoyıp atırman…", "Bot logikasın pisirip atırman…", "Maǵlıwmat hám katalogtı tayarlap atırman…", "Bezep atırman…", "Hámmesi ornındama, tekserip atırman…", "Derlik tayın…"],
   },
   tg: { title: "Telegramdı ulań", hint: "Joybarlarıńız botta da kórinedi. Ápiwayı halda bot bólek akkaunt ashadı.", btn: "Telegramdı ulaw", waiting: "Telegramda «Start» hám «Awa, ulaw» túymelerin basıń…" },
   notify: { title: "Tayın", body: "AI sorawı orınlandı" },
   billing: {
     chipTitle: "Kredit balansı", empty: "Kredit joq", title: "Kreditler", balance: "Házirgi balans", unit: "kredit",
-    how: "AI sorawları kreditke jumsaladı: ápiwayı ilova jaratıw shama menen 5–10 kredit, kishi dúzetiw 1–2 kredit.",
+    how: "AI sorawları kreditke jumsaladı: ápiwayı bot jaratıw shama menen 5–10 kredit, kishi dúzetiw 1–2 kredit.",
     topupTitle: "Balansti toltırıw", topupSoon: "Onlayn tólem (Click, Payme) tezde qosıladı. Házirshe kreditti administrator qosadı.",
     history: "Tariyx", noHistory: "Házirshe háreket joq.", back: "Joybarlar", unmetered: "Siz platforma administratorısız: kreditler esaplanbaydı.",
     reasons: { grant: "Baslanǵısh kredit", ai: "AI sorawı", topup: "Toltırıw", admin: "Administrator" },
