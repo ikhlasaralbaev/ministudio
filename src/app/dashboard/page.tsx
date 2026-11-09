@@ -14,6 +14,7 @@ import { askNotify } from "@/lib/notifyClient";
 import { markBuilding } from "@/lib/building";
 import { fmt } from "@/i18n/app";
 import { useT } from "@/i18n/client";
+import { browserLocale, translateServer } from "@/i18n/server-text";
 import type { Perms } from "@/lib/permissions";
 
 interface Row {
@@ -80,7 +81,7 @@ export default function Dashboard() {
     try {
       const r = await fetch("/api/projects/import", { method: "POST", body: await file.text() });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || t.dash.importBad);
+      if (!r.ok) throw new Error(j.error ? translateServer(browserLocale(), j.error) : t.dash.importBad);
       router.push(`/projects/${j._id}/studio`);
     } catch (e) {
       alert((e as Error).message || t.dash.importBad);

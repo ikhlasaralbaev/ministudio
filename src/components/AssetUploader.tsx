@@ -3,12 +3,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ImageSquare, Sparkle, Trash, UploadSimple } from "@phosphor-icons/react";
 import { api, uploadAsset, type AssetItem } from "@/lib/client";
 import { ACCEPT, pickImages } from "@/lib/attachFiles";
+import { useX } from "@/i18n/client";
 
 /**
  * The project's logo: shows the current one, uploads a new one (replaces it) or removes it. The AI reads the logo's
  * look and main color; "apply" asks it to put the logo into the app and adopt the color.
  */
 export function LogoUploader({ projectId, canEdit, onApply }: { projectId: string; canEdit: boolean; onApply?: () => void }) {
+  const x = useX();
   const [logo, setLogo] = useState<AssetItem | null | undefined>(undefined);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
@@ -42,7 +44,7 @@ export function LogoUploader({ projectId, canEdit, onApply }: { projectId: strin
   }
 
   async function remove() {
-    if (!logo || !window.confirm("Logo o'chirilsinmi?")) return;
+    if (!logo || !window.confirm(x("Logo o'chirilsinmi?"))) return;
     await api(`/api/projects/${projectId}/assets/${logo.id}`, { method: "DELETE" });
     setLogo(null);
     setFresh(false);
@@ -73,23 +75,23 @@ export function LogoUploader({ projectId, canEdit, onApply }: { projectId: strin
               )}
             </p>
           ) : (
-            <p>PNG, JPG yoki WebP, 5 MB gacha. AI logoni ilovaga qo&apos;yadi va rangini oladi.</p>
+            <p>{x("PNG, JPG yoki WebP, 5 MB gacha. AI logoni ilovaga qo'yadi va rangini oladi.")}</p>
           )}
         </div>
       </div>
       {canEdit && (
         <div className="flex flex-wrap gap-1.5">
           <button type="button" className="btn btn-sm" disabled={busy} onClick={() => input.current?.click()}>
-            <UploadSimple /> {busy ? "Yuklanmoqda…" : logo ? "Almashtirish" : "Logo yuklash"}
+            <UploadSimple /> {busy ? x("Yuklanmoqda…") : logo ? x("Almashtirish") : x("Logo yuklash")}
           </button>
           {logo && (
-            <button type="button" className="btn btn-sm btn-danger" onClick={remove} title="O'chirish">
+            <button type="button" className="btn btn-sm btn-danger" onClick={remove} title={x("O'chirish")}>
               <Trash />
             </button>
           )}
           {logo && onApply && (
             <button type="button" className={`btn btn-sm ${fresh ? "btn-primary" : ""}`} onClick={onApply}>
-              <Sparkle weight="fill" /> Ilovaga qo&apos;llash
+              <Sparkle weight="fill" /> {x("Ilovaga qo'llash")}
             </button>
           )}
         </div>

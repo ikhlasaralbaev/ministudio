@@ -6,6 +6,7 @@ import { buildColumns, coerceInput, type Column } from "@/lib/dataModel";
 import type { AppDoc, Collection, ProjectDTO } from "@/lib/types";
 import { CellView } from "./cells";
 import { TYPE_ICON } from "./DataTable";
+import { useX } from "@/i18n/client";
 
 type Rec = Record<string, unknown>;
 const inp = "w-full min-w-24 rounded border border-transparent bg-transparent px-2 py-1.5 text-[13px] outline-none hover:border-line focus:border-accent focus:bg-bg";
@@ -27,6 +28,7 @@ export function CatalogEditor({
   canEdit: boolean;
   onSaved: () => void;
 }) {
+  const x = useX();
   const [rows, setRows] = useState<Rec[]>((collection.data || []) as Rec[]);
   const [state, setState] = useState<"saved" | "saving" | "error" | "unpublished" | "publishing">("saved");
   const [err, setErr] = useState("");
@@ -89,22 +91,22 @@ export function CatalogEditor({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center gap-3 border-b border-line px-4 py-2 text-sm">
         <span className="text-muted">
-          {state === "saving" ? "Saqlanmoqda…" : state === "error" ? <span className="text-danger">{err || "Saqlanmadi"}</span> : state === "unpublished" ? <span className="text-warn">Qoralama saqlandi, ilovada hali eski holat</span> : state === "publishing" ? "E'lon qilinmoqda…" : "Hammasi saqlangan"}
+          {state === "saving" ? x("Saqlanmoqda…") : state === "error" ? <span className="text-danger">{err || x("Saqlanmadi")}</span> : state === "unpublished" ? <span className="text-warn">{x("Qoralama saqlandi, ilovada hali eski holat")}</span> : state === "publishing" ? x("E'lon qilinmoqda…") : x("Hammasi saqlangan")}
         </span>
         {canEdit && (
           <div className="ml-auto flex gap-2">
             <button className="btn btn-sm" onClick={addRow}>
-              <Plus /> Qator qo&apos;shish
+              <Plus /> {x("Qator qo'shish")}
             </button>
             <button className="btn btn-sm btn-primary" disabled={state === "publishing" || state === "saving"} onClick={publish}>
-              <CloudArrowUp /> Ilovaga chiqarish
+              <CloudArrowUp /> {x("Ilovaga chiqarish")}
             </button>
           </div>
         )}
       </div>
       <div className="scroll-thin relative flex-1 overflow-auto">
         {rows.length === 0 ? (
-          <p className="p-10 text-center text-muted">Katalog bo&apos;sh. {canEdit ? "«Qator qo'shish» tugmasini bosing." : ""}</p>
+          <p className="p-10 text-center text-muted">{x("Katalog bo'sh.")} {canEdit ? x("«Qator qo'shish» tugmasini bosing.") : ""}</p>
         ) : (
           <table className="w-full min-w-max border-separate border-spacing-0 text-[13px]">
             <thead>
@@ -148,7 +150,7 @@ export function CatalogEditor({
                   ))}
                   {canEdit && (
                     <td className="border-b border-line/60 px-1">
-                      <button className="btn btn-sm btn-danger" onClick={() => window.confirm("Qator o'chirilsinmi?") && queueSave(rows.filter((_, k) => k !== i))} title="O'chirish">
+                      <button className="btn btn-sm btn-danger" onClick={() => window.confirm("Qator o'chirilsinmi?") && queueSave(rows.filter((_, k) => k !== i))} title={x("O'chirish")}>
                         <Trash />
                       </button>
                     </td>

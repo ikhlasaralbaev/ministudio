@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Paperclip, X } from "@phosphor-icons/react";
 import { ACCEPT, pickImages } from "@/lib/attachFiles";
+import { useX } from "@/i18n/client";
 
 export interface Attached {
   key: string;
@@ -68,7 +69,9 @@ export function imageDropProps(a: Attachments, disabled?: boolean) {
   };
 }
 
-export function AttachButton({ onFiles, disabled, title = "Reference rasm qo'shish" }: { onFiles: (f: File[]) => void; disabled?: boolean; title?: string }) {
+export function AttachButton({ onFiles, disabled, title }: { onFiles: (f: File[]) => void; disabled?: boolean; title?: string }) {
+  const x = useX();
+  const label = title ?? x("Reference rasm qo'shish");
   const input = useRef<HTMLInputElement>(null);
   return (
     <>
@@ -83,7 +86,7 @@ export function AttachButton({ onFiles, disabled, title = "Reference rasm qo'shi
           e.target.value = "";
         }}
       />
-      <button type="button" disabled={disabled} onClick={() => input.current?.click()} className="btn btn-sm !px-2" title={title} aria-label={title}>
+      <button type="button" disabled={disabled} onClick={() => input.current?.click()} className="btn btn-sm !px-2" title={label} aria-label={label}>
         <Paperclip size={15} />
       </button>
     </>
@@ -91,16 +94,17 @@ export function AttachButton({ onFiles, disabled, title = "Reference rasm qo'shi
 }
 
 export function AttachThumbs({ a }: { a: Attachments }) {
+  const x = useX();
   if (!a.items.length && !a.error) return null;
   return (
     <div className="px-4 pb-2">
       {a.items.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {a.items.map((x) => (
-            <div key={x.key} className="group relative h-12 w-12 overflow-hidden rounded-lg border border-line">
+          {a.items.map((it) => (
+            <div key={it.key} className="group relative h-12 w-12 overflow-hidden rounded-lg border border-line">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={x.url} alt="" className="h-full w-full object-cover" />
-              <button type="button" onClick={() => a.remove(x.key)} className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100" aria-label="Olib tashlash">
+              <img src={it.url} alt="" className="h-full w-full object-cover" />
+              <button type="button" onClick={() => a.remove(it.key)} className="absolute right-0.5 top-0.5 grid h-4 w-4 place-items-center rounded-full bg-black/70 text-white opacity-0 transition group-hover:opacity-100" aria-label={x("Olib tashlash")}>
                 <X size={10} weight="bold" />
               </button>
             </div>

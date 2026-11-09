@@ -1,22 +1,23 @@
 // Typed view of schemaless data: which kind of value a field holds (money, date, status, relation...) so the
 // panel can show it properly, plus guessing which collections reference each other. Pure, shared client/server.
 import type { CollectionField } from "./types";
+import { T } from "../i18n/x";
 
 export type FieldType = "text" | "number" | "money" | "boolean" | "date" | "phone" | "url" | "image" | "select" | "relation" | "list" | "object";
 
 export const TYPE_LABEL: Record<FieldType, string> = {
-  text: "Matn",
-  number: "Son",
-  money: "Pul",
-  boolean: "Ha/Yo'q",
-  date: "Sana",
-  phone: "Telefon",
-  url: "Havola",
-  image: "Rasm",
-  select: "Tanlov",
-  relation: "Bog'lanish",
-  list: "Ro'yxat",
-  object: "Obyekt",
+  text: T("Matn"),
+  number: T("Son"),
+  money: T("Pul"),
+  boolean: T("Ha/Yo'q"),
+  date: T("Sana"),
+  phone: T("Telefon"),
+  url: T("Havola"),
+  image: T("Rasm"),
+  select: T("Tanlov"),
+  relation: T("Bog'lanish"),
+  list: T("Ro'yxat"),
+  object: T("Obyekt"),
 };
 export const FIELD_TYPES = Object.keys(TYPE_LABEL) as FieldType[];
 

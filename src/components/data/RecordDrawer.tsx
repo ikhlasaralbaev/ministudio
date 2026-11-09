@@ -6,6 +6,8 @@ import { coerceInput, TYPE_LABEL, type Column } from "@/lib/dataModel";
 import type { TableView } from "@/lib/server/dataview";
 import { CellView, Pretty, RawJson, type Lookup } from "./cells";
 import { TYPE_ICON } from "./DataTable";
+import { tl } from "@/i18n/server-text";
+import { useX } from "@/i18n/client";
 
 const sys = new Set(["_number", "_at", "_user"]);
 const field = "w-full rounded-md border border-line bg-bg px-2.5 py-1.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/25";
@@ -36,6 +38,7 @@ export function RecordDrawer({
   onChanged: () => void;
   onOpenUser: (tgId: number) => void;
 }) {
+  const x = useX();
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [json, setJson] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -61,7 +64,7 @@ export function RecordDrawer({
         try {
           patch[k] = JSON.parse(raw);
         } catch {
-          throw new Error(`«${k}»: JSON noto'g'ri`);
+          throw new Error(x("«{k}»: JSON noto'g'ri", { k }));
         }
       }
       await api(`/api/projects/${projectId}/data/records/${row.id}`, { method: "PATCH", json: { patch } });
@@ -76,7 +79,7 @@ export function RecordDrawer({
   }
 
   async function remove() {
-    if (!window.confirm("Bu yozuv butunlay o'chiriladi. Qaytarib bo'lmaydi. Davom etamizmi?")) return;
+    if (!window.confirm(x("Bu yozuv butunlay o'chiriladi. Qaytarib bo'lmaydi. Davom etamizmi?"))) return;
     setBusy(true);
     try {
       await api(`/api/projects/${projectId}/data/records/${row.id}`, { method: "DELETE" });
@@ -95,7 +98,7 @@ export function RecordDrawer({
       case "boolean":
         return (
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={!!v} onChange={(e) => set(e.target.checked)} /> {v ? "Ha" : "Yo'q"}
+            <input type="checkbox" checked={!!v} onChange={(e) => set(e.target.checked)} /> {v ? x("Ha") : x("Yo'q")}
           </label>
         );
       case "select":
@@ -116,7 +119,7 @@ export function RecordDrawer({
           <input
             className={field}
             inputMode={c.type === "date" ? "text" : "decimal"}
-            placeholder={c.type === "date" ? "2026-11-08 yoki ISO vaqt" : ""}
+            placeholder={c.type === "date" ? x("2026-11-08 yoki ISO vaqt") : ""}
             defaultValue={String(v ?? "")}
             onChange={(e) => {
               const n = coerceInput(c.type, e.target.value);
@@ -128,7 +131,7 @@ export function RecordDrawer({
       case "object":
         return (
           <details className="text-xs text-muted">
-            <summary className="cursor-pointer hover:text-fg">Tahrirlash (ilg&apos;or)</summary>
+            <summary className="cursor-pointer hover:text-fg">{x("Tahrirlash (ilg'or)")}</summary>
             <textarea
               className={field + " mt-1.5 font-mono text-xs"}
               rows={6}
@@ -149,17 +152,17 @@ export function RecordDrawer({
       <header className="flex items-center gap-2 border-b border-line px-4 py-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">
-            {row.cells._number != null ? `#${row.cells._number}` : "Yozuv"} <span className="font-normal text-muted">· {source}</span>
+            {row.cells._number != null ? `#${row.cells._number}` : x("Yozuv")} <span className="font-normal text-muted">· {source}</span>
           </p>
         </div>
         {row.tgId ? (
-          <button className="btn btn-sm ml-auto" onClick={() => onOpenUser(row.tgId!)} title="Shu foydalanuvchining barcha yozuvlari">
-            <UserCircle /> Foydalanuvchi
+          <button className="btn btn-sm ml-auto" onClick={() => onOpenUser(row.tgId!)} title={x("Shu foydalanuvchining barcha yozuvlari")}>
+            <UserCircle /> {x("Foydalanuvchi")}
           </button>
         ) : (
           <span className="ml-auto" />
         )}
-        <button className="btn btn-sm" onClick={onClose} aria-label="Yopish">
+        <button className="btn btn-sm" onClick={onClose} aria-label={x("Yopish")}>
           <X />
         </button>
       </header>
@@ -169,7 +172,7 @@ export function RecordDrawer({
           <dl className="grid grid-cols-[110px_1fr] gap-x-3 gap-y-2 rounded-lg border border-line bg-bg p-3 text-[13px]">
             {system.map((c) => (
               <div key={c.key} className="contents">
-                <dt className="text-muted">{c.label}</dt>
+                <dt className="text-muted">{tl(c.label)}</dt>
                 <dd><CellView col={c} value={row.cells[c.key]} /></dd>
               </div>
             ))}
@@ -180,8 +183,8 @@ export function RecordDrawer({
           return (
             <div key={c.key}>
               <div className="mb-1 flex items-center gap-1.5 text-[12px] text-muted">
-                {TYPE_ICON[c.type]} <span className="font-medium">{c.label}</span>
-                <span className="text-muted/60">· {TYPE_LABEL[c.type]}{c.ref ? ` → ${c.ref}` : ""}</span>
+                {TYPE_ICON[c.type]} <span className="font-medium">{tl(c.label)}</span>
+                <span className="text-muted/60">· {x(TYPE_LABEL[c.type])}{c.ref ? ` → ${c.ref}` : ""}</span>
               </div>
               {c.type !== "list" && c.type !== "object" &&
                 (mayEdit ? editor(c) : (
@@ -209,9 +212,9 @@ export function RecordDrawer({
           {err && <p className="text-sm text-danger">{err}</p>}
           <div className="flex gap-2">
             <button className="btn btn-primary flex-1" disabled={!dirty || busy} onClick={save}>
-              <FloppyDisk weight="fill" /> {busy ? "Saqlanmoqda…" : "Saqlash"}
+              <FloppyDisk weight="fill" /> {busy ? x("Saqlanmoqda…") : x("Saqlash")}
             </button>
-            <button className="btn btn-danger" disabled={busy} onClick={remove} title="O'chirish">
+            <button className="btn btn-danger" disabled={busy} onClick={remove} title={x("O'chirish")}>
               <Trash />
             </button>
           </div>

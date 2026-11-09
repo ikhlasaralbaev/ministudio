@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, CircleNotch, TelegramLogo } from "@phosphor-icons/react";
 import { LangSwitch, Logo } from "@/components/ui";
 import { useT } from "@/i18n/client";
+import { browserLocale, translateServer } from "@/i18n/server-text";
 import { authClient } from "@/lib/auth-client";
 
 function safeNext(v: string | null) {
@@ -40,7 +41,7 @@ function LoginInner() {
         } else if (!r.ok || Date.now() - started > 5 * 60_000) {
           clearInterval(timer);
           setTgBusy(false);
-          setTgErr(j.error || t.login.telegramFail);
+          setTgErr(j.error ? translateServer(browserLocale(), j.error) : t.login.telegramFail);
         }
       } catch {
         /* keep waiting */
@@ -55,7 +56,7 @@ function LoginInner() {
     try {
       const r = await fetch("/api/tglogin", { method: "POST" });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || t.login.telegramFail);
+      if (!r.ok) throw new Error(j.error ? translateServer(browserLocale(), j.error) : t.login.telegramFail);
       pending.current = { code: j.code, secret: j.secret };
       setTgLink(j.link);
       setTgBusy(true);

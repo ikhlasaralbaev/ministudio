@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Eye } from "@phosphor-icons/react";
 import type { AppDoc, UINode } from "@/lib/types";
 import { CONTAINERS, nodeLabel, TYPE_ICON } from "./describe";
+import { useX } from "@/i18n/client";
 
 type DropPos = "before" | "after" | "inside";
 
@@ -25,6 +26,7 @@ export function Layers({
   onAddScreen: () => void;
   readOnly?: boolean;
 }) {
+  const x = useX();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [drag, setDrag] = useState<string | null>(null);
   const [over, setOver] = useState<{ id: string; pos: DropPos } | null>(null);
@@ -82,8 +84,8 @@ export function Layers({
           </button>
           <span className="w-4 text-center text-[11px] text-muted">{TYPE_ICON[n.type]}</span>
           <span className={`truncate ${isScreen ? "font-medium" : ""}`}>{nodeLabel(n)}</span>
-          {n.events?.onClick?.length ? <span className="ml-auto text-[10px] text-warn" title="Logika bor">ƒ</span> : null}
-          {n.visibleIf ? <span className={`${n.events?.onClick?.length ? "" : "ml-auto"} text-accent-2`} title={"Ko'rinish sharti: " + n.visibleIf}><Eye size={12} /></span> : null}
+          {n.events?.onClick?.length ? <span className="ml-auto text-[10px] text-warn" title={x("Logika bor")}>ƒ</span> : null}
+          {n.visibleIf ? <span className={`${n.events?.onClick?.length ? "" : "ml-auto"} text-accent-2`} title={x("Ko'rinish sharti: ") + n.visibleIf}><Eye size={12} /></span> : null}
         </div>
         {hasKids && open && n.children!.map((c) => row(c, depth + 1))}
       </div>
@@ -93,10 +95,10 @@ export function Layers({
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-3 pb-1 pt-3">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">Qatlamlar</span>
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted">{x("Qatlamlar")}</span>
         {!readOnly && (
-          <button onClick={onAddScreen} className="text-xs text-muted hover:text-fg" title="Yangi ekran">
-            + Ekran
+          <button onClick={onAddScreen} className="text-xs text-muted hover:text-fg" title={x("Yangi ekran")}>
+            {x("+ Ekran")}
           </button>
         )}
       </div>

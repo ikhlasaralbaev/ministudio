@@ -1,5 +1,6 @@
 "use client";
 import type { Ref } from "react";
+import { useX } from "@/i18n/client";
 
 export const SCREEN_W = 390;
 export const SCREEN_H = 844;
@@ -60,6 +61,7 @@ export function PhoneFrame({
   overlay?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const x = useX();
   const light = isLight(theme.background);
   const fg = light ? "#0b0b0f" : "#ffffff";
   return (
@@ -97,11 +99,11 @@ export function PhoneFrame({
             style={{ height: HEADER_H, background: theme.background, color: theme.text }}
           >
             <span className="text-[15px] font-medium" style={{ color: theme.primary }}>
-              Yopish
+              {x("Yopish")}
             </span>
             <span className="min-w-0 text-center leading-tight">
               <span className="block truncate text-[15px] font-semibold">{title}</span>
-              <span className="block text-[11px] opacity-50">mini ilova</span>
+              <span className="block text-[11px] opacity-50">{x("mini ilova")}</span>
             </span>
             <span className="flex justify-end">
               <span

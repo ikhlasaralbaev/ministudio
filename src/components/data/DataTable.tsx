@@ -4,6 +4,8 @@ import type { Column, FieldType } from "@/lib/dataModel";
 import { TYPE_LABEL } from "@/lib/dataModel";
 import type { TableView } from "@/lib/server/dataview";
 import { CellView, type Lookup } from "./cells";
+import { tl } from "@/i18n/server-text";
+import { useX } from "@/i18n/client";
 
 export const TYPE_ICON: Record<FieldType, React.ReactNode> = {
   text: <TextT size={13} />,
@@ -46,15 +48,16 @@ export function DataTable({
   lookup?: Lookup;
   activeId?: string | null;
 }) {
+  const x = useX();
   return (
     <table className="w-full min-w-max border-separate border-spacing-0 text-[13px]">
       <thead>
         <tr>
           {columns.map((c) => (
             <th key={c.key} className="sticky top-0 z-10 border-b border-line bg-panel px-3 py-2 text-left align-bottom font-medium">
-              <button onClick={() => onSort(c.key)} className="group flex items-center gap-1.5 text-muted hover:text-fg" title={`${TYPE_LABEL[c.type]}${c.ref ? " → " + c.ref : ""}`}>
+              <button onClick={() => onSort(c.key)} className="group flex items-center gap-1.5 text-muted hover:text-fg" title={`${x(TYPE_LABEL[c.type])}${c.ref ? " → " + c.ref : ""}`}>
                 <span className="text-muted/70">{TYPE_ICON[c.type]}</span>
-                <span className="whitespace-nowrap text-[12px] font-medium">{c.label}</span>
+                <span className="whitespace-nowrap text-[12px] font-medium">{tl(c.label)}</span>
                 {sort === c.key ? dir === "asc" ? <ArrowUp size={12} className="text-accent-2" /> : <ArrowDown size={12} className="text-accent-2" /> : <ArrowDown size={12} className="opacity-0 group-hover:opacity-40" />}
               </button>
               {c.type === "select" && c.options && c.options.length > 1 && (
@@ -63,7 +66,7 @@ export function DataTable({
                   onChange={(e) => onFilter(c.key, e.target.value || null)}
                   className="mt-1 w-full max-w-36 rounded border border-line bg-bg px-1 py-0.5 text-[11px] font-normal text-muted outline-none focus:border-accent"
                 >
-                  <option value="">Hammasi</option>
+                  <option value="">{x("Hammasi")}</option>
                   {c.options.map((o) => (
                     <option key={o} value={o}>
                       {o}

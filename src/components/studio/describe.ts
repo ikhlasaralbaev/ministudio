@@ -1,3 +1,4 @@
+import { makeX, type XFn } from "@/i18n/x";
 import type { Action, AppDoc, UINode } from "@/lib/types";
 
 export function nodeLabel(n: UINode): string {
@@ -24,39 +25,39 @@ export const TYPE_ICON: Record<string, string> = {
 
 export const CONTAINERS = new Set(["Screen", "Box", "Row", "List"]);
 
-export function describeAction(a: Action, doc: AppDoc): string {
+export function describeAction(a: Action, doc: AppDoc, x: XFn = makeX("uz")): string {
   switch (a.type) {
     case "setState":
       return `state.${a.key} = ${a.value}`;
     case "append":
-      return `state.${a.key} ga qo'shish ← ${a.value}`;
+      return x("state.{k} ga qo'shish ← {v}", { k: a.key, v: a.value });
     case "removeAt":
-      return `state.${a.key} dan o'chirish [${a.index}]`;
+      return x("state.{k} dan o'chirish [{i}]", { k: a.key, i: a.index });
     case "navigate": {
       const s = doc.screens.find((x) => x.id === a.screen);
-      return `→ "${s ? nodeLabel(s) : a.screen}" ekraniga o'tish`;
+      return x('→ "{s}" ekraniga o\'tish', { s: s ? nodeLabel(s) : a.screen });
     }
     case "back":
-      return "← Orqaga";
+      return x("← Orqaga");
     case "alert":
-      return `Xabar: "${a.text}"`;
+      return x('Xabar: "{t}"', { t: a.text });
     case "haptic":
-      return `Vibratsiya (${a.style || "light"})`;
+      return x("Vibratsiya ({s})", { s: a.style || "light" });
     case "dbInsert":
-      return `Bazaga yozish → ${a.collection}`;
+      return x("Bazaga yozish → {c}", { c: a.collection });
     case "dbUpdate":
-      return `Yozuvni yangilash → ${a.collection} [${a.id}]`;
+      return x("Yozuvni yangilash → {c} [{i}]", { c: a.collection, i: a.id });
     case "dbDelete":
-      return `Yozuvni o'chirish → ${a.collection} [${a.id}]`;
+      return x("Yozuvni o'chirish → {c} [{i}]", { c: a.collection, i: a.id });
     case "notifyOwner":
-      return "Egasiga Telegram xabar";
+      return x("Egasiga Telegram xabar");
     case "pay":
-      return `To'lov (${a.provider}): ${a.amount}`;
+      return x("To'lov ({p}): {a}", { p: a.provider, a: a.amount });
     case "openLink":
-      return `Havola: ${a.url}`;
+      return x("Havola: {u}", { u: a.url });
     case "closeApp":
-      return "Ilovani yopish";
+      return x("Ilovani yopish");
     case "if":
-      return `Agar ${a.cond}: ${a.then.length} amal${a.else?.length ? `, aks holda ${a.else.length} amal` : ""}`;
+      return x("Agar {c}: {n} amal", { c: a.cond, n: a.then.length }) + (a.else?.length ? x(", aks holda {n} amal", { n: a.else.length }) : "");
   }
 }

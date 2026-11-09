@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ArrowSquareOut, Check, Minus, Phone } from "@phosphor-icons/react";
 import { badgeTone, buildColumns, fmtMoney, labelOf, type Column } from "@/lib/dataModel";
 import { fmtDate } from "@/lib/export";
+import { useX } from "@/i18n/client";
 
 export type Lookup = (ref: string, value: unknown) => { label: string; open?: () => void } | null;
 
@@ -43,10 +44,11 @@ function Relation({ col, value, lookup }: { col: Column; value: unknown; lookup?
 
 /** One value rendered according to its column type. `compact` keeps list/object values to a short summary. */
 export function CellView({ col, value, lookup, compact = true, depth = 0 }: { col: Column; value: unknown; lookup?: Lookup; compact?: boolean; depth?: number }) {
+  const x = useX();
   if (value === null || value === undefined || value === "") return <span className="text-muted">—</span>;
   switch (col.type) {
     case "money":
-      return <span className="tabular-nums">{fmtMoney(Number(value))} <span className="text-muted">so&apos;m</span></span>;
+      return <span className="tabular-nums">{fmtMoney(Number(value))} <span className="text-muted">{x("so'm")}</span></span>;
     case "number":
       return <span className="tabular-nums">{typeof value === "number" ? num(value) : String(value)}</span>;
     case "boolean":
@@ -83,8 +85,9 @@ export function CellView({ col, value, lookup, compact = true, depth = 0 }: { co
 
 /** One-line summary of nested data: "3 ta element: Osh ×2, Somsa…" / "4 maydon". */
 export function Summary({ value }: { value: unknown }) {
+  const x = useX();
   if (Array.isArray(value)) {
-    if (!value.length) return <span className="text-muted">bo&apos;sh</span>;
+    if (!value.length) return <span className="text-muted">{x("bo'sh")}</span>;
     const names = value.slice(0, 3).map((x) => {
       if (x && typeof x === "object") {
         const o = x as Record<string, unknown>;
@@ -102,14 +105,15 @@ export function Summary({ value }: { value: unknown }) {
     );
   }
   const keys = Object.keys(value as object);
-  return <span className="lb lb-muted">{keys.length} maydon</span>;
+  return <span className="lb lb-muted">{keys.length} {x("maydon")}</span>;
 }
 
 /** Nested data as a readable structure instead of JSON: tables for lists of objects, key/value grids for objects. */
 export function Pretty({ value, lookup, depth = 0 }: { value: unknown; lookup?: Lookup; depth?: number }) {
+  const x = useX();
   if (depth > 3) return <span className="text-muted">…</span>;
   if (Array.isArray(value)) {
-    if (!value.length) return <span className="text-muted">bo&apos;sh ro&apos;yxat</span>;
+    if (!value.length) return <span className="text-muted">{x("bo'sh ro'yxat")}</span>;
     if (value.every((x) => x && typeof x === "object" && !Array.isArray(x))) {
       const rows = value as Record<string, unknown>[];
       const cols = buildColumns(undefined, rows, []).slice(0, 8);
@@ -143,7 +147,7 @@ export function Pretty({ value, lookup, depth = 0 }: { value: unknown; lookup?: 
                 <tr className="border-t border-line bg-panel-2/60 font-medium">
                   {cols.map((c, i) => (
                     <td key={c.key} className="px-2.5 py-1.5">
-                      {sum.includes(c) ? <CellView col={c} value={total(c.key)} /> : i === 0 ? "Jami" : ""}
+                      {sum.includes(c) ? <CellView col={c} value={total(c.key)} /> : i === 0 ? x("Jami") : ""}
                     </td>
                   ))}
                 </tr>
@@ -180,11 +184,12 @@ export function Pretty({ value, lookup, depth = 0 }: { value: unknown; lookup?: 
 
 /** Disclosure for the raw JSON of a value, for people who want to see exactly what is stored. */
 export function RawJson({ value }: { value: unknown }) {
+  const x = useX();
   const [open, setOpen] = useState(false);
   return (
     <div>
       <button className="text-[11px] text-muted hover:text-fg" onClick={() => setOpen(!open)}>
-        {open ? "Xom ma'lumotni yashirish" : "Xom ma'lumotni ko'rsatish"}
+        {open ? x("Xom ma'lumotni yashirish") : x("Xom ma'lumotni ko'rsatish")}
       </button>
       {open && <pre className="scroll-thin mt-1.5 max-h-60 overflow-auto rounded-lg border border-line bg-bg p-2.5 font-mono text-[11px]">{JSON.stringify(value, null, 2)}</pre>}
     </div>

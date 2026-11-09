@@ -154,3 +154,11 @@ the `credit_balances` and `credit_ledger` collections, so a payment only has to 
 ## Other new settings
 `NOTIFY_AFTER_MS` (default 20000): AI jobs longer than this are announced in Telegram when no page is watching.
 Browser login through Telegram needs the manager bot (`TELEGRAM_MANAGER_BOT_TOKEN` / `_USERNAME`).
+
+## Translations of the inner pages
+Interface texts of Studio, settings, data, admin and so on are written in Uzbek in the code and translated through a catalog:
+`x("Uzbek text")` (hook `useX()`) returns the text in the active language (uz, kaa, en, ru); a missing entry falls back to Uzbek.
+Module-level constants use the marker `T("...")` and are translated where shown with `x(...)`. Catalog files: `src/i18n/x/*.ts`.
+Messages the server sends in errors are translated in the browser by `translateServer()` (`src/i18n/x/server.ts`).
+`test/i18n-x.test.ts` fails when a text in the code has no kaa/en/ru translation, when `{placeholders}` differ, or when a catalog entry is unused.
+Content written by the owner (screen names, app texts, bot texts) is never translated.

@@ -4,6 +4,8 @@ import { Sparkle } from "@phosphor-icons/react";
 import { api, timeAgo, uploadAsset } from "@/lib/client";
 import { AttachButton, AttachThumbs, imageDropProps, useAttachments } from "@/components/Attachments";
 import { AI_MODELS } from "@/lib/models";
+import { useX } from "@/i18n/client";
+import { T } from "@/i18n/x";
 
 export interface PromptItem {
   id: string;
@@ -30,22 +32,23 @@ const modelLabel = (id: string, mock: boolean) => (mock ? "Demo" : AI_MODELS.fin
 const secs = (ms: number) => (ms < 1000 ? `${ms} ms` : `${(ms / 1000).toFixed(1)} s`);
 
 const STARTERS = [
-  "Kafe uchun menyu, savat va buyurtma berish ilovasi",
-  "Sartaroshxonaga yozilish: xizmatlar, usta va vaqt tanlash",
-  "Kurslar katalogi va ro'yxatdan o'tish formasi",
+  T("Kafe uchun menyu, savat va buyurtma berish ilovasi"),
+  T("Sartaroshxonaga yozilish: xizmatlar, usta va vaqt tanlash"),
+  T("Kurslar katalogi va ro'yxatdan o'tish formasi"),
 ];
-const EDIT_IDEAS = ["Dizaynni zamonaviyroq va toza qil", "Bosh sahifaga aksiya banneri qo'sh", "Ranglarni to'q mavzuga o'tkaz"];
+const EDIT_IDEAS = [T("Dizaynni zamonaviyroq va toza qil"), T("Bosh sahifaga aksiya banneri qo'sh"), T("Ranglarni to'q mavzuga o'tkaz")];
 
 function Meta({ item }: { item: PromptItem }) {
+  const x = useX();
   return (
     <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted">
       <span className="rounded bg-panel-2 px-1.5 py-px text-fg/70">{modelLabel(item.model, item.mock)}</span>
-      <span title="Kirish / chiqish tokenlari">
+      <span title={x("Kirish / chiqish tokenlari")}>
         ↑ {num(item.inputTokens)} · ↓ {num(item.outputTokens)} token
       </span>
       <span>{secs(item.durationMs)}</span>
       {item.status === "ok" && item.opsCount != null && (
-        <span>{item.kind === "generate" ? `${item.opsCount} ekran` : `${item.opsCount} o'zgarish`}</span>
+        <span>{item.kind === "generate" ? x("{n} ekran", { n: item.opsCount }) : x("{n} o'zgarish", { n: item.opsCount })}</span>
       )}
     </div>
   );
@@ -72,6 +75,7 @@ export function ChatPanel({
   meId: string | null;
   onSend: (text: string, refs?: string[]) => void;
 }) {
+  const x = useX();
   const [items, setItems] = useState<PromptItem[] | null>(null);
   const [err, setErr] = useState("");
   const [text, setText] = useState("");
@@ -144,9 +148,9 @@ export function ChatPanel({
         {items && items.length === 0 && !pending && (
           <div className="pt-6 text-center">
             <div className="mx-auto mb-3 grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-xl text-accent-2"><Sparkle weight="fill" /></div>
-            <p className="font-medium">{hasDoc ? "Ilovani o'zgartiramiz" : "Qanday ilova yaratamiz?"}</p>
+            <p className="font-medium">{hasDoc ? x("Ilovani o'zgartiramiz") : x("Qanday ilova yaratamiz?")}</p>
             <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
-              {hasDoc ? "Nimani o'zgartirish kerakligini oddiy so'z bilan yozing." : "Biznesingizni tasvirlab bering — AI ekranlar, dizayn va logikani yaratadi."}
+              {hasDoc ? x("Nimani o'zgartirish kerakligini oddiy so'z bilan yozing.") : x("Biznesingizni tasvirlab bering — AI ekranlar, dizayn va logikani yaratadi.")}
             </p>
           </div>
         )}
@@ -171,7 +175,7 @@ export function ChatPanel({
                   it.status === "error" ? "border border-danger/30 bg-danger/10 text-danger" : "bg-panel-2 text-white/90"
                 }`}
               >
-                {it.status === "error" ? `Xato: ${it.error}` : it.message || "Bajarildi"}
+                {it.status === "error" ? `Xato: ${it.error}` : it.message || x("Bajarildi")}
               </div>
               <Meta item={it} />
             </div>
@@ -190,7 +194,7 @@ export function ChatPanel({
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-2 [animation-delay:-0.15s]" />
                   <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary-2" />
                 </span>
-                {hasDoc ? "AI o'zgartirmoqda…" : "AI ilovani chizmoqda… (30–90 s)"}
+                {hasDoc ? x("AI o'zgartirmoqda…") : x("AI ilovani chizmoqda… (30–90 s)")}
               </div>
             )}
           </div>
@@ -204,10 +208,10 @@ export function ChatPanel({
               {ideas.map((s) => (
                 <button
                   key={s}
-                  onClick={() => send(s)}
+                  onClick={() => send(x(s))}
                   className="rounded-full border border-line px-2.5 py-1 text-xs text-muted hover:border-accent/60 hover:text-fg"
                 >
-                  {s}
+                  {x(s)}
                 </button>
               ))}
             </div>
@@ -225,20 +229,20 @@ export function ChatPanel({
                   send();
                 }
               }}
-              placeholder={hasDoc ? "Nimani o'zgartiramiz?" : "Ilovangizni tasvirlab bering…"}
+              placeholder={hasDoc ? x("Nimani o'zgartiramiz?") : x("Ilovangizni tasvirlab bering…")}
               className="block max-h-[180px] w-full resize-none bg-transparent px-2 py-1.5 text-[14px] outline-none placeholder:text-muted/60"
             />
             <AttachThumbs a={attach} />
             <div className="flex items-center justify-between gap-2 px-1 pt-1">
               <AttachButton onFiles={attach.add} disabled={busy || uploading} />
               <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
-                {totals.n ? `${totals.n} so'rov · ${num(totals.tokens)} token` : "↵ yuborish · ⇧↵ yangi qator"}
+                {totals.n ? x("{n} so'rov · {t} token", { n: totals.n, t: num(totals.tokens) }) : x("↵ yuborish · ⇧↵ yangi qator")}
               </span>
               <button
                 onClick={() => send()}
                 disabled={busy || uploading || !text.trim()}
                 className="grid h-8 w-8 place-items-center rounded-xl bg-primary text-white hover:bg-primary-2 disabled:opacity-40"
-                title="Yuborish"
+                title={x("Yuborish")}
               >
                 ↑
               </button>

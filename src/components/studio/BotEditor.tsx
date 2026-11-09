@@ -3,14 +3,16 @@ import { Plus, Trash } from "@phosphor-icons/react";
 import type { AppDoc, BotConfig, Op } from "@/lib/types";
 import { formatButtons, formatKeyboard, formatSteps, parseButtons, parseKeyboard, parseSteps, slug } from "@/lib/botText";
 import { Row, Section, Txt } from "./Inspector";
+import { useX } from "@/i18n/client";
 
 type Apply = (ops: Op[], coalesceKey?: string) => void;
 const sel = "w-full rounded-lg bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
 
 function Target({ value, onChange, targets }: { value: string; onChange: (v: string) => void; targets: string[] }) {
+  const x = useX();
   return (
     <select className={sel} value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">— tanlang —</option>
+      <option value="">{x("— tanlang —")}</option>
       {targets.map((t) => (
         <option key={t} value={t}>
           {t}
@@ -27,8 +29,9 @@ function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
   );
 }
 function DelBtn({ onClick }: { onClick: () => void }) {
+  const x = useX();
   return (
-    <button onClick={onClick} className="btn btn-sm btn-danger" title="O'chirish">
+    <button onClick={onClick} className="btn btn-sm btn-danger" title={x("O'chirish")}>
       <Trash />
     </button>
   );
@@ -46,6 +49,7 @@ function Card({ children, onDelete }: { children: React.ReactNode; onDelete: () 
 
 /** Editor for the bot's chat features: messages, commands, keywords, question flows, owner alerts. */
 export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
+  const x = useX();
   const bot = doc.bot;
   const set = (patch: Partial<BotConfig>, key?: string) => apply([{ op: "setBot", bot: patch }], key);
   const messages = bot.messages || [];
@@ -65,42 +69,42 @@ export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
 
   return (
     <>
-      <Section title="Bot: xabarlar">
-        <p className="text-[11px] leading-snug text-muted">Tugma qatori: <code>Yozuv -&gt; app</code>, <code>-&gt; https://…</code> yoki <code>-&gt; boshqa id</code>. Bir qatorda bir nechta tugma: <code> | </code></p>
+      <Section title={x("Bot: xabarlar")}>
+        <p className="text-[11px] leading-snug text-muted">{x("Tugma qatori: «Yozuv -> app», «-> https://…» yoki «-> boshqa id». Bir qatorda bir nechta tugma: « | »")}</p>
         {messages.map((m, i) => (
           <Card key={i} onDelete={() => set({ messages: del(messages, i) })}>
             <Row label="id">
               <Txt mono value={m.id} onChange={(v) => slug(v) && set({ messages: patch(messages, i, { id: slug(v) }) }, `bm.${i}.id`)} />
             </Row>
-            <Txt multiline value={m.text} placeholder="Xabar matni" onChange={(v) => set({ messages: patch(messages, i, { text: v }) }, `bm.${i}.t`)} />
-            <Txt multiline mono placeholder="Inline tugmalar" value={formatButtons(m.buttons)} onChange={(v) => set({ messages: patch(messages, i, { buttons: parseButtons(v) }) }, `bm.${i}.b`)} />
-            <Txt multiline mono placeholder="Pastki klaviatura (ixtiyoriy): A | B" value={formatKeyboard(m.keyboard)} onChange={(v) => set({ messages: patch(messages, i, { keyboard: parseKeyboard(v) }) }, `bm.${i}.k`)} />
+            <Txt multiline value={m.text} placeholder={x("Xabar matni")} onChange={(v) => set({ messages: patch(messages, i, { text: v }) }, `bm.${i}.t`)} />
+            <Txt multiline mono placeholder={x("Inline tugmalar")} value={formatButtons(m.buttons)} onChange={(v) => set({ messages: patch(messages, i, { buttons: parseButtons(v) }) }, `bm.${i}.b`)} />
+            <Txt multiline mono placeholder={x("Pastki klaviatura (ixtiyoriy): A | B")} value={formatKeyboard(m.keyboard)} onChange={(v) => set({ messages: patch(messages, i, { keyboard: parseKeyboard(v) }) }, `bm.${i}.k`)} />
           </Card>
         ))}
-        <AddBtn label="Xabar qo'shish" onClick={() => set({ messages: [...messages, { id: nextId("xabar"), text: "Salom!" }] })} />
-        <Row label="Mos kelmasa">
+        <AddBtn label={x("Xabar qo'shish")} onClick={() => set({ messages: [...messages, { id: nextId("xabar"), text: "Salom!" }] })} />
+        <Row label={x("Mos kelmasa")}>
           <Target targets={targets} value={bot.fallback || ""} onChange={(v) => set({ fallback: v || undefined })} />
         </Row>
       </Section>
 
-      <Section title="Bot: buyruqlar">
+      <Section title={x("Bot: buyruqlar")}>
         {commands.map((c, i) => (
           <Card key={i} onDelete={() => set({ commands: del(commands, i) })}>
             <Row label="/buyruq">
               <Txt mono value={c.command} onChange={(v) => /^[a-z]/.test(slug(v, 32)) && set({ commands: patch(commands, i, { command: slug(v, 32).replace(/-/g, "_") }) }, `bc.${i}.c`)} />
             </Row>
-            <Row label="Tavsif">
+            <Row label={x("Tavsif")}>
               <Txt value={c.description} onChange={(v) => set({ commands: patch(commands, i, { description: v }) }, `bc.${i}.d`)} />
             </Row>
-            <Row label="Javob">
+            <Row label={x("Javob")}>
               <Target targets={targets} value={c.to} onChange={(v) => set({ commands: patch(commands, i, { to: v }) })} />
             </Row>
           </Card>
         ))}
-        <AddBtn label="Buyruq qo'shish" onClick={() => set({ commands: [...commands, { command: `buyruq${commands.length + 1}`, description: "Tavsif", to: targets[0] || "" }] })} />
+        <AddBtn label={x("Buyruq qo'shish")} onClick={() => set({ commands: [...commands, { command: `buyruq${commands.length + 1}`, description: "Tavsif", to: targets[0] || "" }] })} />
       </Section>
 
-      <Section title="Bot: kalit so'zlar">
+      <Section title={x("Bot: kalit so'zlar")}>
         {keywords.map((k, i) => (
           <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-center gap-1.5">
             <Txt value={k.match} placeholder="narx" onChange={(v) => set({ keywords: patch(keywords, i, { match: v }) }, `bk.${i}`)} />
@@ -108,22 +112,22 @@ export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
             <DelBtn onClick={() => set({ keywords: del(keywords, i) })} />
           </div>
         ))}
-        <AddBtn label="Kalit so'z qo'shish" onClick={() => set({ keywords: [...keywords, { match: "", to: targets[0] || "" }] })} />
+        <AddBtn label={x("Kalit so'z qo'shish")} onClick={() => set({ keywords: [...keywords, { match: "", to: targets[0] || "" }] })} />
       </Section>
 
-      <Section title="Bot: so'rovnomalar">
-        <p className="text-[11px] leading-snug text-muted">Qadam: <code>kalit | savol | text/phone/number/choice | variantlar</code></p>
+      <Section title={x("Bot: so'rovnomalar")}>
+        <p className="text-[11px] leading-snug text-muted">{x("Qadam: kalit | savol | text/phone/number/choice | variantlar")}</p>
         {flows.map((f, i) => (
           <Card key={i} onDelete={() => set({ flows: del(flows, i) })}>
             <Row label="id">
               <Txt mono value={f.id} onChange={(v) => slug(v) && set({ flows: patch(flows, i, { id: slug(v) }) }, `bf.${i}.id`)} />
             </Row>
-            <Txt multiline placeholder="Kirish matni (ixtiyoriy)" value={f.intro || ""} onChange={(v) => set({ flows: patch(flows, i, { intro: v || undefined }) }, `bf.${i}.i`)} />
-            <Txt multiline mono placeholder="name | Ismingiz?" value={formatSteps(f.steps)} onChange={(v) => set({ flows: patch(flows, i, { steps: parseSteps(v) }) }, `bf.${i}.s`)} />
-            <Txt multiline placeholder="Yakuniy matn" value={f.done} onChange={(v) => set({ flows: patch(flows, i, { done: v }) }, `bf.${i}.d`)} />
-            <Row label="Saqlash">
+            <Txt multiline placeholder={x("Kirish matni (ixtiyoriy)")} value={f.intro || ""} onChange={(v) => set({ flows: patch(flows, i, { intro: v || undefined }) }, `bf.${i}.i`)} />
+            <Txt multiline mono placeholder={x("name | Ismingiz?")} value={formatSteps(f.steps)} onChange={(v) => set({ flows: patch(flows, i, { steps: parseSteps(v) }) }, `bf.${i}.s`)} />
+            <Txt multiline placeholder={x("Yakuniy matn")} value={f.done} onChange={(v) => set({ flows: patch(flows, i, { done: v }) }, `bf.${i}.d`)} />
+            <Row label={x("Saqlash")}>
               <select className={sel} value={f.saveTo || ""} onChange={(e) => set({ flows: patch(flows, i, { saveTo: e.target.value || undefined }) })}>
-                <option value="">— saqlamaslik —</option>
+                <option value="">{x("— saqlamaslik —")}</option>
                 {records.map((r) => (
                   <option key={r} value={r}>
                     {r}
@@ -133,12 +137,12 @@ export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
             </Row>
             <label className="flex items-center gap-2 text-[12px] text-muted">
               <input type="checkbox" checked={f.notifyOwner !== false} onChange={(e) => set({ flows: patch(flows, i, { notifyOwner: e.target.checked }) })} />
-              Egaga xabar yuborish
+              {x("Egaga xabar yuborish")}
             </label>
           </Card>
         ))}
         <AddBtn
-          label="So'rovnoma qo'shish"
+          label={x("So'rovnoma qo'shish")}
           onClick={() =>
             set({
               flows: [
@@ -150,9 +154,9 @@ export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
         />
       </Section>
 
-      <Section title="Bot: egaga tugmali xabar">
-        <p className="text-[11px] leading-snug text-muted">Yangi yozuv egaga &laquo;Qabul qilish / Rad etish&raquo; tugmalari bilan boradi, mijozga natija yuboriladi.</p>
-        {records.length === 0 && <p className="text-[12px] text-muted">Yozuv kolleksiyasi yo&apos;q.</p>}
+      <Section title={x("Bot: egaga tugmali xabar")}>
+        <p className="text-[11px] leading-snug text-muted">{x("Yangi yozuv egaga «Qabul qilish / Rad etish» tugmalari bilan boradi, mijozga natija yuboriladi.")}</p>
+        {records.length === 0 && <p className="text-[12px] text-muted">{x("Yozuv kolleksiyasi yo'q.")}</p>}
         {records.map((r) => {
           const a = alerts.find((x) => x.collection === r);
           return (
@@ -163,8 +167,8 @@ export function BotEditor({ doc, apply }: { doc: AppDoc; apply: Apply }) {
               </label>
               {a && (
                 <>
-                  <Txt placeholder="Qabul qilinganda mijozga" value={a.acceptText || ""} onChange={(v) => set({ ownerAlerts: alerts.map((x) => (x.collection === r ? { ...x, acceptText: v || undefined } : x)) }, `ba.${r}.a`)} />
-                  <Txt placeholder="Rad etilganda mijozga" value={a.rejectText || ""} onChange={(v) => set({ ownerAlerts: alerts.map((x) => (x.collection === r ? { ...x, rejectText: v || undefined } : x)) }, `ba.${r}.r`)} />
+                  <Txt placeholder={x("Qabul qilinganda mijozga")} value={a.acceptText || ""} onChange={(v) => set({ ownerAlerts: alerts.map((x) => (x.collection === r ? { ...x, acceptText: v || undefined } : x)) }, `ba.${r}.a`)} />
+                  <Txt placeholder={x("Rad etilganda mijozga")} value={a.rejectText || ""} onChange={(v) => set({ ownerAlerts: alerts.map((x) => (x.collection === r ? { ...x, rejectText: v || undefined } : x)) }, `ba.${r}.r`)} />
                 </>
               )}
             </div>

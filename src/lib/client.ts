@@ -1,5 +1,9 @@
 "use client";
 import { watchLevel } from "./notifyClient";
+import { browserLocale, translateServer } from "../i18n/server-text";
+
+/** A server message in the browser's interface language. */
+const tr = (m: string) => translateServer(browserLocale(), m);
 export async function api<T = any>(url: string, init?: RequestInit & { json?: unknown }): Promise<T> {
   const r = await fetch(url, {
     ...init,
@@ -18,7 +22,7 @@ export async function api<T = any>(url: string, init?: RequestInit & { json?: un
         window.location.replace("/login?error=1");
       }
     }
-    throw new Error(j.error || `HTTP ${r.status}`);
+    throw new Error(tr(j.error || `HTTP ${r.status}`));
   }
   return j as T;
 }
@@ -43,7 +47,7 @@ export async function pollAi<T = any>(projectId: string, jobId: string, opts: { 
       misses = 0;
       if (j.status === "done" || j.status === "error") window.dispatchEvent(new Event("ms:credits")); // the balance just changed
       if (j.status === "done") return j.result as T;
-      if (j.status === "error") throw new Error(j.error || "AI xatosi");
+      if (j.status === "error") throw new Error(tr(j.error || "AI xatosi"));
     } catch (e) {
       // A dropped poll (network blip, proxy hiccup) is not a failed job: retry a few times.
       if ((e as Error).message.startsWith("HTTP") || e instanceof TypeError) {
@@ -53,7 +57,7 @@ export async function pollAi<T = any>(projectId: string, jobId: string, opts: { 
       throw e;
     }
   }
-  throw new Error("AI javobi juda uzoq kechikdi. Keyinroq loyihani yangilab ko'ring.");
+  throw new Error(tr("AI javobi juda uzoq kechikdi. Keyinroq loyihani yangilab ko'ring."));
 }
 
 export interface AssetItem {
@@ -76,16 +80,27 @@ export async function uploadAsset(projectId: string, file: File, kind: "logo" | 
   const j = await r.json().catch(() => ({}));
   if (!r.ok) {
     if (r.status === 401 && typeof window !== "undefined") window.location.replace(`/login?next=${encodeURIComponent(window.location.pathname)}`);
-    throw new Error(j.error || `HTTP ${r.status}`);
+    throw new Error(tr(j.error || `HTTP ${r.status}`));
   }
   return j.item as AssetItem;
 }
 
+const AGO: Record<string, [string, (n: number) => string, (n: number) => string]> = {
+  uz: ["hozirgina", (n) => `${n} daqiqa oldin`, (n) => `${n} soat oldin`],
+  kaa: ["házir ǵana", (n) => `${n} minut aldın`, (n) => `${n} saat aldın`],
+  en: ["just now", (n) => `${n} min ago`, (n) => `${n} h ago`],
+  ru: ["только что", (n) => `${n} мин назад`, (n) => `${n} ч назад`],
+};
+const DATE_LOCALE: Record<string, string> = { uz: "uz-UZ", kaa: "uz-UZ", en: "en-GB", ru: "ru-RU" };
+
+/** "3 minutes ago" in the interface language. */
 export function timeAgo(iso?: string) {
   if (!iso) return "";
+  const l = browserLocale();
+  const [now, mins, hours] = AGO[l] ?? AGO.uz;
   const s = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (s < 60) return "hozirgina";
-  if (s < 3600) return `${Math.floor(s / 60)} daqiqa oldin`;
-  if (s < 86400) return `${Math.floor(s / 3600)} soat oldin`;
-  return new Date(iso).toLocaleDateString("uz-UZ");
+  if (s < 60) return now;
+  if (s < 3600) return mins(Math.floor(s / 60));
+  if (s < 86400) return hours(Math.floor(s / 3600));
+  return new Date(iso).toLocaleDateString(DATE_LOCALE[l] ?? "uz-UZ");
 }

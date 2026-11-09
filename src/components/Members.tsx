@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { api } from "@/lib/client";
 import { checkMemberChange, type Access, type Grant, type Member, type Perms } from "@/lib/permissions";
 import { inputCls } from "./ui";
+import { T } from "@/i18n/x";
+import { useX } from "@/i18n/client";
 
 type Row = Member & { name?: string; image?: string | null };
 interface Resp {
@@ -12,7 +14,7 @@ interface Resp {
   members: Row[];
 }
 
-const ACCESS_LABEL: Record<Access, string> = { read: "Ko'rish", update: "Tahrirlash" };
+const ACCESS_LABEL: Record<Access, string> = { read: T("Ko'rish"), update: T("Tahrirlash") };
 
 function Avatar({ image, email }: { image?: string | null; email: string }) {
   return image ? (
@@ -37,6 +39,7 @@ function GrantEditor({
   userId: string;
   target: Member | null;
 }) {
+  const x = useX();
   const allowed = (g: Grant) => checkMemberChange(perms, userId, target, g) === null;
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -47,7 +50,7 @@ function GrantEditor({
       >
         {(["read", "update"] as Access[]).map((a) => (
           <option key={a} value={a} disabled={!allowed({ ...value, access: a })}>
-            {ACCESS_LABEL[a]}
+            {x(ACCESS_LABEL[a])}
           </option>
         ))}
       </select>
@@ -58,7 +61,7 @@ function GrantEditor({
           disabled={!allowed({ ...value, manageMembers: !value.manageMembers })}
           onChange={(e) => onChange({ ...value, manageMembers: e.target.checked })}
         />
-        A&apos;zolarni boshqarish
+        {x("A'zolarni boshqarish")}
       </label>
       <label className="flex items-center gap-1.5">
         <input
@@ -67,13 +70,14 @@ function GrantEditor({
           disabled={!allowed({ ...value, deleteProject: !value.deleteProject })}
           onChange={(e) => onChange({ ...value, deleteProject: e.target.checked })}
         />
-        Loyihani o&apos;chirish
+        {x("Loyihani o'chirish")}
       </label>
     </div>
   );
 }
 
 export function Members({ projectId, perms, userId }: { projectId: string; perms: Perms; userId: string }) {
+  const x = useX();
   const router = useRouter();
   const [data, setData] = useState<Resp | null>(null);
   const [email, setEmail] = useState("");
@@ -104,13 +108,13 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
       await api(base, { method: "POST", json: { email, ...grant } });
       setEmail("");
       setInvited(true);
-    }, "A'zo qo'shildi");
+    }, x("A'zo qo'shildi"));
   }
 
   const keyOf = (m: Member) => `${base}/${encodeURIComponent(m.email)}`;
 
   async function leave(m: Member) {
-    if (!confirm("Loyihadan chiqasizmi? Qaytish uchun sizni yana qo'shishlari kerak bo'ladi.")) return;
+    if (!confirm(x("Loyihadan chiqasizmi? Qaytish uchun sizni yana qo'shishlari kerak bo'ladi."))) return;
     await api(keyOf(m), { method: "DELETE" });
     router.replace("/dashboard");
   }
@@ -119,13 +123,13 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
 
   return (
     <section className="card p-6">
-      <h2 className="mb-1 font-semibold">A&apos;zolar</h2>
+      <h2 className="mb-1 font-semibold">{x("A'zolar")}</h2>
       <p className="mb-4 text-sm text-muted">
-        Qo&apos;shilgan odam Google akkaunti bilan kirganda loyiha uning ro&apos;yxatida paydo bo&apos;ladi.
+        {x("Qo'shilgan odam Google akkaunti bilan kirganda loyiha uning ro'yxatida paydo bo'ladi.")}
       </p>
 
       {!data ? (
-        <p className="text-sm text-muted">Yuklanmoqda…</p>
+        <p className="text-sm text-muted">{x("Yuklanmoqda…")}</p>
       ) : (
         <ul className="mb-5 divide-y divide-line">
           {data.owner && (
@@ -135,7 +139,7 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
                 <p className="truncate text-sm">{data.owner.name || shownEmail(data.owner.email)}</p>
                 <p className="truncate text-xs text-muted">{shownEmail(data.owner.email)}</p>
               </div>
-              <span className="rounded bg-accent/15 px-2 py-0.5 text-xs text-accent-2">Ega</span>
+              <span className="rounded bg-accent/15 px-2 py-0.5 text-xs text-accent-2">{x("Ega")}</span>
             </li>
           )}
           {data.members.map((m) => {
@@ -148,11 +152,11 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm">
                     {m.name || shownEmail(m.email)}
-                    {isMe && <span className="ml-2 text-xs text-muted">(siz)</span>}
+                    {isMe && <span className="ml-2 text-xs text-muted">{x("(siz)")}</span>}
                   </p>
                   <p className="truncate text-xs text-muted">
                     {shownEmail(m.email)}
-                    {m.userId === null && <span className="ml-2 text-warn">kirishini kutmoqda</span>}
+                    {m.userId === null && <span className="ml-2 text-warn">{x("kirishini kutmoqda")}</span>}
                   </p>
                 </div>
                 {canEdit ? (
@@ -165,21 +169,21 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
                   />
                 ) : (
                   <span className="text-xs text-muted">
-                    {ACCESS_LABEL[m.access]}
-                    {m.manageMembers && " · a'zolarni boshqaradi"}
-                    {m.deleteProject && " · o'chira oladi"}
+                    {x(ACCESS_LABEL[m.access])}
+                    {m.manageMembers && x(" · a'zolarni boshqaradi")}
+                    {m.deleteProject && x(" · o'chira oladi")}
                   </span>
                 )}
                 {isMe && !perms.isOwner ? (
                   <button onClick={() => leave(m)} className="text-xs text-muted hover:text-danger">
-                    Loyihadan chiqish
+                    {x("Loyihadan chiqish")}
                   </button>
                 ) : (
                   canRemove && (
                     <button
-                      onClick={() => confirm(`${m.email} ni olib tashlaysizmi?`) && run(() => api(keyOf(m), { method: "DELETE" }))}
+                      onClick={() => confirm(x("{email} ni olib tashlaysizmi?", { email: m.email })) && run(() => api(keyOf(m), { method: "DELETE" }))}
                       className="px-1 text-muted hover:text-danger"
-                      title="Olib tashlash"
+                      title={x("Olib tashlash")}
                     >
                       ✕
                     </button>
@@ -203,17 +207,17 @@ export function Members({ projectId, perms, userId }: { projectId: string; perms
           />
           <div className="flex flex-wrap items-center justify-between gap-3">
             <GrantEditor value={grant} onChange={setGrant} perms={perms} userId={userId} target={null} />
-            <button className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-2">Qo&apos;shish</button>
+            <button className="rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-2">{x("Qo'shish")}</button>
           </div>
         </form>
       )}
 
       {invited && (
         <div className="mt-3 flex items-center gap-2 rounded-lg bg-panel-2 p-3 text-sm">
-          <span className="text-muted">Kirish havolasini yuboring:</span>
+          <span className="text-muted">{x("Kirish havolasini yuboring:")}</span>
           <code className="flex-1 truncate">{loginUrl}</code>
           <button type="button" onClick={() => navigator.clipboard.writeText(loginUrl)} className="text-accent-2">
-            Nusxalash
+            {x("Nusxalash")}
           </button>
         </div>
       )}

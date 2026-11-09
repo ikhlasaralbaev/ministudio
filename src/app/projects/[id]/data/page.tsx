@@ -13,6 +13,7 @@ import { num, type Lookup } from "@/components/data/cells";
 import { labelOf } from "@/lib/dataModel";
 import type { TableView } from "@/lib/server/dataview";
 import type { Collection, ProjectDTO } from "@/lib/types";
+import { useX } from "@/i18n/client";
 
 interface Overview {
   collections: { name: string; count: number; last: string | null }[];
@@ -44,6 +45,7 @@ function SourceButton({ active, icon, label, count, hint, onClick }: { active: b
 const Group = ({ children }: { children: React.ReactNode }) => <p className="px-2 pb-1 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted first:pt-1">{children}</p>;
 
 export default function DataPage() {
+  const x = useX();
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<ProjectDTO | null>(null);
   const [overview, setOverview] = useState<Overview | null>(null);
@@ -160,7 +162,7 @@ export default function DataPage() {
   };
 
   const meta = (s: string) => (project?.doc?.collections || []).find((c) => c.name === s);
-  const title = source === "users" ? "Foydalanuvchilar" : source === "payments" ? "To'lovlar" : meta(source)?.label || source;
+  const title = source === "users" ? x("Foydalanuvchilar") : source === "payments" ? x("To'lovlar") : meta(source)?.label || source;
   const pages = view ? Math.max(1, Math.ceil(view.total / view.pageSize)) : 1;
   const canEdit = !!project?.permissions.update;
   const records = overview?.collections.filter((c) => !catalogs.some((k) => k.name === c.name)) ?? [];
@@ -174,7 +176,7 @@ export default function DataPage() {
         right={
           <>
             <Link href={`/projects/${id}/schema`} className="btn">
-              <TreeStructure /> Tuzilma
+              <TreeStructure /> {x("Tuzilma")}
             </Link>
             <Broadcast projectId={id} canSend={canEdit} />
             <button
@@ -184,51 +186,51 @@ export default function DataPage() {
               }}
               className="btn"
             >
-              <ArrowsClockwise /> Yangilash
+              <ArrowsClockwise /> {x("Yangilash")}
             </button>
           </>
         }
       />
       <div className="flex min-h-0 flex-1">
         <aside className="scroll-thin hidden w-72 shrink-0 space-y-1 overflow-y-auto border-r border-line bg-panel p-3 md:block">
-          <Group>Jadvallar</Group>
-          {records.length === 0 && <p className="px-2 py-2 text-xs text-muted">Hali yozuv kolleksiyasi yo&apos;q. Ilova buyurtma yoki ariza yozganda shu yerda paydo bo&apos;ladi.</p>}
+          <Group>{x("Jadvallar")}</Group>
+          {records.length === 0 && <p className="px-2 py-2 text-xs text-muted">{x("Hali yozuv kolleksiyasi yo'q. Ilova buyurtma yoki ariza yozganda shu yerda paydo bo'ladi.")}</p>}
           {records.map((c) => (
-            <SourceButton key={c.name} active={source === c.name} icon={<Folders size={18} />} label={meta(c.name)?.label || c.name} count={c.count} hint={c.last ? `oxirgisi ${timeAgo(c.last)}` : "bo'sh"} onClick={() => pick(c.name)} />
+            <SourceButton key={c.name} active={source === c.name} icon={<Folders size={18} />} label={meta(c.name)?.label || c.name} count={c.count} hint={c.last ? x("oxirgisi {t}", { t: timeAgo(c.last) }) : x("bo'sh")} onClick={() => pick(c.name)} />
           ))}
-          {catalogs.length > 0 && <Group>Katalog (tahrirlash mumkin)</Group>}
+          {catalogs.length > 0 && <Group>{x("Katalog (tahrirlash mumkin)")}</Group>}
           {catalogs.map((c) => (
-            <SourceButton key={c.name} active={source === c.name} icon={<Package size={18} />} label={c.label || c.name} count={c.data?.length ?? 0} hint="tovar, xizmat, menyu" onClick={() => pick(c.name)} />
+            <SourceButton key={c.name} active={source === c.name} icon={<Package size={18} />} label={c.label || c.name} count={c.data?.length ?? 0} hint={x("tovar, xizmat, menyu")} onClick={() => pick(c.name)} />
           ))}
-          <Group>Tizim</Group>
-          <SourceButton active={source === "users"} icon={<UsersThree size={18} />} label="Foydalanuvchilar" count={overview?.users ?? 0} hint="Botni yoki ilovani ochganlar" onClick={() => pick("users")} />
-          <SourceButton active={source === "payments"} icon={<CreditCard size={18} />} label="To'lovlar" count={overview?.payments ?? 0} hint="Click va Payme" onClick={() => pick("payments")} />
+          <Group>{x("Tizim")}</Group>
+          <SourceButton active={source === "users"} icon={<UsersThree size={18} />} label={x("Foydalanuvchilar")} count={overview?.users ?? 0} hint={x("Botni yoki ilovani ochganlar")} onClick={() => pick("users")} />
+          <SourceButton active={source === "payments"} icon={<CreditCard size={18} />} label={x("To'lovlar")} count={overview?.payments ?? 0} hint={x("Click va Payme")} onClick={() => pick("payments")} />
           <Link href={`/projects/${id}/schema`} className="mt-3 flex items-center gap-2 rounded-lg border border-dashed border-line px-3 py-2 text-xs text-muted hover:border-accent hover:text-fg">
-            <TreeStructure size={16} /> Jadvallar tuzilmasi va bog&apos;lanishlari
+            <TreeStructure size={16} /> {x("Jadvallar tuzilmasi va bog'lanishlari")}
           </Link>
         </aside>
 
         <main className="flex min-w-0 flex-1 flex-col">
           <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-2.5">
             <h2 className="mr-1 text-base font-semibold">{title}</h2>
-            {!isCatalog && view && <span className="text-sm text-muted">{num(view.total)} ta</span>}
+            {!isCatalog && view && <span className="text-sm text-muted">{x("{n} ta", { n: num(view.total) })}</span>}
             {user && (
               <span className="lb lb-accent">
                 <UserCircle /> {user.label}
-                <button onClick={() => setUser(null)} aria-label="Filterni olib tashlash"><X size={11} /></button>
+                <button onClick={() => setUser(null)} aria-label={x("Filterni olib tashlash")}><X size={11} /></button>
               </span>
             )}
             {Object.entries(filters).map(([k, v]) => (
               <span key={k} className="lb lb-pur">
                 {k}: {v}
-                <button onClick={() => setFilters((f) => Object.fromEntries(Object.entries(f).filter(([x]) => x !== k)))} aria-label="Filterni olib tashlash"><X size={11} /></button>
+                <button onClick={() => setFilters((f) => Object.fromEntries(Object.entries(f).filter(([x]) => x !== k)))} aria-label={x("Filterni olib tashlash")}><X size={11} /></button>
               </span>
             ))}
             {!isCatalog && (
               <div className="ml-auto flex flex-wrap items-center gap-2">
                 <div className="relative">
                   <MagnifyingGlass className="pointer-events-none absolute left-2.5 top-2 text-muted" size={15} />
-                  <input value={qLive} onChange={(e) => setQLive(e.target.value)} placeholder="Qidirish…" className="inp h-8 w-52 pl-8" />
+                  <input value={qLive} onChange={(e) => setQLive(e.target.value)} placeholder={x("Qidirish…")} className="inp h-8 w-52 pl-8" />
                 </div>
                 <a href={exportHref("xlsx")} className="btn btn-primary"><DownloadSimple /> Excel</a>
                 <a href={exportHref("csv")} className="btn">CSV</a>
@@ -250,8 +252,8 @@ export default function DataPage() {
                 {view && view.total === 0 && !err && (
                   <div className="mx-auto max-w-sm p-16 text-center text-muted">
                     <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-xl bg-panel-2 text-2xl"><Folders /></div>
-                    <p className="font-medium text-fg">Hozircha ma&apos;lumot yo&apos;q</p>
-                    <p className="mt-1 text-sm">{q || user || Object.keys(filters).length ? "Qidiruv yoki filtr bo'yicha hech narsa topilmadi." : "Ilova ma'lumot yozganda shu yerda ko'rinadi."}</p>
+                    <p className="font-medium text-fg">{x("Hozircha ma'lumot yo'q")}</p>
+                    <p className="mt-1 text-sm">{q || user || Object.keys(filters).length ? x("Qidiruv yoki filtr bo'yicha hech narsa topilmadi.") : x("Ilova ma'lumot yozganda shu yerda ko'rinadi.")}</p>
                   </div>
                 )}
                 {view && view.total > 0 && (

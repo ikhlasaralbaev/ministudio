@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle, CircleNotch, Key, Robot, TelegramLogo } from "@phosphor-icons/react";
 import { api } from "@/lib/client";
+import { useX } from "@/i18n/client";
 
 interface TgState {
   linked: { id: number; username: string; name: string } | null;
@@ -36,6 +37,7 @@ function StepRow({ n, done, active, title, sub }: { n: number; done: boolean; ac
  * the bot's token itself.
  */
 export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: { projectId: string; onConnected: () => void; onTokenSaved?: (botUsername: string) => void; onOwnerId?: (id: number) => void }) {
+  const x = useX();
   const [tg, setTg] = useState<TgState | null>(null);
   const [st, setSt] = useState<CreateState | null>(null);
   const [waiting, setWaiting] = useState(false);
@@ -134,7 +136,7 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
     }
   }
 
-  if (err && (!tg || !st)) return <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">Yuklanmadi: {err}</p>;
+  if (err && (!tg || !st)) return <p className="rounded-lg border border-danger/40 bg-danger/10 p-3 text-sm text-danger">{x("Yuklanmadi:")} {err}</p>;
   if (!tg || !st || !st.enabled) return null;
   if (st.hasBot) {
     return (
@@ -142,18 +144,18 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
         <CheckCircle weight="fill" size={20} className="shrink-0 text-ok" />
         <div className="min-w-0 flex-1">
           <p className="font-medium">
-            Bot ulandi{" "}
+            {x("Bot ulandi")}{" "}
             {st.botUsername && (
               <a className="text-accent-2 hover:underline" target="_blank" rel="noreferrer" href={`https://t.me/${st.botUsername}`}>
                 @{st.botUsername}
               </a>
             )}
           </p>
-          {!st.ownerReady && st.ownerLink && <p className="text-xs text-muted">Buyurtmalar kelishi uchun botda Start bosing</p>}
+          {!st.ownerReady && st.ownerLink && <p className="text-xs text-muted">{x("Buyurtmalar kelishi uchun botda Start bosing")}</p>}
         </div>
         {!st.ownerReady && st.ownerLink && (
           <a href={st.ownerLink} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
-            <TelegramLogo weight="fill" /> Start
+            <TelegramLogo weight="fill" /> {x("Start")}
           </a>
         )}
       </div>
@@ -165,22 +167,22 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
   return (
     <div className="space-y-4 rounded-2xl bg-panel-2 p-4 text-sm">
       <div className="flex items-center gap-2 font-medium">
-        <Robot weight="fill" size={18} className="text-accent-2" /> Telegram bot yaratish
+        <Robot weight="fill" size={18} className="text-accent-2" /> {x("Telegram bot yaratish")}
       </div>
       <ol className="space-y-2.5">
-        <StepRow n={1} active={step === 1} done={!!tg.linked} title={tg.linked ? "Telegram ulangan" : "Telegramni ulash"} sub={tg.linked ? tg.linked.name || (tg.linked.username ? `@${tg.linked.username}` : "") : undefined} />
-        <StepRow n={2} active={step === 2} done={false} title="Bot yaratish" />
+        <StepRow n={1} active={step === 1} done={!!tg.linked} title={tg.linked ? x("Telegram ulangan") : x("Telegramni ulash")} sub={tg.linked ? tg.linked.name || (tg.linked.username ? `@${tg.linked.username}` : "") : undefined} />
+        <StepRow n={2} active={step === 2} done={false} title={x("Bot yaratish")} />
       </ol>
       <button type="button" className="btn btn-primary w-full justify-center" disabled={busy || waitingNow} onClick={step === 1 ? startLink : create}>
         {waitingNow ? <CircleNotch size={16} className="animate-spin" /> : step === 1 ? <TelegramLogo weight="fill" /> : <Robot weight="fill" />}
-        {waitingNow ? "Telegramda tasdiqlang…" : step === 1 ? "Telegramni ulash" : "Bot yaratish"}
+        {waitingNow ? x("Telegramda tasdiqlang…") : step === 1 ? x("Telegramni ulash") : x("Bot yaratish")}
       </button>
-      {waitingNow && <p className="text-center text-xs text-muted">{step === 1 ? "Start, so‘ng «Ha, ulash» ni bosing" : "«Yaratish» ni bosing"}</p>}
+      {waitingNow && <p className="text-center text-xs text-muted">{step === 1 ? x("Start, so‘ng «Ha, ulash» ni bosing") : x("«Yaratish» ni bosing")}</p>}
       {err && <p className="text-danger">{err}</p>}
       <div className="border-t border-line pt-3">
         {!tokenOpen ? (
           <button type="button" className="flex items-center gap-1.5 text-xs text-muted hover:text-fg" onClick={() => setTokenOpen(true)}>
-            <Key size={14} /> Mavjud bot tokenini kiritish
+            <Key size={14} /> {x("Mavjud bot tokenini kiritish")}
           </button>
         ) : (
           <form
@@ -206,10 +208,10 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
             <div className="flex gap-2">
               <button type="submit" className="btn btn-primary btn-sm flex-1 justify-center" disabled={!token.trim() || tokenBusy}>
                 {tokenBusy ? <CircleNotch size={14} className="animate-spin" /> : null}
-                {tokenBusy ? "Tekshirilmoqda…" : "Saqlash"}
+                {tokenBusy ? x("Tekshirilmoqda…") : x("Saqlash")}
               </button>
               <button type="button" className="btn btn-sm" disabled={tokenBusy} onClick={() => { setTokenOpen(false); setToken(""); setTokenErr(""); }}>
-                Bekor
+                {x("Bekor")}
               </button>
             </div>
           </form>
@@ -217,7 +219,7 @@ export function BotCreator({ projectId, onConnected, onTokenSaved, onOwnerId }: 
       </div>
       {onOwnerId && tg.linked && (
         <button type="button" className="text-xs text-muted hover:text-fg" onClick={() => onOwnerId(tg.linked!.id)}>
-          Buyurtmalar shu Telegramga kelsin
+          {x("Buyurtmalar shu Telegramga kelsin")}
         </button>
       )}
     </div>

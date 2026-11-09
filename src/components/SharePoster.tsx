@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { DownloadSimple, Link as LinkIcon, QrCode } from "@phosphor-icons/react";
+import { useX } from "@/i18n/client";
 
 /** The app's Telegram link as a QR code and a print-ready poster (PNG), for tables, windows and flyers. */
 export function SharePoster({ botUsername, name, color = "#2a8bd1" }: { botUsername: string; name: string; color?: string }) {
+  const x = useX();
   const link = `https://t.me/${botUsername}`;
   const [qr, setQr] = useState("");
   const [copied, setCopied] = useState(false);
@@ -37,17 +39,17 @@ export function SharePoster({ botUsername, name, color = "#2a8bd1" }: { botUsern
     wrap(g, name, W / 2, 190, W - 160, 88);
     g.font = "500 44px system-ui, -apple-system, Segoe UI, sans-serif";
     g.fillStyle = "rgba(255,255,255,0.92)";
-    g.fillText("Telegram'da buyurtma bering", W / 2, 400);
+    g.fillText(x("Telegram'da buyurtma bering"), W / 2, 400);
     // the QR sits on a white card
     const card = 700;
-    const x = (W - card) / 2;
+    const cx = (W - card) / 2;
     g.fillStyle = "#ffffff";
-    round(g, x, 470, card, card, 36);
+    round(g, cx, 470, card, card, 36);
     g.fill();
     const img = new Image();
     img.src = qr;
     await img.decode();
-    g.drawImage(img, x + 30, 500, card - 60, card - 60);
+    g.drawImage(img, cx + 30, 500, card - 60, card - 60);
     g.fillStyle = "#ffffff";
     g.font = "600 54px system-ui, -apple-system, Segoe UI, sans-serif";
     g.fillText(`@${botUsername}`, W / 2, 1270);
@@ -71,7 +73,7 @@ export function SharePoster({ botUsername, name, color = "#2a8bd1" }: { botUsern
         <p className="truncate font-medium">t.me/{botUsername}</p>
         <div className="flex flex-wrap gap-2">
           <button type="button" className="btn btn-sm" disabled={!qr} onClick={() => void poster()}>
-            <DownloadSimple /> Plakat (PNG)
+            <DownloadSimple /> {x("Plakat (PNG)")}
           </button>
           <button
             type="button"
@@ -80,7 +82,7 @@ export function SharePoster({ botUsername, name, color = "#2a8bd1" }: { botUsern
               void navigator.clipboard.writeText(link).then(() => setCopied(true));
             }}
           >
-            <LinkIcon /> {copied ? "Nusxalandi" : "Havolani nusxalash"}
+            <LinkIcon /> {copied ? x("Nusxalandi") : x("Havolani nusxalash")}
           </button>
         </div>
       </div>

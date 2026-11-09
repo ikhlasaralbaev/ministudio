@@ -9,6 +9,9 @@ import { ProjectNav } from "@/components/ui";
 import { BotCreator } from "@/components/BotCreator";
 import { SharePoster } from "@/components/SharePoster";
 import { motion } from "motion/react";
+import { useX } from "@/i18n/client";
+import { T, type XFn } from "@/i18n/x";
+import { browserLocale, translateServer } from "@/i18n/server-text";
 import { SPRING } from "@/lib/springs";
 import { AiPrompt } from "@/components/AiPrompt";
 import { BuildingScreen } from "@/components/BuildingScreen";
@@ -35,15 +38,16 @@ interface Toast {
 }
 
 const EXAMPLES = [
-  "Kafe uchun menyu: taomlar kartochkalari, savat, telefon va manzil bilan buyurtma berish",
-  "Go'zallik saloni: xizmatlar ro'yxati, usta tanlash, kun va vaqt tanlab yozilish",
-  "Onlayn kurs: kurslar katalogi, kurs sahifasi, Click orqali to'lov",
-  "Kiyim do'koni: kategoriyalar bo'yicha filtr, o'lcham tanlash, savat va buyurtma",
+  T("Kafe uchun menyu: taomlar kartochkalari, savat, telefon va manzil bilan buyurtma berish"),
+  T("Go'zallik saloni: xizmatlar ro'yxati, usta tanlash, kun va vaqt tanlab yozilish"),
+  T("Onlayn kurs: kurslar katalogi, kurs sahifasi, Click orqali to'lov"),
+  T("Kiyim do'koni: kategoriyalar bo'yicha filtr, o'lcham tanlash, savat va buyurtma"),
 ];
 
 /* ------------------------------------------------------------------ */
 
 export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] } }) {
+  const x = useX();
   const id = project._id;
   const tr = useT();
   // Members without "update" get a view-only studio. The server rejects writes regardless; this keeps the UI honest.
@@ -164,11 +168,11 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         setSave((s) => (s === "saving" ? "saved" : s));
       } catch (e) {
         setSave("error");
-        toast("Saqlab bo'lmadi: " + (e as Error).message, "err");
+        toast(x("Saqlab bo'lmadi: ") + (e as Error).message, "err");
       }
     }, 700);
     return () => clearTimeout(t);
-  }, [doc, save, id, toast, readOnly]);
+  }, [doc, save, id, toast, readOnly, x]);
 
   // keep screen valid
   useEffect(() => {
@@ -188,7 +192,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       setScreenId(r.doc.screens[0].id);
       setSelectedId(null);
       // in vibe mode the chat shows the result; toasts are kept for errors only
-      if (!vibe) toast("Ilova tayyor! Elementni bosib, comment orqali o'zgartiring.", "ok");
+      if (!vibe) toast(x("Ilova tayyor! Elementni bosib, comment orqali o'zgartiring."), "ok");
     } catch (e) {
       toast((e as Error).message, "err");
     } finally {
@@ -207,7 +211,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
       const r = await runAi<{ doc: AppDoc; message: string }>(id, { mode: "edit", prompt, nodeId, doc, refs });
       commit(r.doc, undefined, true);
       notifyDone(tr.notify.title, tr.notify.body);
-      if (!vibe) toast(r.message || "O'zgartirildi", "ok");
+      if (!vibe) toast(r.message || x("O'zgartirildi"), "ok");
       // if a new screen appeared and the comment was global, jump to it
       const newScreen = r.doc.screens.find((s) => !doc.screens.some((o) => o.id === s.id));
       if (newScreen) setScreenId(newScreen.id);
@@ -375,7 +379,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
     }
   }
 
-  const saveLabel = { saved: "Saqlangan", saving: "Saqlanmoqda…", dirty: "O'zgarishlar…", error: "Saqlanmadi" }[save];
+  const saveLabel = { saved: x("Saqlangan"), saving: x("Saqlanmoqda…"), dirty: x("O'zgarishlar…"), error: x("Saqlanmadi") }[save];
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
@@ -385,7 +389,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         project={project}
         right={
           <>
-            <div className="seg mr-1" title="Studio ko'rinishi">
+            <div className="seg mr-1" title={x("Studio ko'rinishi")}>
               {(["vibe", "advanced"] as Layout[]).map((l) => (
                 <button
                   key={l}
@@ -403,14 +407,14 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
           {doc && (
             <>
               {readOnly ? (
-                <span className="mr-2 rounded-md bg-panel-2 px-2 py-1 text-xs text-muted">Faqat ko&apos;rish</span>
+                <span className="mr-2 rounded-md bg-panel-2 px-2 py-1 text-xs text-muted">{x("Faqat ko'rish")}</span>
               ) : (
                 <>
               <span className={`mr-2 text-xs ${save === "error" ? "text-danger" : "text-muted"}`}>{saveLabel}</span>
-              <button onClick={undo} disabled={!past.current.length} title="Bekor qilish (⌘Z)" className="rounded-md px-2 py-1 text-muted hover:bg-panel-2 hover:text-fg disabled:opacity-30">
+              <button onClick={undo} disabled={!past.current.length} title={x("Bekor qilish (⌘Z)")} className="rounded-md px-2 py-1 text-muted hover:bg-panel-2 hover:text-fg disabled:opacity-30">
                 ↶
               </button>
-              <button onClick={redo} disabled={!future.current.length} title="Qaytarish (⇧⌘Z)" className="rounded-md px-2 py-1 text-muted hover:bg-panel-2 hover:text-fg disabled:opacity-30">
+              <button onClick={redo} disabled={!future.current.length} title={x("Qaytarish (⇧⌘Z)")} className="rounded-md px-2 py-1 text-muted hover:bg-panel-2 hover:text-fg disabled:opacity-30">
                 ↷
               </button>
                 </>
@@ -426,7 +430,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
                     aria-pressed={mode === m}
                     className="seg-item"
                   >
-                    {m === "edit" ? "Tahrirlash" : "▶ Sinash"}
+                    {m === "edit" ? x("Tahrirlash") : x("▶ Sinash")}
                   </button>
                 ))}
               </div>}
@@ -436,7 +440,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
                   disabled={publishing}
                   className="shrink-0 rounded-lg bg-primary px-4 py-1.5 text-sm font-medium text-white hover:bg-primary-2 disabled:opacity-50 max-md:order-first"
                 >
-                  {publishing ? "E'lon qilinmoqda…" : version ? `Publish · v${version + 1}` : "Publish"}
+                  {publishing ? x("E'lon qilinmoqda…") : version ? `Publish · v${version + 1}` : "Publish"}
                 </button>
               )}
             </>
@@ -449,7 +453,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
         <PaneTabs
           pane={pane}
           setPane={setPane}
-          items={vibe ? [["left", "Chat"], ["center", "Ilova"]] : [["left", "Qatlamlar"], ["center", "Ilova"], ["right", "Xususiyatlar"]]}
+          items={vibe ? [["left", "Chat"], ["center", x("Ilova")]] : [["left", x("Qatlamlar")], ["center", "Ilova"], ["right", x("Xususiyatlar")]]}
         />
       )}
 
@@ -489,7 +493,7 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
           </div>
         </div>
       ) : !doc && readOnly ? (
-        <div className="canvas-dots grid flex-1 place-items-center p-6 text-muted">Ilova hali yaratilmagan.</div>
+        <div className="canvas-dots grid flex-1 place-items-center p-6 text-muted">{x("Ilova hali yaratilmagan.")}</div>
       ) : !doc && building ? (
         <BuildingScreen />
       ) : !doc ? (
@@ -596,16 +600,17 @@ export function Studio({ project }: { project: ProjectDTO & { envKeys: string[] 
 
 /** Vibe mode before the first generation: an empty phone that fills in once the AI is done. */
 function VibePlaceholder({ busy }: { busy: boolean }) {
+  const x = useX();
   return (
     <section className="canvas-dots grid min-w-0 flex-1 place-items-center overflow-auto p-6">
       <div style={{ zoom: 0.85 }}>
         <PhoneFrame
-          title="Yangi ilova"
+          title={x("Yangi ilova")}
           theme={{ background: "#f6f7f9", text: "#111111", primary: "#2481cc" }}
           overlay={busy ? <div className="ai-working pointer-events-none absolute inset-0" /> : null}
         >
           <div className="grid h-full place-items-center px-10 text-center text-[15px] text-[#8a8f98]">
-            {busy ? "AI ilovani chizmoqda…" : "Chatda ilovangizni tasvirlab bering — natija shu yerda paydo bo'ladi"}
+            {busy ? x("AI ilovani chizmoqda…") : x("Chatda ilovangizni tasvirlab bering — natija shu yerda paydo bo'ladi")}
           </div>
         </PhoneFrame>
       </div>
@@ -629,13 +634,14 @@ function EmptyState({
   picker: React.ReactNode;
   projectId: string;
 }) {
+  const x = useX();
   const [prompt, setPrompt] = useState(initial);
   const attach = useAttachments();
   return (
     <div className="canvas-dots grid flex-1 place-items-center overflow-auto p-6">
       <div className="w-full max-w-2xl">
-        <h1 className="mb-2 text-center text-3xl font-semibold tracking-tight">Qanday ilova yaratamiz?</h1>
-        <p className="mb-8 text-center text-muted">Biznesingizni tasvirlab bering — AI ekranlar, dizayn va logikani yaratadi.</p>
+        <h1 className="mb-2 text-center text-3xl font-semibold tracking-tight">{x("Qanday ilova yaratamiz?")}</h1>
+        <p className="mb-8 text-center text-muted">{x("Biznesingizni tasvirlab bering — AI ekranlar, dizayn va logikani yaratadi.")}</p>
         <AiPrompt
           value={prompt}
           onChange={setPrompt}
@@ -648,12 +654,12 @@ function EmptyState({
           }}
           attach={attach}
           busy={busy}
-          busyLabel="AI chizmoqda… 30–90 s"
-          submitLabel="Yaratish"
-          placeholders={EXAMPLES}
+          busyLabel={x("AI chizmoqda… 30–90 s")}
+          submitLabel={x("Yaratish")}
+          placeholders={EXAMPLES.map((e) => x(e))}
           rows={4}
           autoFocus
-          footerLeft={`${envKeys.length ? `Ulangan: ${envKeys.filter((k) => !k.includes("SECRET") && !k.endsWith("KEY")).join(", ")}` : "Integratsiyalar hali ulanmagan"} · ⌘↵`}
+          footerLeft={`${envKeys.length ? x("Ulangan: {list}", { list: envKeys.filter((k) => !k.includes("SECRET") && !k.endsWith("KEY")).join(", ") }) : x("Integratsiyalar hali ulanmagan")} · ⌘↵`}
           extra={picker}
         />
         <div className="mt-5 grid gap-2 sm:grid-cols-2">
@@ -661,10 +667,10 @@ function EmptyState({
             <button
               key={ex}
               disabled={busy}
-              onClick={() => setPrompt(ex)}
+              onClick={() => setPrompt(x(ex))}
               className="rounded-xl border border-line bg-panel/60 p-3 text-left text-[13px] text-fg/80 hover:border-accent/50 hover:text-fg"
             >
-              {ex}
+              {x(ex)}
             </button>
           ))}
         </div>
@@ -676,7 +682,7 @@ function EmptyState({
 /* ------------------------------------------------------------------ */
 
 /** Studio preview host: server actions are simulated; records live in memory for the studio session. */
-function studioHost(toast: (t: string, k?: "ok" | "err" | "info") => void): Host {
+function studioHost(toast: (t: string, k?: "ok" | "err" | "info") => void, x: XFn): Host {
   let n = 1000;
   const store: RecordsByCollection = {};
   return {
@@ -688,13 +694,13 @@ function studioHost(toast: (t: string, k?: "ok" | "err" | "info") => void): Host
       const data = value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : { value };
       const row: RecordRow = { ...data, _id: `sim_${n}`, _number: n, _at: new Date().toISOString() };
       store[collection] = [row, ...(store[collection] || [])];
-      toast(`Sinov: "${collection}" ga yozildi (#${n})`, "info");
+      toast(x('Sinov: "{c}" ga yozildi (#{n})', { c: collection, n }), "info");
       return { id: String(n), row };
     },
     async dbUpdate(collection, id, value) {
       const list = store[collection] || [];
       const old = list.find((r) => r._id === id);
-      if (!old) throw new Error("Yozuv topilmadi");
+      if (!old) throw new Error(x("Yozuv topilmadi"));
       const row = { ...old, ...(value as Record<string, unknown>), _id: old._id, _number: old._number, _at: old._at };
       store[collection] = list.map((r) => (r._id === id ? row : r));
       return row;
@@ -703,10 +709,10 @@ function studioHost(toast: (t: string, k?: "ok" | "err" | "info") => void): Host
       store[collection] = (store[collection] || []).filter((r) => r._id !== id);
     },
     async notifyOwner(text) {
-      toast("Sinov: egasiga xabar → " + text.slice(0, 80), "info");
+      toast(x("Sinov: egasiga xabar → ") + text.slice(0, 80), "info");
     },
     async pay({ provider, amount }) {
-      toast(`Sinov: ${provider} to'lov sahifasi ochiladi (${amount.toLocaleString("ru-RU")} so'm)`, "info");
+      toast(x("Sinov: {p} to'lov sahifasi ochiladi ({a} so'm)", { p: provider, a: amount.toLocaleString("ru-RU") }), "info");
       return null;
     },
     toast: (t) => toast(t, "info"),
@@ -729,13 +735,14 @@ function Canvas(props: {
   /** Vibe mode: just the phone, no screen tabs or command bar. */
   clean?: boolean;
 }) {
+  const x = useX();
   const { doc, mode, screenId, setScreenId, selectedId, onSelect, selected, busy, onEdit, toast, readOnly, clean = false } = props;
   const wrapRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const [anchor, setAnchor] = useState<{ top: number; left: number; bracket: number; elTop: number; elH: number } | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
   const [fit, setFit] = useState(1);
-  const host = useMemo(() => studioHost(toast), [toast]);
+  const host = useMemo(() => studioHost(toast, x), [toast, x]);
 
   // scale the phone so the whole device fits the canvas height (label + padding included)
   useLayoutEffect(() => {
@@ -800,7 +807,7 @@ function Canvas(props: {
           onClick={() => setPreviewKey((k) => k + 1)}
           className="absolute right-4 top-4 z-10 rounded-lg border border-line bg-panel/80 px-3 py-1.5 text-[12px] text-muted backdrop-blur hover:text-fg"
         >
-          ↻ Qayta boshlash
+          {x("↻ Qayta boshlash")}
         </button>
       )}
       {/* screen tabs */}
@@ -824,7 +831,7 @@ function Canvas(props: {
         )}
         {mode === "preview" && (
           <button onClick={() => setPreviewKey((k) => k + 1)} className="ml-auto shrink-0 text-[13px] text-muted hover:text-fg">
-            ↻ Qayta boshlash
+            {x("↻ Qayta boshlash")}
           </button>
         )}
       </div>}
@@ -838,7 +845,7 @@ function Canvas(props: {
         <div className="flex min-h-full min-w-max items-center justify-center p-6">
           <div className="relative" onClick={(e) => e.stopPropagation()} style={{ zoom: fit }}>
             <div className={`mb-3 flex items-center justify-between px-2 text-[12px] text-muted ${clean ? "invisible" : ""}`}>
-              <span>{mode === "edit" ? "Element ustiga bosing → comment yozing" : "Sinov rejimi — xuddi Telegram'dagidek ishlaydi"}</span>
+              <span>{mode === "edit" ? x("Element ustiga bosing → comment yozing") : x("Sinov rejimi — xuddi Telegram'dagidek ishlaydi")}</span>
               <span>
                 {SCREEN_W} × {SCREEN_H}
               </span>
@@ -915,14 +922,14 @@ function PreviewSurface({ doc, host, screenId }: { doc: AppDoc; host: Host; scre
 /* ------------------------------------------------------------------ */
 
 const QUICK: Record<string, string[]> = {
-  Button: ["Bosilganda keyingi ekranga o'tsin", "Rangini o'zgartir", "Kattaroq va yumaloq qil"],
-  Text: ["Kattaroq va qalin qil", "Matnni chiroyliroq yoz", "Rangini asosiy rangga o'zgartir"],
-  Image: ["Burchaklarini yumaloq qil", "Kvadrat qil"],
-  List: ["Ikki ustunli grid qil", "Qidiruv qo'sh"],
-  Box: ["Kartochka qilib soya ber", "Ichiga tugma qo'sh"],
-  Row: ["Elementlar orasini kengaytir"],
-  Input: ["Bo'sh bo'lsa xato ko'rsatsin"],
-  Screen: ["Dizaynni zamonaviyroq qil", "Pastiga navigatsiya paneli qo'sh"],
+  Button: [T("Bosilganda keyingi ekranga o'tsin"), T("Rangini o'zgartir"), T("Kattaroq va yumaloq qil")],
+  Text: [T("Kattaroq va qalin qil"), T("Matnni chiroyliroq yoz"), T("Rangini asosiy rangga o'zgartir")],
+  Image: [T("Burchaklarini yumaloq qil"), T("Kvadrat qil")],
+  List: [T("Ikki ustunli grid qil"), T("Qidiruv qo'sh")],
+  Box: [T("Kartochka qilib soya ber"), T("Ichiga tugma qo'sh")],
+  Row: [T("Elementlar orasini kengaytir")],
+  Input: [T("Bo'sh bo'lsa xato ko'rsatsin")],
+  Screen: [T("Dizaynni zamonaviyroq qil"), T("Pastiga navigatsiya paneli qo'sh")],
 };
 
 function CommentBox({
@@ -940,6 +947,7 @@ function CommentBox({
   onSend: (t: string) => void;
   onClose: () => void;
 }) {
+  const x = useX();
   const [text, setText] = useState("");
   const send = () => {
     if (!text.trim() || busy) return;
@@ -975,26 +983,26 @@ function CommentBox({
         }}
         placeholder={
           CONTAINERS.has(node.type)
-            ? "Nima o'zgarsin? Dizayn, ichidagi elementlar, logika…"
-            : "Nima o'zgarsin? Masalan: bosilganda savatga qo'shsin"
+            ? x("Nima o'zgarsin? Dizayn, ichidagi elementlar, logika…")
+            : x("Nima o'zgarsin? Masalan: bosilganda savatga qo'shsin")
         }
         className="w-full resize-none rounded-lg bg-panel-2 p-2 text-[13px] outline-none placeholder:text-muted/70 disabled:opacity-50"
       />
       <div className="mt-2 flex flex-wrap gap-1">
         {(QUICK[node.type] || []).map((q) => (
-          <button key={q} disabled={busy} onClick={() => onSend(q)} className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted hover:border-accent/60 hover:text-fg">
-            {q}
+          <button key={q} disabled={busy} onClick={() => onSend(x(q))} className="rounded-full border border-line px-2 py-0.5 text-[11px] text-muted hover:border-accent/60 hover:text-fg">
+            {x(q)}
           </button>
         ))}
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <span className="text-[11px] text-muted">↵ yuborish · ⇧↵ yangi qator</span>
+        <span className="text-[11px] text-muted">{x("↵ yuborish · ⇧↵ yangi qator")}</span>
         <button
           onClick={send}
           disabled={busy || !text.trim()}
           className="rounded-lg bg-primary px-3 py-1 text-[13px] font-medium text-white hover:bg-primary-2 disabled:opacity-40"
         >
-          {busy ? "AI ishlayapti…" : "Yuborish"}
+          {busy ? x("AI ishlayapti…") : x("Yuborish")}
         </button>
       </div>
     </div>
@@ -1002,6 +1010,7 @@ function CommentBox({
 }
 
 function GlobalBar({ busy, disabled, onSend }: { busy: boolean; disabled: boolean; onSend: (t: string) => void }) {
+  const x = useX();
   const [text, setText] = useState("");
   return (
     <div className="shrink-0 border-t border-line bg-panel px-4 py-3">
@@ -1017,7 +1026,7 @@ function GlobalBar({ busy, disabled, onSend }: { busy: boolean; disabled: boolea
               setText("");
             }
           }}
-          placeholder={busy ? "AI ishlayapti…" : "Butun ilova uchun buyruq: masalan, \"Biz haqimizda\" ekrani qo'sh, ranglarni to'q rangga o'tkaz…"}
+          placeholder={busy ? x("AI ishlayapti…") : x("Butun ilova uchun buyruq: masalan, \"Biz haqimizda\" ekrani qo'sh, ranglarni to'q rangga o'tkaz…")}
           className="flex-1 bg-transparent py-1 text-sm outline-none placeholder:text-muted/70"
         />
         <button
@@ -1068,6 +1077,7 @@ function PublishModal({
   onBot: (botUsername: string | null) => void;
   onClose: () => void;
 }) {
+  const x = useX();
   const warnings = res.botUsername ? res.warnings : res.warnings.filter((w) => !/Bot token|OWNER_CHAT_ID/.test(w));
   return (
     <motion.div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4 backdrop-blur-sm" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
@@ -1079,14 +1089,14 @@ function PublishModal({
         transition={SPRING.smooth}
       >
         <div className="mb-1 text-3xl text-accent-2"><RocketLaunch weight="duotone" className="mx-auto" /></div>
-        <h2 className="mb-4 text-lg font-semibold">Ilova e&apos;lon qilindi <span className="text-sm font-normal text-muted">v{res.version}</span></h2>
+        <h2 className="mb-4 text-lg font-semibold">{x("Ilova e'lon qilindi")} <span className="text-sm font-normal text-muted">v{res.version}</span></h2>
         {res.botUsername && (
           <a
             href={`https://t.me/${res.botUsername}`}
             target="_blank"
             className="mb-2 flex items-center justify-between rounded-xl bg-[#2aabee] px-4 py-3 font-medium text-white"
           >
-            <span>Telegramda ochish</span>
+            <span>{x("Telegramda ochish")}</span>
             <span>@{res.botUsername} ↗</span>
           </a>
         )}
@@ -1113,12 +1123,12 @@ function PublishModal({
         {warnings.length > 0 && (
           <ul className="mt-4 space-y-1.5 text-[13px] text-warn">
             {warnings.map((w) => (
-              <li key={w}><Warning className="mr-1 inline" />{w}</li>
+              <li key={w}><Warning className="mr-1 inline" />{translateServer(browserLocale(), w)}</li>
             ))}
           </ul>
         )}
         <button onClick={onClose} className="btn mt-5 w-full">
-          Yopish
+          {x("Yopish")}
         </button>
       </motion.div>
     </motion.div>

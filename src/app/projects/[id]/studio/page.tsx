@@ -6,8 +6,10 @@ import type { ProjectDTO } from "@/lib/types";
 import { Studio } from "@/components/studio/Studio";
 import { BuildingScreen } from "@/components/BuildingScreen";
 import { isBuilding } from "@/lib/building";
+import { useX } from "@/i18n/client";
 
 export default function StudioPage() {
+  const x = useX();
   const { id } = useParams<{ id: string }>();
   const [p, setP] = useState<(ProjectDTO & { envKeys: string[] }) | null>(null);
   const [err, setErr] = useState("");
@@ -18,6 +20,6 @@ export default function StudioPage() {
     api(`/api/projects/${id}`).then(setP).catch((e) => setErr(e.message));
   }, [id]);
   if (err) return <p className="p-10 text-danger">{err}</p>;
-  if (!p) return building ? <BuildingScreen fullscreen /> : building === false ? <p className="p-10 text-muted">Yuklanmoqda…</p> : null;
+  if (!p) return building ? <BuildingScreen fullscreen /> : building === false ? <p className="p-10 text-muted">{x("Yuklanmoqda…")}</p> : null;
   return <Studio project={p} />;
 }

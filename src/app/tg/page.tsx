@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { IkatLoader } from "@/components/IkatLoader";
 import { Logo } from "@/components/ui";
+import { useX } from "@/i18n/client";
 
 interface TgWebApp {
   initData: string;
@@ -15,6 +16,7 @@ interface TgWebApp {
 const safeNext = (v: string | null) => (v && v.startsWith("/") && !v.startsWith("//") ? v : "/dashboard");
 
 function Inner() {
+  const x = useX();
   const next = safeNext(useSearchParams().get("next"));
   const [err, setErr] = useState("");
   const [ready, setReady] = useState(false);
@@ -22,7 +24,7 @@ function Inner() {
   const enter = useCallback(async () => {
     const wa = (window as unknown as { Telegram?: { WebApp?: TgWebApp } }).Telegram?.WebApp;
     if (!wa?.initData) {
-      setErr("Bu sahifa Telegram ichida ochilishi kerak: manager botdagi «Panel» tugmasidan foydalaning.");
+      setErr(x("Bu sahifa Telegram ichida ochilishi kerak: manager botdagi «Panel» tugmasidan foydalaning."));
       return;
     }
     wa.ready();
@@ -35,7 +37,7 @@ function Inner() {
     } catch (e) {
       setErr((e as Error).message);
     }
-  }, [next]);
+  }, [next, x]);
 
   useEffect(() => {
     if (ready) void enter();
@@ -49,10 +51,10 @@ function Inner() {
         {err ? (
           <>
             <p className="text-sm text-danger">{err}</p>
-            <a href="/login" className="btn">Sayt orqali kirish</a>
+            <a href="/login" className="btn">{x("Sayt orqali kirish")}</a>
           </>
         ) : (
-          <IkatLoader size={30} label="Kirilmoqda…" />
+          <IkatLoader size={30} label={x("Kirilmoqda…")} />
         )}
       </div>
     </main>

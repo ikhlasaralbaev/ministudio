@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { api } from "@/lib/client";
 import { SPRING } from "@/lib/springs";
 import { AI_MODELS, resolveModel } from "@/lib/models";
+import { useX } from "@/i18n/client";
 
 /** Claude model used for this project's generation and edits. Saved on the project. */
 export function ModelPicker({
@@ -17,6 +18,7 @@ export function ModelPicker({
   onChange: (id: string) => void;
   onError: (msg: string) => void;
 }) {
+  const x = useX();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = AI_MODELS.find((m) => m.id === resolveModel(value))!;
@@ -42,7 +44,7 @@ export function ModelPicker({
       await api(`/api/projects/${projectId}`, { method: "PATCH", json: { aiModel: id } });
     } catch (e) {
       onChange(prev ?? current.id);
-      onError("Modelni saqlab bo'lmadi: " + (e as Error).message);
+      onError(x("Modelni saqlab bo'lmadi: ") + (e as Error).message);
     }
   }
 
@@ -51,7 +53,7 @@ export function ModelPicker({
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        title="AI modeli"
+        title={x("AI modeli")}
         className="btn btn-sm gap-1.5"
       >
         <span className="text-accent-2">✦</span>
@@ -65,7 +67,7 @@ export function ModelPicker({
           animate={{ opacity: 1, scale: 1 }}
           transition={SPRING.snappy}
         >
-          <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted">Claude modeli</p>
+          <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted">{x("Claude modeli")}</p>
           {AI_MODELS.map((m) => (
             <button
               key={m.id}
@@ -81,7 +83,7 @@ export function ModelPicker({
               </span>
             </button>
           ))}
-          <p className="px-3 pb-2 pt-1 text-[11px] text-muted/80">Narx: 1M kirish / chiqish token uchun</p>
+          <p className="px-3 pb-2 pt-1 text-[11px] text-muted/80">{x("Narx: 1M kirish / chiqish token uchun")}</p>
         </motion.div>
       )}
     </div>

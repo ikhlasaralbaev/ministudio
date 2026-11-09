@@ -9,6 +9,8 @@ import { BotCreator } from "@/components/BotCreator";
 import { SharePoster } from "@/components/SharePoster";
 import { LogoUploader } from "@/components/AssetUploader";
 import type { ProjectDTO } from "@/lib/types";
+import { T } from "@/i18n/x";
+import { useX } from "@/i18n/client";
 
 interface EnvResp {
   env: Record<string, string>;
@@ -24,26 +26,23 @@ const KNOWN: { key: string; label: string; hint: React.ReactNode; secret?: boole
     label: "Telegram bot token",
     group: "Telegram",
     secret: true,
-    hint: (
-      <>
-        @BotFather → /newbot → tokenni shu yerga qo&apos;ying. Saqlanganda token tekshiriladi.
-      </>
-    ),
+    hint: T("@BotFather → /newbot → tokenni shu yerga qo'ying. Saqlanganda token tekshiriladi."),
   },
   {
     key: "OWNER_CHAT_ID",
-    label: "Egasining chat ID",
+    label: T("Egasining chat ID"),
     group: "Telegram",
-    hint: "Buyurtma va to'lov xabarlari shu chatga boradi. Pastdagi tugma orqali avtomatik ulash mumkin.",
+    hint: T("Buyurtma va to'lov xabarlari shu chatga boradi. Pastdagi tugma orqali avtomatik ulash mumkin."),
   },
-  { key: "CLICK_SERVICE_ID", label: "Click service_id", group: "Click", hint: "Click merchant kabinetidan" },
+  { key: "CLICK_SERVICE_ID", label: "Click service_id", group: "Click", hint: T("Click merchant kabinetidan") },
   { key: "CLICK_MERCHANT_ID", label: "Click merchant_id", group: "Click", hint: "" },
-  { key: "CLICK_SECRET_KEY", label: "Click secret key", group: "Click", secret: true, hint: "Prepare/Complete imzosini tekshirish uchun" },
-  { key: "PAYME_MERCHANT_ID", label: "Payme merchant ID", group: "Payme", hint: "Payme Business kabinetidan" },
-  { key: "PAYME_KEY", label: "Payme kalit (key)", group: "Payme", secret: true, hint: "Merchant API Basic auth uchun" },
+  { key: "CLICK_SECRET_KEY", label: "Click secret key", group: "Click", secret: true, hint: T("Prepare/Complete imzosini tekshirish uchun") },
+  { key: "PAYME_MERCHANT_ID", label: "Payme merchant ID", group: "Payme", hint: T("Payme Business kabinetidan") },
+  { key: "PAYME_KEY", label: "Payme kalit (key)", group: "Payme", secret: true, hint: T("Merchant API Basic auth uchun") },
 ];
 
 function SettingsInner() {
+  const x = useX();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const isNew = useSearchParams().get("new") === "1";
@@ -91,7 +90,7 @@ function SettingsInner() {
         if (!KNOWN.some((x) => x.key === k) && !custom.some((c) => c.k.trim().toUpperCase() === k)) env[k] = "";
       await api(`/api/projects/${id}`, { method: "PATCH", json: { name } });
       const r = await api<{ botUsername: string | null }>(`/api/projects/${id}/env`, { method: "PUT", json: { env } });
-      setMsg({ ok: true, text: r.botUsername ? `Saqlandi. Bot: @${r.botUsername}` : "Saqlandi" });
+      setMsg({ ok: true, text: r.botUsername ? x("Saqlandi. Bot: @{b}", { b: r.botUsername }) : x("Saqlandi") });
       await load();
     } catch (e) {
       setMsg({ ok: false, text: (e as Error).message });
@@ -110,27 +109,26 @@ function SettingsInner() {
         <form onSubmit={save} className="mx-auto max-w-3xl space-y-6 px-6 pt-8">
           {project && !canEdit && (
             <div className="rounded-2xl bg-panel-2 p-4 text-sm text-muted">
-              Sizda faqat ko&apos;rish huquqi bor: sozlamalarni o&apos;zgartira olmaysiz.
+              {x("Sizda faqat ko'rish huquqi bor: sozlamalarni o'zgartira olmaysiz.")}
             </div>
           )}
           <fieldset disabled={!canEdit} className="space-y-6">
           {isNew && (
             <div className="rounded-xl border border-accent/40 bg-accent/10 p-4 text-sm">
-              Loyiha yaratildi. Bot token va to&apos;lov kalitlarini kiriting (keyinroq ham qo&apos;shsa bo&apos;ladi), keyin{" "}
+              {x("Loyiha yaratildi. Bot token va to'lov kalitlarini kiriting (keyinroq ham qo'shsa bo'ladi).")}{" "}
               <Link href={`/projects/${id}/studio`} className="font-medium text-accent-2 underline">
-                Studio
+                {x("Studio'ga o'tish →")}
               </Link>
-              ga o&apos;ting.
             </div>
           )}
 
           <section className="card p-6">
-            <h2 className="mb-4 font-semibold">Loyiha</h2>
-            <Field label="Nomi">
+            <h2 className="mb-4 font-semibold">{x("Loyiha")}</h2>
+            <Field label={x("Nomi")}>
               <input className={inputCls} value={name} onChange={(e) => setName(e.target.value)} />
             </Field>
             <div className="mt-4">
-              <span className="mb-1 block text-xs font-medium text-muted">Logo</span>
+              <span className="mb-1 block text-xs font-medium text-muted">{x("Logo")}</span>
               <LogoUploader projectId={id} canEdit={canEdit} />
             </div>
           </section>
@@ -149,7 +147,7 @@ function SettingsInner() {
                 {g === "Telegram" && <BotCreator projectId={id} onConnected={() => void load()} onOwnerId={(tgId) => setForm((f) => ({ ...f, OWNER_CHAT_ID: String(tgId) }))} />}
                 {g === "Telegram" && data?.botUsername && <SharePoster botUsername={data.botUsername} name={name || "Mini App"} />}
                 {KNOWN.filter((k) => k.group === g && !(k.key === "BOT_TOKEN" && !data?.env.BOT_TOKEN)).map((k) => ( // no bot yet: the card above takes the token (checked before saving)
-                  <Field key={k.key} label={`${k.label} · ${k.key}`} hint={k.hint}>
+                  <Field key={k.key} label={`${x(k.label)} · ${k.key}`} hint={typeof k.hint === "string" && k.hint ? x(k.hint) : k.hint}>
                     <input
                       className={inputCls + " font-mono"}
                       type={k.secret ? "password" : "text"}
@@ -157,19 +155,19 @@ function SettingsInner() {
                       value={form[k.key] ?? ""}
                       onFocus={(e) => k.secret && e.target.value.includes("••") && setForm({ ...form, [k.key]: "" })}
                       onChange={(e) => setForm({ ...form, [k.key]: e.target.value })}
-                      placeholder={k.secret && data?.env[k.key] ? "o'zgartirish uchun yangisini kiriting" : ""}
+                      placeholder={k.secret && data?.env[k.key] ? x("o'zgartirish uchun yangisini kiriting") : ""}
                     />
                   </Field>
                 ))}
                 {g === "Telegram" && data?.ownerLink && (
                   <div className="rounded-lg bg-panel-2 p-3 text-sm">
                     <p className="mb-2 text-muted">
-                      Egasini avtomatik ulash: ilova e&apos;lon qilingandan keyin quyidagi havolani Telegramda oching va Start bosing.
+                      {x("Egasini avtomatik ulash: ilova e'lon qilingandan keyin quyidagi havolani Telegramda oching va Start bosing.")}
                     </p>
                     <a href={data.ownerLink} target="_blank" className="break-all font-mono text-accent-2">
                       {data.ownerLink}
                     </a>
-                    {!data.published && <p className="mt-2 text-warn">Avval Studio&apos;da Publish qiling (webhook o&apos;rnatiladi).</p>}
+                    {!data.published && <p className="mt-2 text-warn">{x("Avval Studio'da Publish qiling (webhook o'rnatiladi).")}</p>}
                   </div>
                 )}
                 {g === "Click" && data && (
@@ -187,8 +185,8 @@ function SettingsInner() {
           ))}
 
           <section className="card p-6">
-            <h2 className="mb-1 font-semibold">Boshqa o&apos;zgaruvchilar</h2>
-            <p className="mb-4 text-sm text-muted">Har qanday qo&apos;shimcha kalit. Barchasi shifrlangan holda saqlanadi.</p>
+            <h2 className="mb-1 font-semibold">{x("Boshqa o'zgaruvchilar")}</h2>
+            <p className="mb-4 text-sm text-muted">{x("Har qanday qo'shimcha kalit. Barchasi shifrlangan holda saqlanadi.")}</p>
             <div className="space-y-2">
               {custom.map((c, i) => (
                 <div key={i} className="flex gap-2">
@@ -210,7 +208,7 @@ function SettingsInner() {
                 </div>
               ))}
               <button type="button" onClick={() => setCustom([...custom, { k: "", v: "" }])} className="text-sm text-accent-2">
-                + O&apos;zgaruvchi qo&apos;shish
+                {x("+ O'zgaruvchi qo'shish")}
               </button>
             </div>
           </section>
@@ -220,11 +218,11 @@ function SettingsInner() {
           <div className="sticky bottom-0 z-10 flex items-center gap-4 border-t border-line bg-bg/90 py-4 backdrop-blur">
             {canEdit && (
               <button disabled={saving} className="rounded-xl bg-primary px-6 py-2.5 font-medium text-white hover:bg-primary-2 disabled:opacity-50">
-                {saving ? "Saqlanmoqda..." : "Saqlash"}
+                {saving ? x("Saqlanmoqda...") : x("Saqlash")}
               </button>
             )}
             <Link href={`/projects/${id}/studio`} className="text-sm text-muted hover:text-fg">
-              Studio&apos;ga o&apos;tish →
+              {x("Studio'ga o'tish →")}
             </Link>
             {msg && <span className={`text-sm ${msg.ok ? "text-ok" : "text-danger"}`}>{msg.text}</span>}
           </div>
@@ -234,11 +232,11 @@ function SettingsInner() {
 
           {project && (
             <section className="card p-6">
-              <h2 className="mb-1 font-semibold">Nusxa va eksport</h2>
-              <p className="mb-4 text-sm text-muted">Ilovaning dizayni va mantig&apos;i (kalitlar, buyurtmalar va mijozlar ma&apos;lumoti kirmaydi).</p>
+              <h2 className="mb-1 font-semibold">{x("Nusxa va eksport")}</h2>
+              <p className="mb-4 text-sm text-muted">{x("Ilovaning dizayni va mantig'i (kalitlar, buyurtmalar va mijozlar ma'lumoti kirmaydi).")}</p>
               <div className="flex flex-wrap gap-2">
                 <a className="btn btn-sm" href={`/api/projects/${id}/export`} download>
-                  Yuklab olish (JSON)
+                  {x("Yuklab olish (JSON)")}
                 </a>
                 {canEdit && (
                   <button
@@ -253,7 +251,7 @@ function SettingsInner() {
                       }
                     }}
                   >
-                    Nusxa yaratish
+                    {x("Nusxa yaratish")}
                   </button>
                 )}
               </div>

@@ -8,6 +8,8 @@ import { BotEditor } from "./BotEditor";
 import { LogoUploader } from "@/components/AssetUploader";
 import { useParams } from "next/navigation";
 import { CollectionEditor, StateEditor } from "./DataEditors";
+import { useX } from "@/i18n/client";
+import { T } from "@/i18n/x";
 
 const inp =
   "w-full rounded-lg bg-panel-2 px-2 py-1.5 text-[13px] outline-none focus:border-accent";
@@ -131,22 +133,22 @@ function ColorInput({ value, onChange }: { value: string; onChange: (v: string) 
 }
 
 const STYLE_FIELDS: { key: string; label: string; kind?: "color" | "select"; options?: string[] }[] = [
-  { key: "color", label: "Matn rangi", kind: "color" },
-  { key: "background", label: "Fon", kind: "color" },
-  { key: "fontSize", label: "Shrift" },
-  { key: "fontWeight", label: "Qalinlik", kind: "select", options: ["", "400", "500", "600", "700", "800"] },
-  { key: "textAlign", label: "Tekislash", kind: "select", options: ["", "left", "center", "right"] },
+  { key: "color", label: T("Matn rangi"), kind: "color" },
+  { key: "background", label: T("Fon"), kind: "color" },
+  { key: "fontSize", label: T("Shrift") },
+  { key: "fontWeight", label: T("Qalinlik"), kind: "select", options: ["", "400", "500", "600", "700", "800"] },
+  { key: "textAlign", label: T("Tekislash"), kind: "select", options: ["", "left", "center", "right"] },
   { key: "padding", label: "Padding" },
   { key: "margin", label: "Margin" },
   { key: "gap", label: "Gap" },
   { key: "borderRadius", label: "Radius" },
-  { key: "width", label: "Kenglik" },
-  { key: "height", label: "Balandlik" },
+  { key: "width", label: T("Kenglik") },
+  { key: "height", label: T("Balandlik") },
   { key: "flex", label: "Flex" },
   { key: "justifyContent", label: "Justify", kind: "select", options: ["", "flex-start", "center", "flex-end", "space-between", "space-around"] },
   { key: "alignItems", label: "Align", kind: "select", options: ["", "flex-start", "center", "flex-end", "stretch"] },
-  { key: "border", label: "Chegara" },
-  { key: "boxShadow", label: "Soya" },
+  { key: "border", label: T("Chegara") },
+  { key: "boxShadow", label: T("Soya") },
 ];
 
 function toStyleVal(v: string): string | number | null {
@@ -171,6 +173,7 @@ export function NodeInspector({
   onDuplicate: () => void;
   onShift: (dir: -1 | 1) => void;
 }) {
+  const x = useX();
   const p = node.props || {};
   const s = node.style || {};
   const setProp = (k: string, v: unknown) => apply([{ op: "update", id: node.id, props: { [k]: v === "" ? null : v } }], `${node.id}.p.${k}`);
@@ -186,19 +189,19 @@ export function NodeInspector({
         right={
           <div className="flex gap-1 text-[12px]">
             {parentId && (
-              <button title="Ota elementni tanlash" onClick={() => onSelect(parentId)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">
+              <button title={x("Ota elementni tanlash")} onClick={() => onSelect(parentId)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">
                 ↰
               </button>
             )}
             {!isScreen && (
               <>
-                <button title="Yuqoriga" onClick={() => onShift(-1)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">↑</button>
-                <button title="Pastga" onClick={() => onShift(1)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">↓</button>
+                <button title={x("Yuqoriga")} onClick={() => onShift(-1)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">↑</button>
+                <button title={x("Pastga")} onClick={() => onShift(1)} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">↓</button>
               </>
             )}
-            <button title="Nusxalash (⌘D)" onClick={onDuplicate} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">⧉</button>
+            <button title={x("Nusxalash (⌘D)")} onClick={onDuplicate} className="rounded px-1.5 py-0.5 text-muted hover:bg-panel-2 hover:text-fg">⧉</button>
             <button
-              title="O'chirish (Del)"
+              title={x("O'chirish (Del)")}
               onClick={() => {
                 apply([{ op: "delete", id: node.id }]);
                 onSelect(null);
@@ -210,7 +213,7 @@ export function NodeInspector({
           </div>
         }
       >
-        <Row label="Nomi">
+        <Row label={x("Nomi")}>
           <Txt value={node.name || ""} placeholder={node.type} onChange={(v) => apply([{ op: "update", id: node.id, name: v }], `${node.id}.name`)} />
         </Row>
         <Row label="ID">
@@ -218,44 +221,44 @@ export function NodeInspector({
         </Row>
       </Section>
 
-      <Section title="Kontent">
+      <Section title={x("Kontent")}>
         {(node.type === "Text" || node.type === "Button" || node.type === "Badge") && (
-          <Row label="Matn">
+          <Row label={x("Matn")}>
             <Txt value={String(p.text ?? "")} onChange={(v) => setProp("text", v)} multiline={node.type === "Text"} />
           </Row>
         )}
         {node.type === "Icon" && (
           <>
-            <Row label="Ikonka">
+            <Row label={x("Ikonka")}>
               <Txt mono value={String(p.name ?? "")} placeholder="shopping-cart" onChange={(v) => setProp("name", v)} />
             </Row>
-            <Row label="O'lcham">
+            <Row label={x("O'lcham")}>
               <Txt mono value={String(p.size ?? 22)} onChange={(v) => setProp("size", Number(v) || 22)} />
             </Row>
-            <Row label="Rang">
+            <Row label={x("Rang")}>
               <Txt mono value={String(p.color ?? "")} placeholder="#e8590c" onChange={(v) => setProp("color", v)} />
             </Row>
-            <Row label="Qalinlik">
+            <Row label={x("Qalinlik")}>
               <Sel value={String(p.weight || "bold")} options={["thin", "light", "regular", "bold", "fill", "duotone"]} onChange={(v) => setProp("weight", v)} />
             </Row>
           </>
         )}
         {node.type === "Text" && (
-          <Row label="Turi">
+          <Row label={x("Turi")}>
             <Sel value={String(p.variant || "body")} options={["h1", "h2", "h3", "body", "caption"]} onChange={(v) => setProp("variant", v)} />
           </Row>
         )}
         {node.type === "Button" && (
-          <Row label="Ko'rinish">
+          <Row label={x("Ko'rinish")}>
             <Sel value={String(p.variant || "primary")} options={["primary", "secondary", "ghost"]} onChange={(v) => setProp("variant", v)} />
           </Row>
         )}
         {node.type === "Image" && (
           <>
-            <Row label="Rasm URL">
+            <Row label={x("Rasm URL")}>
               <Txt value={String(p.src ?? "")} onChange={(v) => setProp("src", v)} mono />
             </Row>
-            <Row label="Nisbat">
+            <Row label={x("Nisbat")}>
               <Sel value={String(p.aspect || "16/10")} options={["16/10", "16/9", "4/3", "1/1", "3/4"]} onChange={(v) => setProp("aspect", v)} />
             </Row>
           </>
@@ -268,50 +271,50 @@ export function NodeInspector({
             <Row label="Placeholder">
               <Txt value={String(p.placeholder ?? "")} onChange={(v) => setProp("placeholder", v)} />
             </Row>
-            <Row label="Turi">
+            <Row label={x("Turi")}>
               <Sel value={String(p.inputType || "text")} options={["text", "tel", "number", "email"]} onChange={(v) => setProp("inputType", v)} />
             </Row>
-            <Row label="Ko'p qatorli">
+            <Row label={x("Ko'p qatorli")}>
               <input type="checkbox" checked={!!p.multiline} onChange={(e) => setProp("multiline", e.target.checked || null)} />
             </Row>
           </>
         )}
         {node.type === "List" && (
           <>
-            <Row label="Manba">
+            <Row label={x("Manba")}>
               <Txt value={String(p.source ?? "")} onChange={(v) => setProp("source", v)} placeholder="collections.products" mono />
             </Row>
-            <Row label="Bo'sh matn">
+            <Row label={x("Bo'sh matn")}>
               <Txt value={String(p.emptyText ?? "")} onChange={(v) => setProp("emptyText", v)} />
             </Row>
           </>
         )}
         {node.type === "Spacer" && (
-          <Row label="O'lcham">
+          <Row label={x("O'lcham")}>
             <Txt value={String(p.size ?? "")} onChange={(v) => setProp("size", v ? Number(v) : "")} placeholder="avto" />
           </Row>
         )}
         {isScreen && (
-          <Row label="Sarlavha">
+          <Row label={x("Sarlavha")}>
             <Txt value={String(p.title ?? "")} onChange={(v) => setProp("title", v)} />
           </Row>
         )}
-        <Row label="Ko'rinish sharti">
+        <Row label={x("Ko'rinish sharti")}>
           <Txt
             value={node.visibleIf || ""}
             onChange={(v) => apply([{ op: "update", id: node.id, visibleIf: v || null }], `${node.id}.vis`)}
-            placeholder="har doim (masalan: count(state.cart) > 0)"
+            placeholder={x("har doim (masalan: count(state.cart) > 0)")}
             mono
           />
         </Row>
         <p className="text-[11px] leading-snug text-muted">
-          Matnlarda <code className="text-fg/70">{"{{ ifoda }}"}</code> ishlatsa bo&apos;ladi: <code className="text-fg/70">{"{{ fmt(item.price) }}"}</code>
+          {x("Matnlarda {{ ifoda }} ishlatsa bo'ladi: {{ fmt(item.price) }}")}
         </p>
       </Section>
 
-      <Section title="Stil">
+      <Section title={x("Stil")}>
         {STYLE_FIELDS.map((f) => (
-          <Row key={f.key} label={f.label}>
+          <Row key={f.key} label={x(f.label)}>
             {f.kind === "color" ? (
               <ColorInput value={String(s[f.key] ?? "")} onChange={(v) => setStyle(f.key, v)} />
             ) : f.kind === "select" ? (
@@ -322,7 +325,7 @@ export function NodeInspector({
           </Row>
         ))}
         <details>
-          <summary className="cursor-pointer text-[12px] text-muted hover:text-fg">Barcha stillar (JSON)</summary>
+          <summary className="cursor-pointer text-[12px] text-muted hover:text-fg">{x("Barcha stillar (JSON)")}</summary>
           <div className="mt-2">
             <JsonEdit
               value={s}
@@ -335,21 +338,21 @@ export function NodeInspector({
         </details>
       </Section>
 
-      <Section title="Logika · bosilganda">
+      <Section title={x("Logika · bosilganda")}>
         {actions.length ? (
           <ol className="space-y-1">
             {actions.map((a, i) => (
               <li key={i} className="flex gap-2 rounded-md bg-panel-2 px-2 py-1.5 text-[12px]">
                 <span className="text-warn">{i + 1}</span>
-                <span className="break-all">{describeAction(a, doc)}</span>
+                <span className="break-all">{describeAction(a, doc, x)}</span>
               </li>
             ))}
           </ol>
         ) : (
-          <p className="text-[12px] text-muted">Logika yo&apos;q. Elementga comment yozing, masalan: &quot;bosilganda savatga qo&apos;shsin va vibratsiya bersin&quot;.</p>
+          <p className="text-[12px] text-muted">{x("Logika yo'q. Elementga comment yozing, masalan: «bosilganda savatga qo'shsin va vibratsiya bersin».")}</p>
         )}
         <details>
-          <summary className="cursor-pointer text-[12px] text-muted hover:text-fg">Qo&apos;lda tahrirlash (JSON)</summary>
+          <summary className="cursor-pointer text-[12px] text-muted hover:text-fg">{x("Qo'lda tahrirlash (JSON)")}</summary>
           <div className="mt-2">
             <JsonEdit
               value={actions}
@@ -368,16 +371,17 @@ export function NodeInspector({
 }
 
 export function AppInspector({ doc, apply, onAiEdit }: { doc: AppDoc; apply: (ops: Op[], coalesceKey?: string) => void; onAiEdit?: (prompt: string) => void }) {
+  const x = useX();
   const { id: projectId } = useParams<{ id: string }>();
   const t = doc.theme;
   return (
     <div>
-      <Section title="Ilova">
-        <Row label="Nomi">
+      <Section title={x("Ilova")}>
+        <Row label={x("Nomi")}>
           <Txt value={doc.name} onChange={(v) => apply([{ op: "rename", name: v }], "name")} />
         </Row>
       </Section>
-      <Section title="Logo">
+      <Section title={x("Logo")}>
         <LogoUploader
           projectId={projectId}
           canEdit
@@ -388,28 +392,28 @@ export function AppInspector({ doc, apply, onAiEdit }: { doc: AppDoc; apply: (op
           }
         />
       </Section>
-      <Section title="Mavzu">
-        <Row label="Asosiy rang">
+      <Section title={x("Mavzu")}>
+        <Row label={x("Asosiy rang")}>
           <ColorInput value={t.primary} onChange={(v) => apply([{ op: "setTheme", theme: { primary: v } }], "t.primary")} />
         </Row>
-        <Row label="Fon">
+        <Row label={x("Fon")}>
           <ColorInput value={t.background} onChange={(v) => apply([{ op: "setTheme", theme: { background: v } }], "t.bg")} />
         </Row>
-        <Row label="Matn">
+        <Row label={x("Matn")}>
           <ColorInput value={t.text} onChange={(v) => apply([{ op: "setTheme", theme: { text: v } }], "t.text")} />
         </Row>
         <Row label="Radius">
           <Txt value={String(t.radius)} onChange={(v) => apply([{ op: "setTheme", theme: { radius: Number(v) || 0 } }], "t.radius")} mono />
         </Row>
-        <Row label="Shrift">
+        <Row label={x("Shrift")}>
           <Txt value={t.font} onChange={(v) => apply([{ op: "setTheme", theme: { font: v } }], "t.font")} mono />
         </Row>
       </Section>
-      <Section title="Telegram bot">
-        <Row label="Salom matni">
+      <Section title={x("Telegram bot")}>
+        <Row label={x("Salom matni")}>
           <Txt multiline value={doc.bot.welcomeText} onChange={(v) => apply([{ op: "setBot", bot: { welcomeText: v } }], "b.w")} />
         </Row>
-        <Row label="Tugma">
+        <Row label={x("Tugma")}>
           <Txt value={doc.bot.buttonText} onChange={(v) => apply([{ op: "setBot", bot: { buttonText: v } }], "b.b")} />
         </Row>
       </Section>
@@ -418,7 +422,7 @@ export function AppInspector({ doc, apply, onAiEdit }: { doc: AppDoc; apply: (op
       {doc.collections.map((c) => (
         <CollectionEditor key={c.name} doc={doc} c={c} apply={apply} />
       ))}
-      <Section title="Yangi kolleksiya">
+      <Section title={x("Yangi kolleksiya")}>
         <NewCollection onAdd={(c) => apply([{ op: "setCollection", collection: c }])} />
       </Section>
     </div>
