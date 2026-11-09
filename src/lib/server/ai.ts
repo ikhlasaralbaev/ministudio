@@ -65,6 +65,8 @@ export function lint(doc: AppDoc, opts: { noEmoji?: boolean } = {}): string[] {
     const w = `${n.type}#${n.id}`;
     if (n.type === "Screen" && parent) errs.push(`${w}: Screen must be top-level`);
     if (n.type !== "Screen" && !parent) errs.push(`${w}: top-level nodes must be Screen`);
+    if (String(n.style?.position ?? "").trim() === "fixed")
+      errs.push(`${w}: position "fixed" is not allowed (it escapes the screen; use "sticky" for bars or make a Screen fill the page)`);
     checkExpr(w + ".visibleIf", n.visibleIf);
     if (n.type === "List") checkExpr(w + ".source", n.props?.source as string);
     for (const k of ["text", "src", "alt", "placeholder", "emptyText", "name", "color"]) checkTpl(`${w}.${k}`, n.props?.[k]);

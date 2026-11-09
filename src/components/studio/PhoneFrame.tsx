@@ -117,7 +117,9 @@ export function PhoneFrame({
           <div
             ref={scrollRef}
             className={`phone-scroll relative overflow-y-auto ${scrollClassName}`}
-            style={{ height: SCREEN_H - STATUS_H - HEADER_H, width: SCREEN_W, background: theme.background }}
+            // a transform makes this box the containing block of position:fixed children, so an app screen that is
+            // "fixed to the whole page" (a language chooser, a splash) stays inside the phone instead of covering the studio
+            style={{ height: SCREEN_H - STATUS_H - HEADER_H, width: SCREEN_W, background: theme.background, transform: "translateZ(0)" }}
           >
             {children}
             {overlay}

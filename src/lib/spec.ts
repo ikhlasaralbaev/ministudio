@@ -126,6 +126,8 @@ Components and states
   icon-only button = 44px Box with a centered Icon.
 - Navigation: 3+ sections get a bottom tab bar (sticky Row at the bottom, each tab = Box with Icon + caption; active = primary + "fill",
   others at 55% opacity; paddingBottom "env(safe-area-inset-bottom)"). Sub-screens: ghost back Button with an arrow-left Icon. No hamburger menus.
+- Never use position "fixed" (it covers the whole page and the editor). Bottom bars: position "sticky" with bottom 0. A first-run screen
+  (language chooser, welcome) is a normal Screen: justifyContent "center", padding 24, rows as tappable cards, not a full-page overlay.
 - Every List has a friendly emptyText (and, where useful, an empty-state Box with an icon, one line of text and an action).
 - Show feedback for every action: haptic light on taps, success haptic + alert/navigation after saving, validation messages with if.
 - Forms: one Input per row, clear placeholders, label captions above inputs, inputType tel/number/email where it applies.
