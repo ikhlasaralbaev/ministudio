@@ -72,47 +72,59 @@ function Running({ doc, interactive }: { doc: AppDoc; interactive: boolean }) {
 }
 
 /**
- * The first screen of a template, drawn live (not a screenshot) and scaled to the card width. It mounts only when the
- * card scrolls into view, so a page of twenty templates does not render twenty apps at once.
+ * The first screen of an app, drawn live (not a screenshot) and scaled to the box width. The app is loaded and mounted only
+ * when the box scrolls into view, so a page with many of them does not render them all at once.
+ * `ratio` is height / width of the visible part.
  */
-export function TemplateThumb({ doc }: { doc: AppDoc }) {
+export function LiveThumb({ load, bg, ratio = 560 / 390, children }: { load: () => Promise<AppDoc | null>; bg: string; ratio?: number; children?: React.ReactNode }) {
   const box = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.55);
-  const [seen, setSeen] = useState(false);
+  const [doc, setDoc] = useState<AppDoc | null>(null);
+  const loadRef = useRef(load);
+  loadRef.current = load;
+  const H = Math.round(W * ratio);
 
   useEffect(() => {
     const el = box.current;
     if (!el) return;
+    let off = false;
     const ro = new ResizeObserver(() => setScale(el.clientWidth / W));
     ro.observe(el);
     setScale(el.clientWidth / W);
     const io = new IntersectionObserver(
       (e) => {
         if (e.some((i) => i.isIntersecting)) {
-          setSeen(true);
           io.disconnect();
+          loadRef.current().then((d) => !off && setDoc(d)).catch(() => {});
         }
       },
       { rootMargin: "300px" },
     );
     io.observe(el);
     return () => {
+      off = true;
       ro.disconnect();
       io.disconnect();
     };
   }, []);
 
   return (
-    <div ref={box} className="relative w-full overflow-hidden" style={{ aspectRatio: "390 / 560", background: doc.theme.background }}>
-      {seen && (
-        <div className="absolute left-0 top-0 origin-top-left" style={{ width: W, height: 560, transform: `scale(${scale})` }} inert>
-          <div style={{ width: W, height: 560, overflow: "hidden" }}>
+    <div ref={box} className="relative w-full overflow-hidden" style={{ aspectRatio: `${W} / ${H}`, background: doc?.theme.background ?? bg }}>
+      {doc && (
+        <div className="absolute left-0 top-0 origin-top-left" style={{ width: W, height: H, transform: `scale(${scale})` }} inert>
+          <div style={{ width: W, height: H, overflow: "hidden" }}>
             <Running doc={doc} interactive={false} />
           </div>
         </div>
       )}
+      {children}
     </div>
   );
+}
+
+/** A template's first screen. */
+export function TemplateThumb({ doc }: { doc: AppDoc }) {
+  return <LiveThumb load={() => Promise.resolve(doc)} bg={doc.theme.background} />;
 }
 
 /** The whole template as a working app: browse, add to the cart, fill the form. Nothing is saved anywhere. */

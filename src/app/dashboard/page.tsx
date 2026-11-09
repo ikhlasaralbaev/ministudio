@@ -7,6 +7,8 @@ import { useAttachments } from "@/components/Attachments";
 import { Sparkle, Gear, Database, Trash, Robot, Copy, UploadSimple } from "@phosphor-icons/react";
 import { TelegramLink } from "@/components/TelegramLink";
 import { TemplateGallery } from "@/components/TemplateGallery";
+import { LiveThumb } from "@/components/templates/TemplatePreview";
+import type { AppDoc } from "@/lib/types";
 import { AiPrompt } from "@/components/AiPrompt";
 import { takeIdeaDraft } from "@/lib/draft";
 import { BuildingScreen } from "@/components/BuildingScreen";
@@ -164,16 +166,19 @@ function Section({ title, rows, empty, onRemove, onCopy }: { title: string; rows
           {rows.map((p, i) => (
             <div key={p._id} style={{ ["--i" as string]: i }} className="rise card press group p-4">
               <Link href={`/projects/${p._id}/studio`} className="block">
-                <div
-                  className="relative mb-4 flex h-28 items-end overflow-hidden rounded-xl p-3"
-                  style={{
-                    background: p.theme
-                      ? `linear-gradient(135deg, ${p.theme.primary}, ${p.theme.primary}55)`
-                      : "linear-gradient(135deg, var(--panel-2), var(--panel))",
-                  }}
-                >
-                  <Robot size={64} weight="duotone" className="absolute -right-2 -top-2 text-white/15 transition group-hover:scale-110" />
-                  <span className="rounded-full bg-black/40 px-2.5 py-0.5 text-xs text-white">
+                <div className="relative mb-4 overflow-hidden rounded-xl border border-line">
+                  {p.screens ? (
+                    <LiveThumb
+                      ratio={0.8}
+                      bg={p.theme?.background ?? "var(--panel-2)"}
+                      load={() => api<{ doc: AppDoc | null }>(`/api/projects/${p._id}`).then((r) => r.doc)}
+                    />
+                  ) : (
+                    <div className="grid place-items-center" style={{ aspectRatio: "390 / 312", background: "linear-gradient(135deg, var(--panel-2), var(--panel))" }}>
+                      <Robot size={56} weight="duotone" className="text-muted/40" />
+                    </div>
+                  )}
+                  <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2.5 py-0.5 text-xs text-white backdrop-blur">
                     {p.screens ? fmt(t.dash.screens, { n: p.screens }) : t.dash.blank}
                   </span>
                 </div>
